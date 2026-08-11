@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HollyCRM - Shared Inbox</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#464555",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#07006c",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#005236",
+                        "inverse-primary": "#c3c0ff",
+                        "surface": "#faf8ff",
+                        "tertiary-fixed": "#e1e0ff",
+                        "outline-variant": "#c7c4d8",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-fixed": "#e2dfff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#002113",
+                        "surface-variant": "#dae2fd",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e2e7ff",
+                        "on-background": "#131b2e",
+                        "primary": "#3525cd",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-container-low": "#f2f3ff",
+                        "tertiary": "#3130c0",
+                        "on-secondary-container": "#00714d",
+                        "surface-container-highest": "#dae2fd",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "on-surface": "#131b2e",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#faf8ff",
+                        "outline": "#777587",
+                        "on-tertiary-container": "#d9d8ff",
+                        "inverse-surface": "#283044",
+                        "primary-container": "#4f46e5",
+                        "on-primary-container": "#dad7ff",
+                        "inverse-on-surface": "#eef0ff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "tertiary-container": "#4b4dd8",
+                        "surface-tint": "#4d44e3",
+                        "secondary-container": "#6cf8bb",
+                        "surface-container": "#eaedff",
+                        "on-primary": "#ffffff",
+                        "background": "#faf8ff",
+                        "secondary": "#006c49",
+                        "surface-dim": "#d2d9f4"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.125rem",
+                        lg: "0.25rem",
+                        xl: "0.5rem",
+                        full: "0.75rem"
+                    },
+                    spacing: {
+                        base: "4px",
+                        "margin-desktop": "24px",
+                        "margin-mobile": "16px",
+                        xl: "32px",
+                        sm: "8px",
+                        gutter: "16px",
+                        lg: "24px",
+                        md: "16px",
+                        xs: "4px"
+                    },
+                    fontFamily: {
+                        metadata: ["Inter"],
+                        "body-medium": ["Inter"],
+                        h1: ["Inter"],
+                        h2: ["Inter"],
+                        caption: ["Inter"],
+                        h3: ["Inter"],
+                        "metadata-bold": ["Inter"],
+                        "body-base": ["Inter"]
+                    },
+                    fontSize: {
+                        metadata: ["12px", { lineHeight: "16px", fontWeight: "400" }],
+                        "body-medium": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+                        h1: ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        h2: ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        caption: ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "500" }],
+                        h3: ["16px", { lineHeight: "24px", fontWeight: "600" }],
+                        "metadata-bold": ["12px", { lineHeight: "16px", fontWeight: "600" }],
+                        "body-base": ["14px", { lineHeight: "20px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface h-full flex flex-col font-body-base overflow-hidden">
+<!-- Global Error Banner -->
+<div class="bg-error-container text-on-error-container px-4 py-2 flex items-center justify-center gap-2 z-50 shadow-sm border-b border-error/20">
+<span class="material-symbols-outlined icon-fill text-[18px]">error</span>
+<span class="text-body-medium font-body-medium">WhatsApp instance disconnected</span>
+</div>
+<!-- Main Workspace -->
+<div class="flex flex-1 overflow-hidden">
+<!-- 1. Nav Rail (SideNavBar) -->
+<nav class="bg-inverse-surface dark:bg-inverse-surface w-16 h-full flex flex-col justify-between py-margin-desktop border-r border-outline-variant dark:border-outline shrink-0 z-40 transition-colors duration-200 ease-in-out">
+<div class="flex flex-col items-center gap-8">
+<!-- Brand -->
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-[32px] text-secondary-fixed">interests</span>
+</div>
+<!-- Nav Tabs -->
+<div class="flex flex-col w-full gap-2">
+<!-- Home / Inbox (Active) -->
+<button class="relative w-full flex flex-col items-center justify-center text-secondary-fixed dark:text-secondary-fixed-dim border-l-2 border-secondary-fixed py-3 hover:bg-on-surface-variant/10 dark:hover:bg-surface-variant/10 transition-colors duration-200 ease-in-out group" title="Home">
+<span class="material-symbols-outlined icon-fill text-[24px] mb-1">dashboard</span>
+<span class="text-[10px] font-metadata">Home</span>
+</button>
+<!-- Messages -->
+<button class="w-full flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 dark:hover:bg-surface-variant/10 transition-colors duration-200 ease-in-out group" title="Messages">
+<span class="material-symbols-outlined text-[24px] mb-1">forum</span>
+<span class="text-[10px] font-metadata">Messages</span>
+</button>
+<!-- Leads -->
+<button class="w-full flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 dark:hover:bg-surface-variant/10 transition-colors duration-200 ease-in-out group" title="Leads">
+<span class="material-symbols-outlined text-[24px] mb-1">person_search</span>
+<span class="text-[10px] font-metadata">Leads</span>
+</button>
+<!-- Pipelines -->
+<button class="w-full flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 dark:hover:bg-surface-variant/10 transition-colors duration-200 ease-in-out group" title="Pipelines">
+<span class="material-symbols-outlined text-[24px] mb-1">view_kanban</span>
+<span class="text-[10px] font-metadata">Pipelines</span>
+</button>
+<!-- Analytics -->
+<button class="w-full flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 dark:hover:bg-surface-variant/10 transition-colors duration-200 ease-in-out group" title="Analytics">
+<span class="material-symbols-outlined text-[24px] mb-1">analytics</span>
+<span class="text-[10px] font-metadata">Analytics</span>
+</button>
+</div>
+</div>
+<!-- Footer Tabs -->
+<div class="flex flex-col w-full gap-2">
+<button class="w-full flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 dark:hover:bg-surface-variant/10 transition-colors duration-200 ease-in-out group" title="Settings">
+<span class="material-symbols-outlined text-[24px] mb-1">settings</span>
+<span class="text-[10px] font-metadata">Settings</span>
+</button>
+<button class="w-full flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 dark:hover:bg-surface-variant/10 transition-colors duration-200 ease-in-out group" title="Support">
+<span class="material-symbols-outlined text-[24px] mb-1">help</span>
+<span class="text-[10px] font-metadata">Support</span>
+</button>
+</div>
+</nav>
+<!-- 2. Chat List -->
+<div class="w-[320px] bg-surface flex flex-col border-r border-outline-variant shrink-0 z-30">
+<!-- Header & Search -->
+<div class="p-4 border-b border-outline-variant flex flex-col gap-4 bg-surface-container-lowest">
+<div class="flex justify-between items-center">
+<h2 class="text-h2 font-h2 text-on-surface">Inbox</h2>
+<button class="p-2 hover:bg-surface-variant rounded-full text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">edit_square</span>
+</button>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full bg-surface border border-outline-variant rounded pl-9 pr-3 py-2 text-body-base font-body-base text-on-surface placeholder-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Search chats..." type="text"/>
+</div>
+<!-- Filters -->
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-primary text-on-primary rounded-full text-metadata-bold font-metadata-bold shadow-sm">All</button>
+<button class="px-3 py-1 bg-surface-variant text-on-surface rounded-full text-metadata font-metadata border border-outline-variant hover:bg-surface-container-high transition-colors">Mine</button>
+<button class="px-3 py-1 bg-surface-variant text-on-surface rounded-full text-metadata font-metadata border border-outline-variant hover:bg-surface-container-high transition-colors">Groups</button>
+</div>
+</div>
+<!-- Chat Rows -->
+<div class="flex-1 overflow-y-auto">
+<!-- Active Row -->
+<div class="p-4 border-b border-outline-variant bg-surface-container-high cursor-pointer border-l-4 border-l-primary flex gap-3 items-start hover:bg-surface-variant transition-colors">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-surface-dim overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-secondary rounded-full border-2 border-surface-container-high"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-body-medium font-body-medium text-on-surface truncate">Mohammed Al-Fayed</h3>
+<span class="text-caption font-caption text-outline shrink-0 ml-2">Just now</span>
+</div>
+<p class="text-metadata font-metadata text-on-surface-variant truncate">Agent: We have 2 Quad rooms available at Pullman ZamZam...</p>
+<div class="mt-2 flex gap-1">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">WhatsApp</span>
+</div>
+</div>
+</div>
+<!-- Group Row -->
+<div class="p-4 border-b border-outline-variant bg-surface-container-lowest cursor-pointer flex gap-3 items-start hover:bg-surface-variant transition-colors">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden shrink-0 flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">groups</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="text-body-medium font-body-medium text-on-surface truncate">B2B Agents MEA</h3>
+<span class="text-caption font-caption text-outline shrink-0 ml-2">10:42 AM</span>
+</div>
+<p class="text-metadata font-metadata text-on-surface-variant truncate">Sarah: Please check the latest contract updates.</p>
+<div class="mt-2 flex gap-1">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">GROUP</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. Active Chat Pane -->
+<div class="flex-1 flex flex-col bg-surface-container-lowest min-w-0 z-20">
+<!-- Chat Header -->
+<div class="h-16 px-6 border-b border-outline-variant flex items-center justify-between bg-surface-container-lowest shrink-0">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-dim overflow-hidden flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<h2 class="text-h3 font-h3 text-on-surface">Mohammed Al-Fayed</h2>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-caption font-caption text-on-surface-variant">Online via WhatsApp</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<!-- Hollyland AI Toggle -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant bg-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-amber-600">smart_toy</span>
+<span class="text-metadata-bold font-metadata-bold text-on-surface">Hollyland AI:</span>
+<button class="relative inline-flex h-5 w-9 items-center rounded-full bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2">
+<span class="translate-x-4 inline-block h-3 w-3 transform rounded-full bg-white transition-transform"></span>
+</button>
+<span class="text-caption font-caption text-secondary">Active</span>
+</div>
+<button class="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Message Thread -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-[#F8FAFC]">
+<!-- Date Divider -->
+<div class="flex justify-center">
+<span class="px-3 py-1 rounded-full bg-surface-variant text-caption font-caption text-on-surface-variant border border-outline-variant">Today</span>
+</div>
+<!-- Incoming (Client) RTL -->
+<div class="flex flex-col items-start max-w-[75%] gap-1">
+<span class="text-metadata font-metadata text-on-surface-variant ml-2">Mohammed Al-Fayed • 11:30 AM</span>
+<div class="bg-white border border-[#E2E8F0] p-4 rounded-xl rounded-tl-sm shadow-sm text-on-surface font-body-base leading-relaxed" dir="rtl">
+                        السلام عليكم. أحتاج إلى غرفتين رباعيتين في فندق بولمان زمزم بمكة المكرمة لـ 8 أشخاص، ابتداءً من يوم الخميس القادم ولمدة 4 ليالٍ. هل يوجد توفر وما هو السعر؟
+                    </div>
+</div>
+<!-- Outgoing (Bot AI) -->
+<div class="flex flex-col items-end self-end max-w-[75%] gap-1">
+<div class="flex items-center gap-2 mr-2">
+<span class="material-symbols-outlined text-[14px] text-amber-600">smart_toy</span>
+<span class="text-metadata font-metadata text-on-surface-variant">Hollyland AI • 11:30 AM</span>
+</div>
+<div class="bg-amber-500/10 border border-amber-500 p-4 rounded-xl rounded-tr-sm shadow-sm text-amber-900 font-body-base">
+<p class="mb-2">وعليكم السلام ورحمة الله وبركاته، أهلاً بك أستاذ محمد.</p>
+<p class="mb-2">نعم، تتوفر غرفتان رباعيتان في فندق بولمان زمزم مكة للتاريخ المطلوب.</p>
+<div class="bg-white/50 rounded p-3 my-3 border border-amber-200">
+<div class="flex justify-between items-center border-b border-amber-200/50 pb-2 mb-2">
+<span class="font-metadata-bold">Pullman ZamZam Makkah</span>
+<span class="font-bold text-primary">SAR 680 / night</span>
+</div>
+<div class="text-metadata grid grid-cols-2 gap-2">
+<div><span class="text-amber-800/70">Rooms:</span> 2 Quad</div>
+<div><span class="text-amber-800/70">Pax:</span> 8 Guests</div>
+<div><span class="text-amber-800/70">Duration:</span> 4 Nights</div>
+<div><span class="text-amber-800/70">Total:</span> SAR 5,440</div>
+</div>
+</div>
+<p>هل ترغب في تأكيد الحجز المبدئي؟</p>
+</div>
+</div>
+<!-- Outgoing (Agent) -->
+<div class="flex flex-col items-end self-end max-w-[75%] gap-1">
+<span class="text-metadata font-metadata text-on-surface-variant mr-2">You • 11:32 AM</span>
+<div class="bg-primary-container text-white p-4 rounded-xl rounded-tr-sm shadow-sm font-body-base">
+                        Hello Mohammed, I've paused the AI to assist you personally. The quote provided above for SAR 680/night is currently our best available rate for the Quad rooms. I can hold this reservation for you for the next 2 hours. Would you like me to send the payment link?
+                    </div>
+</div>
+</div>
+<!-- Composer -->
+<div class="p-4 border-t border-outline-variant bg-surface-container-lowest shrink-0">
+<div class="flex items-end gap-2 bg-surface rounded-xl border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all p-2">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 resize-none py-2 text-body-base font-body-base text-on-surface max-h-32 overflow-y-auto" placeholder="Type a message..." rows="1"></textarea>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+</button>
+<button class="p-2 bg-primary text-on-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
+<span class="material-symbols-outlined icon-fill">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 4. Lead Drawer (Right Side) -->
+<div class="w-[340px] bg-surface-container-lowest flex flex-col border-l border-outline-variant shrink-0 z-30 shadow-[-4px_0_6px_-1px_rgba(15,23,42,0.05)]">
+<!-- Header -->
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface">
+<h2 class="text-h3 font-h3 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">contact_page</span>
+                    Lead Details
+                </h2>
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-variant rounded transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+<!-- Stage Bar -->
+<div>
+<h3 class="text-metadata-bold font-metadata-bold text-on-surface-variant uppercase tracking-wider mb-2">Pipeline Stage</h3>
+<div class="bg-surface-variant rounded-lg p-3 border border-outline-variant flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+</div>
+<div>
+<div class="text-body-medium font-body-medium text-on-surface">Quotation Sent</div>
+<div class="text-caption font-caption text-on-surface-variant">Updated 5 mins ago</div>
+</div>
+</div>
+</div>
+<!-- Requirements -->
+<div>
+<div class="flex justify-between items-center mb-2">
+<h3 class="text-metadata-bold font-metadata-bold text-on-surface-variant uppercase tracking-wider">Requirements</h3>
+<button class="text-primary text-caption font-caption hover:underline">Edit</button>
+</div>
+<div class="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+<div class="grid grid-cols-2 divide-x divide-[#E2E8F0] border-b border-[#E2E8F0]">
+<div class="p-3">
+<div class="text-caption font-caption text-on-surface-variant mb-1">Guests</div>
+<div class="text-body-medium font-body-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline">group</span> 8 Pax
+                                </div>
+</div>
+<div class="p-3">
+<div class="text-caption font-caption text-on-surface-variant mb-1">Rooms</div>
+<div class="text-body-medium font-body-medium text-on-surface">2 Quad</div>
+</div>
+</div>
+<div class="p-3">
+<div class="text-caption font-caption text-on-surface-variant mb-1">Destination</div>
+<div class="text-body-medium font-body-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline">location_on</span> Makkah
+                            </div>
+</div>
+</div>
+</div>
+<!-- Proposed Hotels (Cards) -->
+<div>
+<h3 class="text-metadata-bold font-metadata-bold text-on-surface-variant uppercase tracking-wider mb-2">Proposed Options</h3>
+<div class="flex flex-col gap-3">
+<!-- Card 1 -->
+<div class="bg-white rounded-lg border border-[#E2E8F0] p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
+<div class="flex justify-between items-start mb-2 pl-2">
+<div>
+<div class="text-body-medium font-body-medium text-on-surface font-bold">Pullman ZamZam</div>
+<div class="text-caption font-caption text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-amber-400 icon-fill">star</span> 5 Star
+                                    </div>
+</div>
+<div class="text-right">
+<div class="text-body-medium font-body-medium text-primary font-bold">SAR 680</div>
+<div class="text-caption font-caption text-on-surface-variant">/night</div>
+</div>
+</div>
+<div class="pl-2 flex gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-secondary/10 text-secondary border border-secondary/20">Quoted</span>
+</div>
+</div>
+<!-- Add New Option Button -->
+<button class="w-full py-2 border border-dashed border-outline-variant rounded-lg text-on-surface-variant hover:bg-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-2 text-body-medium font-body-medium">
+<span class="material-symbols-outlined text-[18px]">add</span> Add Option
+                        </button>
+</div>
+</div>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="p-4 border-t border-outline-variant bg-surface flex gap-2">
+<button class="flex-1 py-2 bg-white border border-[#E2E8F0] text-on-surface rounded-lg text-body-medium font-body-medium hover:bg-surface-variant transition-colors shadow-sm">Convert to Booking</button>
+<button class="py-2 px-3 bg-white border border-[#E2E8F0] text-on-surface rounded-lg text-body-medium font-body-medium hover:bg-surface-variant transition-colors shadow-sm">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

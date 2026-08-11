@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HollyCRM - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#464555",
+                      "secondary-fixed": "#6ffbbe",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed": "#07006c",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed-variant": "#005236",
+                      "inverse-primary": "#c3c0ff",
+                      "surface": "#faf8ff",
+                      "tertiary-fixed": "#e1e0ff",
+                      "outline-variant": "#c7c4d8",
+                      "on-primary-fixed": "#0f0069",
+                      "primary-fixed": "#e2dfff",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#002113",
+                      "surface-variant": "#dae2fd",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-container-high": "#e2e7ff",
+                      "on-background": "#131b2e",
+                      "primary": "#3525cd",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "surface-container-low": "#f2f3ff",
+                      "tertiary": "#3130c0",
+                      "on-secondary-container": "#00714d",
+                      "surface-container-highest": "#dae2fd",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "on-surface": "#131b2e",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#faf8ff",
+                      "outline": "#777587",
+                      "on-tertiary-container": "#d9d8ff",
+                      "inverse-surface": "#283044",
+                      "primary-container": "#4f46e5",
+                      "on-primary-container": "#dad7ff",
+                      "inverse-on-surface": "#eef0ff",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "tertiary-container": "#4b4dd8",
+                      "surface-tint": "#4d44e3",
+                      "secondary-container": "#6cf8bb",
+                      "surface-container": "#eaedff",
+                      "on-primary": "#ffffff",
+                      "background": "#faf8ff",
+                      "secondary": "#006c49",
+                      "surface-dim": "#d2d9f4"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "margin-desktop": "24px",
+                      "margin-mobile": "16px",
+                      "xl": "32px",
+                      "sm": "8px",
+                      "gutter": "16px",
+                      "lg": "24px",
+                      "md": "16px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "metadata": [
+                              "Inter"
+                      ],
+                      "body-medium": [
+                              "Inter"
+                      ],
+                      "h1": [
+                              "Inter"
+                      ],
+                      "h2": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "h3": [
+                              "Inter"
+                      ],
+                      "metadata-bold": [
+                              "Inter"
+                      ],
+                      "body-base": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "metadata": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-medium": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "h1": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "h2": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "caption": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "h3": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "metadata-bold": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-base": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .input-glow:focus {
+            box-shadow: 0 0 0 2px rgba(195, 192, 255, 0.5); /* light violet glow */
+        }
+    </style>
+</head>
+<body class="h-full bg-background flex items-center justify-center font-body-base text-on-surface">
+<main class="w-full max-w-md px-margin-mobile md:px-0">
+<!-- Login Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_6px_-1px_rgba(15,23,42,0.1)] border border-outline-variant/30 p-xl w-full">
+<!-- Logo & Header -->
+<div class="text-center mb-xl">
+<div class="w-16 h-16 bg-inverse-surface rounded-full flex items-center justify-center mx-auto mb-gutter text-secondary-fixed font-h1 text-h1 font-black">
+                    H
+                </div>
+<h1 class="text-h1 font-h1 text-on-surface">Welcome back</h1>
+<p class="text-body-medium font-body-medium text-on-surface-variant mt-xs">Log in to HollyCRM Enterprise</p>
+</div>
+<!-- Form -->
+<form action="#" class="space-y-gutter" method="POST">
+<!-- Email -->
+<div>
+<label class="block text-metadata-bold font-metadata-bold text-on-surface mb-sm" for="email">Email address</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span aria-hidden="true" class="material-symbols-outlined text-outline text-[20px]">mail</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded bg-surface-container-lowest text-on-surface placeholder-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary input-glow transition-all duration-200 text-body-base font-body-base" id="email" name="email" placeholder="you@company.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div>
+<div class="flex justify-between items-center mb-sm">
+<label class="block text-metadata-bold font-metadata-bold text-on-surface" for="password">Password</label>
+<a class="text-metadata font-metadata text-primary hover:text-on-primary-fixed-variant transition-colors" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span aria-hidden="true" class="material-symbols-outlined text-outline text-[20px]">lock</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded bg-surface-container-lowest text-on-surface placeholder-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary input-glow transition-all duration-200 text-body-base font-body-base" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center">
+<input class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded bg-surface-container-lowest cursor-pointer" id="remember-me" name="remember-me" type="checkbox"/>
+<label class="ml-2 block text-body-medium font-body-medium text-on-surface-variant cursor-pointer" for="remember-me">
+                        Remember me for 30 days
+                    </label>
+</div>
+<!-- Submit Button -->
+<div class="pt-sm">
+<button class="w-full flex justify-center py-2 px-4 border border-transparent rounded bg-primary-container text-on-primary text-body-medium font-body-medium hover:bg-primary transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm" type="submit">
+                        Login
+                    </button>
+</div>
+</form>
+</div>
+<!-- Footer Links -->
+<div class="mt-lg text-center">
+<p class="text-metadata font-metadata text-on-surface-variant">
+                Need help? <a class="font-metadata-bold text-primary hover:underline" href="#">Contact Support</a>
+</p>
+</div>
+</main>
+</body></html>
