@@ -9,6 +9,7 @@ import ImageMessage from "./media/ImageMessage";
 import VoiceRecorder from "./media/VoiceRecorder";
 import { useAssistantName } from "./WorkspaceContext";
 import { displayName, MEDIA_URL_TTL_S } from "@/lib/media";
+import { contactLabel, renderMentions } from "@/lib/people";
 import type { Message } from "@/lib/types";
 
 /** Re-sign a little before the URLs actually die, so playback never breaks mid-thread. */
@@ -26,13 +27,31 @@ export default function MessageThread({
   chatId,
   leadId = null,
   initialMessages,
+  senderNames: initialSenderNames = {},
+  namesByPhone = {},
+  ownPhone = null,
 }: {
   chatId: string;
   /** Stamped onto voice notes so they hang off the same lead as the rest. */
   leadId?: string | null;
   initialMessages: Message[];
+  /** contact id -> the name to print above their bubbles. */
+  senderNames?: Record<string, string>;
+  /** digits-only phone -> name, for rewriting @mentions in the body. */
+  namesByPhone?: Record<string, string>;
+  /** Our own WhatsApp number, so a mention of us isn't shown as raw digits. */
+  ownPhone?: string | null;
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  // Starts from the server's map and grows as live messages arrive from senders
+  // that map has never seen — someone who joins the group and speaks while the
+  // page is open would otherwise stay "Client" until a reload.
+  const [senderNames, setSenderNames] = useState(initialSenderNames);
+  useEffect(() => { setSenderNames((prev) => ({ ...initialSenderNames, ...prev })); },
+    [initialSenderNames]);
+  /** Sender ids already being looked up, so a burst of messages from one new
+   *  participant issues one query instead of one per message. */
+  const resolvingNames = useRef(new Set<string>());
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
@@ -153,6 +172,31 @@ export default function MessageThread({
             }
             return [...prev, full];
           });
+
+          // A sender the server render never saw — someone who joined the group
+          // and spoke while this page was open. Resolve the name once, in the
+          // background: the bubble paints immediately rather than waiting on a
+          // round trip to say anything at all.
+          //
+          // The guard is a ref, not the state map. A state updater must be pure,
+          // and firing the fetch from inside one runs it twice under StrictMode.
+          const senderId = row.sender_contact_id;
+          if (senderId && !resolvingNames.current.has(senderId)) {
+            resolvingNames.current.add(senderId);
+            void (async () => {
+              const { data } = await sb
+                .from("contacts")
+                .select("display_name, phone_e164")
+                .eq("id", senderId)
+                .maybeSingle();
+              if (data) {
+                setSenderNames((p) => ({
+                  ...p,
+                  [senderId]: contactLabel(data.display_name, data.phone_e164),
+                }));
+              }
+            })();
+          }
         })
         .subscribe();
     })();
@@ -271,7 +315,12 @@ export default function MessageThread({
                   </span>
                 </div>
               )}
-              <Bubble m={m} />
+              <Bubble
+                m={m}
+                senderName={m.sender_contact_id ? senderNames[m.sender_contact_id] : null}
+                namesByPhone={namesByPhone}
+                ownPhone={ownPhone}
+              />
             </div>
           );
         })}
@@ -336,7 +385,17 @@ export default function MessageThread({
   );
 }
 
-function Bubble({ m }: { m: Message }) {
+function Bubble({
+  m,
+  senderName,
+  namesByPhone = {},
+  ownPhone = null,
+}: {
+  m: Message;
+  senderName?: string | null;
+  namesByPhone?: Record<string, string>;
+  ownPhone?: string | null;
+}) {
   const assistant = useAssistantName();
   if (m.sender_type === "system") {
     return (
@@ -351,6 +410,16 @@ function Bubble({ m }: { m: Message }) {
   const mine = m.direction === "out";
   const isBot = m.sender_type === "bot";
   const rtl = isArabic(m.body);
+
+  // "Client" was a placeholder that shipped. In a group it made five people
+  // indistinguishable; in a direct chat it told an agent nothing they didn't
+  // already know from the header. It survives only as the last-resort fallback
+  // for an inbound message whose sender we genuinely could not resolve.
+  const who = isBot ? assistant : mine ? "You" : senderName || "Client";
+  // The assistant name is passed unconditionally: it is the CLIENT's message
+  // that mentions our number ("@923112929526 Hey"), so gating it on the message
+  // being ours would leave the one case that actually occurs unrewritten.
+  const body = m.body ? renderMentions(m.body, namesByPhone, assistant, ownPhone) : m.body;
 
   const tone = isBot
     ? "bg-bot-soft border-bot/40 text-bot-dark rounded-tr-sm"
@@ -368,7 +437,7 @@ function Bubble({ m }: { m: Message }) {
     <div className={`flex animate-rise-in flex-col gap-1 ${mine ? "items-end" : "items-start"}`}>
       <div className="flex items-center gap-1.5 px-1 text-caption text-muted">
         {isBot && <Icon name="bot" size={12} className="text-bot" />}
-        <span>{isBot ? assistant : mine ? "You" : "Client"}</span>
+        <span className={senderName && !mine && !isBot ? "font-medium text-ink" : ""}>{who}</span>
         <span aria-hidden>·</span>
         <span>{clock(m.wa_timestamp)}</span>
       </div>
@@ -383,13 +452,13 @@ function Bubble({ m }: { m: Message }) {
       >
         {hasMedia && <Attachment m={m} onBrand={onBrand} />}
 
-        {m.body && (
+        {body && (
           <p
             className={`whitespace-pre-wrap leading-relaxed ${
               hasMedia ? (isImage ? "px-3 pb-2 pt-2" : "mt-2") : ""
             }`}
           >
-            {m.body}
+            {body}
           </p>
         )}
 

@@ -41,6 +41,14 @@ export async function PUT(req: Request) {
       : undefined,
     group_cooldown_seconds: clamp(Number(body.group_cooldown_seconds), 10, 3600, 60),
     group_daily_cap: clamp(Number(body.group_daily_cap), 1, 200, 10),
+    // `?? true` rather than Boolean(): an older client that does not send this
+    // field would otherwise switch social replies off on every save, and the
+    // symptom — the bot silently stops answering greetings — looks like a
+    // regression in the bot rather than a settings write.
+    smalltalk_enabled: body.smalltalk_enabled === undefined
+      ? true
+      : Boolean(body.smalltalk_enabled),
+    smalltalk_cooldown_seconds: clamp(Number(body.smalltalk_cooldown_seconds), 0, 3600, 45),
   };
 
   const { data, error } = await sb

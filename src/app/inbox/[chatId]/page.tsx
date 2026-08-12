@@ -13,6 +13,7 @@ import Chip, { Dot } from "@/components/ui/Chip";
 import type { NoteRow } from "@/components/NotesPanel";
 import type { QuoteRow } from "@/components/QuotesPanel";
 import { isSupervisor, type Chat, type Lead, type Message } from "@/lib/types";
+import { contactLabel } from "@/lib/people";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,7 @@ export default async function ChatPage({
     // B7: ordered by the WhatsApp timestamp, so delayed webhooks still render
     // in the order the customer actually sent them.
     sb.from("messages")
-      .select("id, chat_id, lead_id, wa_message_id, direction, sender_type, message_type, body, media_path, media_mime, media_name, reply_to_wa_message_id, wa_timestamp, delivery_status")
+      .select("id, chat_id, lead_id, wa_message_id, direction, sender_type, sender_contact_id, message_type, body, media_path, media_mime, media_name, reply_to_wa_message_id, wa_timestamp, delivery_status")
       .eq("chat_id", chatId)
       .order("wa_timestamp", { ascending: true })
       .limit(200),
@@ -88,6 +89,72 @@ export default async function ChatPage({
   const supervisor = isSupervisor(me?.role);
   const isGroup = chat.chat_type === "group";
   const phone = chat.chat_jid.split("@")[0];
+
+  /*
+   * Who said what.
+   *
+   * Resolved from the senders actually present in the loaded messages, NOT from
+   * chat_participants: someone who left the group still has messages in the
+   * thread, and their bubbles must keep their name rather than silently
+   * reverting to "Client" the moment they leave. Participants are merged in on
+   * top so a member who has not spoken yet is still named if they arrive live.
+   */
+  const senderIds = [
+    ...new Set(
+      (messages ?? [])
+        .map((m) => m.sender_contact_id)
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+
+  const { data: senderContacts } = senderIds.length
+    ? await sb.from("contacts").select("id, display_name, phone_e164").in("id", senderIds)
+    : { data: [] };
+
+  const senderNames: Record<string, string> = {};
+  const namesByPhone: Record<string, string> = {};
+  for (const c of senderContacts ?? []) {
+    senderNames[c.id] = contactLabel(c.display_name, c.phone_e164);
+    if (c.phone_e164) namesByPhone[c.phone_e164.replace(/\D/g, "")] = senderNames[c.id];
+  }
+  for (const p of participants) {
+    if (!senderNames[p.contact_id]) {
+      senderNames[p.contact_id] = contactLabel(p.display_name, p.phone);
+    }
+    if (p.phone) namesByPhone[p.phone.replace(/\D/g, "")] = contactLabel(p.display_name, p.phone);
+  }
+  // A direct chat has no participant rows, so its one contact comes off the chat.
+  if (!isGroup && chat.contact_id && !senderNames[chat.contact_id]) {
+    senderNames[chat.contact_id] = contactLabel(chat.title, phone);
+  }
+
+  /*
+   * Our own WhatsApp number, so "@923112929526 Hey" renders as a name.
+   *
+   * Read from green_api_instances and NOT from GREEN_API_OWN_JID: the webhook
+   * already prefers the instance row over the env var (a number connected
+   * through Settings → WhatsApp never touches .env), and on this workspace the
+   * two genuinely disagree — the env value is stale, so trusting it would leave
+   * every mention of us rendered as raw digits.
+   *
+   * Via the admin client because instances_admin is supervisor-only. An agent
+   * who can already read this chat must not see a different message body than
+   * their supervisor does; that is the kind of inconsistency that gets reported
+   * as "the CRM is showing me something different".
+   */
+  const { data: instance } = await supabaseAdmin()
+    .from("green_api_instances")
+    .select("own_jid, is_active")
+    .eq("org_id", chat.org_id)
+    .order("is_active", { ascending: false })
+    .limit(5);
+
+  const ownPhone =
+    (instance ?? [])
+      .map((i) => i.own_jid?.split("@")[0]?.replace(/\D/g, "") ?? "")
+      .find(Boolean) ??
+    process.env.GREEN_API_OWN_JID?.split("@")[0]?.replace(/\D/g, "") ??
+    null;
 
   // Sign attachments server-side so a thread of voice notes and passports paints
   // complete on first render. The client re-signs what arrives afterwards and
@@ -158,6 +225,9 @@ export default async function ChatPage({
           chatId={chat.id}
           leadId={lead?.id ?? null}
           initialMessages={withMediaUrls}
+          senderNames={senderNames}
+          namesByPhone={namesByPhone}
+          ownPhone={ownPhone}
         />
       </div>
 

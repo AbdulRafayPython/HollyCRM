@@ -1,9 +1,15 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { GreenQuotaError, sendText } from "@/lib/green/client";
-import { extractRequirements, type Requirements } from "@/lib/deepseek/extract";
 import {
-  composeReply, holdingReply, introReply, noMatchReply, stalledReply,
+  extractRequirements, isSocial, type Intent, type Requirements,
+} from "@/lib/deepseek/extract";
+import {
+  composeKnowledgeReply, composeReply, composeSocialReply, greetBackReply,
+  holdingReply, introReply, noKnowledgeReply, noMatchReply, stalledReply,
+  thanksReply, type ComposeContext,
 } from "@/lib/deepseek/compose";
+import { displayName, loadProfile, rememberPerson } from "./memory";
+import { searchKnowledge } from "@/lib/knowledge/retrieve";
 import { getBotSettings, matchesKeyword } from "./settings";
 import type { HotelResult, LeadStage } from "@/lib/types";
 import type { IngestResult } from "./ingest";
@@ -83,20 +89,16 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
   const db = supabaseAdmin();
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Riyadh" });
 
-  // Recent context so follow-ups like "and for 4 people?" resolve correctly.
-  const { data: recent } = await db
-    .from("messages")
-    .select("sender_type, body")
-    .eq("chat_id", ing.chatId)
-    .order("wa_timestamp", { ascending: false })
-    .limit(HISTORY_MESSAGES);
-
-  const history = (recent ?? [])
-    .reverse()
-    .filter((m) => m.body)
-    .map((m) => `${m.sender_type === "client" ? "Customer" : "Us"}: ${m.body}`);
-
   const settings = await getBotSettings(orgId);
+
+  // ---- 0. who is this? ----
+  // Loaded before anything else, because it changes how the message is READ, not
+  // just how it is answered: the extractor needs to know whose turn this is to
+  // avoid picking up another group member's city, and it needs the language this
+  // person actually writes in to stop a one-word reply flipping it.
+  const profile = await loadProfile(ing.senderContactId);
+  const speakerName = profile.name ?? displayName(ing.senderName);
+  const history = await loadHistory(ing.chatId);
 
   // ---- 1. extract, then merge with what this lead already told us ----
   const fresh = await extractRequirements(ing.body, {
@@ -104,58 +106,59 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
     chatId: ing.chatId,
     recent: history,
     today,
+    speaker: speakerName,
+    knownLanguage: profile.language,
+    knownFacts: profile.facts,
   });
 
   const { slots: stored, attempts: priorAttempts } = await loadSlots(ing.leadId);
   const merged = mergeSlots(stored, fresh);
+  const progressed = addedSomething(stored, merged);
 
-  /*
-   * A bare "Makkah" answering our own question is not, on its own, a hotel
-   * inquiry — but abandoning it as small talk is how a bot ends up ignoring the
-   * answer it just asked for. So a message continues an inquiry when it either
-   * carries a new requirement ("Makkah", "30 sep") or arrives while a question of
-   * ours is outstanding ("Dont know" — no new slot, but still a reply to us).
-   *
-   * What must NOT count is "the lead has slots on it", which is how a plain
-   * "Hello" an hour later got answered with "could you confirm the city": stored
-   * slots never expire, so every future message looked like a live negotiation.
-   * A greeting with nothing outstanding is a greeting.
-   */
-  const continuesInquiry = addedSomething(stored, merged) || priorAttempts > 0;
-  const req: Requirements = {
-    ...fresh,
-    ...merged,
-    is_hotel_inquiry: fresh.is_hotel_inquiry || continuesInquiry,
+  const intent = resolveIntent(fresh, progressed, priorAttempts, ing, settings);
+  const req: Requirements = { ...fresh, ...merged, intent };
+
+  // Memory is written on EVERY turn, including social ones — someone who says
+  // "salam, my mother is in a wheelchair by the way" has just told us the single
+  // most important thing about their booking, in a message with no slots in it.
+  await rememberPerson(orgId, ing.senderContactId, {
+    language: fresh.language,
+    facts: fresh.memory_facts,
+  });
+
+  const ctx: ComposeContext = {
+    orgId,
+    chatId: ing.chatId,
+    customerMessage: ing.body,
+    isGroup: ing.isGroup,
+    settings,
+    speaker: { ...profile, name: speakerName },
+    history,
   };
+
+  // ---- 2. route on what the message actually IS ----
 
   // User-configured handoff keywords escalate even if the model missed it.
   // Both signals read the LATEST message only — `fresh.wants_human` is scoped to
   // it by the extractor prompt, because a request for a human three messages ago
   // must not re-fire the hand-off notice on every message after it.
-  if (fresh.wants_human || matchesKeyword(ing.body, settings.handoff_keywords)) {
+  if (
+    intent === "human_request" ||
+    fresh.wants_human ||
+    matchesKeyword(ing.body, settings.handoff_keywords)
+  ) {
     return handoff(ing, orgId, chatJid, req, "requested_human", holdingReply(req.language));
   }
 
-  if (!req.is_hotel_inquiry && !ing.mentionsBot) {
-    // Direct chats: greet on FIRST contact ("Hi", "Salam"…) instead of staying
-    // silent — a mute bot on a greeting looks broken. Once per chat: if the bot
-    // has ever spoken here, non-hotel chatter is ignored so "ok"/"thanks" don't
-    // trigger canned spam. Groups keep strict passive monitoring.
-    if (!ing.isGroup && settings.greeting_enabled) {
-      const { count } = await db
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .eq("chat_id", ing.chatId)
-        .eq("sender_type", "bot");
-      if ((count ?? 0) === 0) {
-        await deliver(ing, orgId, chatJid, introReply(req.language, settings));
-        return { sent: true, reason: "greeted_first_contact" };
-      }
-    }
-    return { sent: false, reason: "not_an_inquiry" };
+  if (isSocial(intent)) {
+    return social(ing, orgId, chatJid, req, ctx, { priorAttempts, stored, settings });
   }
 
-  // ---- 2. search: exact SQL, never similarity (A3) ----
+  if (intent === "other_question") {
+    return answerFromKnowledge(ing, orgId, chatJid, req, ctx);
+  }
+
+  // ---- 3. search: exact SQL, never similarity (A3) ----
   let hotels: HotelResult[] = [];
   if (req.city && req.check_in && req.check_out) {
     const { data, error } = await db.rpc("search_hotels", {
@@ -192,7 +195,6 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
     const missing = missingSlots(req);
     // Progress resets the budget: a customer who is answering, even partially,
     // has not stalled and should not be rushed to a human.
-    const progressed = addedSomething(stored, merged);
     const attempts = progressed ? 1 : priorAttempts + 1;
 
     await advanceStage(ing.leadId, "new_inquiry", req, attempts);
@@ -204,7 +206,7 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
       );
     }
 
-    await deliver(ing, orgId, chatJid, clarifyAsk(missing, attempts, req));
+    await deliver(ing, orgId, chatJid, clarifyAsk(missing, attempts, req, speakerName));
     return { sent: true, reason: "asked_for_missing_fields", attempts };
   }
 
@@ -218,19 +220,16 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
     );
   }
 
-  // ---- 3. compose ----
+  // ---- 4. compose ----
+  const alreadyQuoted = await previouslyQuotedNames(ing.leadId);
   const reply =
-    (await composeReply(req, hotels, {
-      orgId,
-      chatId: ing.chatId,
-      customerMessage: ing.body,
-      isGroup: ing.isGroup,
-      settings,
-    })) ?? holdingReply(req.language);
+    (await composeReply(req, hotels, { ...ctx, previouslyQuoted: alreadyQuoted })) ??
+    holdingReply(req.language);
 
   await deliver(ing, orgId, chatJid, reply);
   // A quote went out, so nothing is outstanding — clear the clarify counter.
   await advanceStage(ing.leadId, "quotation_sent", req, 0);
+  await recordQuotedHotels(ing.leadId, hotels);
 
   // Record what was quoted, so the agent sees exactly what the customer got.
   if (ing.leadId) {
@@ -246,6 +245,252 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
   }
 
   return { sent: true, reason: "quoted", options: hotels.length };
+}
+
+/* ---------------------------------------------------------------------------
+ * Intent routing
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Reconciles what the model called the message with what the conversation
+ * state says it must be.
+ *
+ * The model is right about most messages and systematically wrong about two
+ * kinds, both of which cost us a booking:
+ *
+ *   "Makkah"  — read as a place name with no request in it, when it is the
+ *               answer to the question we asked ninety seconds ago.
+ *   "Dont know" / "hmm" — read as chatter, when it is a customer failing to
+ *               answer us and quietly running down the clarify budget that
+ *               eventually fetches them a human.
+ *
+ * Both are caught by state the model does not have: whether this message moved
+ * a slot, and whether a question of ours is outstanding.
+ */
+function resolveIntent(
+  fresh: Requirements,
+  progressed: boolean,
+  priorAttempts: number,
+  ing: IngestResult,
+  settings: { smalltalk_enabled?: boolean }
+): Intent {
+  // A new requirement is unambiguous evidence, whatever the message looked like.
+  if (progressed) return "hotel_inquiry";
+
+  // Being @-mentioned in a group is a direct address. Treating it as chatter is
+  // how the bot ignores the one message in a group that was unmistakably for it.
+  if (ing.mentionsBot && fresh.intent === "smalltalk") return "other_question";
+
+  // A shrug while we are waiting on an answer is a non-answer, not small talk —
+  // it belongs on the clarify path so the budget advances and the chat
+  // eventually reaches a human instead of stalling politely forever.
+  // Greetings and thanks are exempt: those are social even mid-negotiation, and
+  // answering them is the entire point of this change.
+  if (priorAttempts > 0 && fresh.intent === "smalltalk") return "hotel_inquiry";
+
+  // With social replies switched off, a greeting falls back to the old
+  // behaviour rather than to silence-plus-an-unused-code-path.
+  if (settings.smalltalk_enabled === false && isSocial(fresh.intent)) {
+    return "smalltalk";
+  }
+
+  return fresh.intent;
+}
+
+/**
+ * Answers a greeting, a thank-you or a pleasantry — at any point in the
+ * conversation, which is the whole fix.
+ *
+ * Three things keep this from becoming spam. The reply is claimed atomically
+ * (claim_smalltalk_reply, 0018) so a rally of "ok"/"thanks"/"👍" produces one
+ * reply and not four, and so two concurrent webhooks cannot both send one. The
+ * lead is not advanced and the clarify counter is not touched — saying hello is
+ * not progress and not a stall. And groups still require the bot to be
+ * addressed, because a group is passive-monitored by default (PRD v2 §4.4) and
+ * a bot that greets every hello in a fifty-person coordination group is worse
+ * than one that never speaks.
+ */
+async function social(
+  ing: IngestResult,
+  orgId: string,
+  chatJid: string,
+  req: Requirements,
+  ctx: ComposeContext,
+  state: { priorAttempts: number; stored: Slots; settings: { smalltalk_enabled: boolean } }
+) {
+  if (ing.isGroup && !ing.mentionsBot) {
+    return { sent: false, reason: "group_social_ignored" };
+  }
+
+  const db = supabaseAdmin();
+
+  // First contact keeps the configured welcome, and is checked BEFORE the
+  // small-talk switch. The two settings answer different questions — "do you
+  // introduce yourself to a new customer?" and "do you answer hello from
+  // someone you're already talking to?" — and a workspace that wants only the
+  // first must not lose it by switching off the second.
+  const { count } = await db
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("chat_id", ing.chatId)
+    .eq("sender_type", "bot");
+  const isFirstContact = (count ?? 0) === 0;
+
+  if (isFirstContact && ctx.settings?.greeting_enabled) {
+    const { data: claimedIntro } = await db.rpc("claim_smalltalk_reply", {
+      p_chat_id: ing.chatId,
+    });
+    if (!claimedIntro) return { sent: false, reason: "smalltalk_cooldown" };
+    await deliver(ing, orgId, chatJid, introReply(req.language, ctx.settings));
+    return { sent: true, reason: "greeted_first_contact" };
+  }
+
+  if (!state.settings.smalltalk_enabled) {
+    return { sent: false, reason: "smalltalk_disabled" };
+  }
+
+  const { data: claimed } = await db.rpc("claim_smalltalk_reply", { p_chat_id: ing.chatId });
+  if (!claimed) return { sent: false, reason: "smalltalk_cooldown" };
+
+  const reply =
+    (await composeSocialReply(req, {
+      ...ctx,
+      // What the bot is still waiting on, so a greeting can carry the question
+      // forward instead of resetting the conversation to nothing.
+      outstandingQuestion:
+        state.priorAttempts > 0 ? describeMissing(missingSlots(req), req) : null,
+      openEnquiry: describeEnquiry(state.stored),
+    })) ??
+    (req.intent === "thanks"
+      ? thanksReply(req.language)
+      : greetBackReply(req.language, ctx.speaker?.name));
+
+  await deliver(ing, orgId, chatJid, reply);
+  return { sent: true, reason: `answered_${req.intent}` };
+}
+
+/**
+ * Answers a non-booking question from the workspace's uploaded documents.
+ *
+ * Before the knowledge base existed, every one of these — visa, transport,
+ * payment terms, cancellation — was either ignored or answered from the model's
+ * own memory of Saudi travel rules, which is confidently out of date. Now it is
+ * answered from what the agency actually uploaded, or handed to a human. There
+ * is no third option, and that is the point.
+ */
+async function answerFromKnowledge(
+  ing: IngestResult,
+  orgId: string,
+  chatJid: string,
+  req: Requirements,
+  ctx: ComposeContext
+) {
+  if (ing.isGroup && !ing.mentionsBot) {
+    return { sent: false, reason: "group_question_ignored" };
+  }
+
+  const hits = await searchKnowledge(orgId, ing.body);
+  if (hits.length === 0) {
+    // Nothing documented. A human answers, and the customer is told so rather
+    // than being left to wonder whether the message arrived.
+    return handoff(
+      ing, orgId, chatJid, req, "no_knowledge_match", noKnowledgeReply(req.language)
+    );
+  }
+
+  const reply = await composeKnowledgeReply(req, { ...ctx, knowledge: hits });
+  if (!reply) {
+    return handoff(
+      ing, orgId, chatJid, req, "knowledge_compose_failed", holdingReply(req.language)
+    );
+  }
+
+  await deliver(ing, orgId, chatJid, reply);
+  return { sent: true, reason: "answered_from_knowledge", sources: hits.length };
+}
+
+/* ---------------------------------------------------------------------------
+ * Conversation history
+ * ------------------------------------------------------------------------ */
+
+/**
+ * The recent thread, with every speaker named.
+ *
+ * This used to render as "Customer:" for everyone, which in a group meant five
+ * people's requirements arrived at the extractor as one person changing their
+ * mind repeatedly. Names are resolved in a second query rather than an embedded
+ * join: the FK constraint name that PostgREST would need for the embed is not
+ * something this code should be coupled to, and the id list is at most a dozen
+ * entries.
+ */
+async function loadHistory(chatId: string): Promise<string[]> {
+  const db = supabaseAdmin();
+  const { data: recent } = await db
+    .from("messages")
+    .select("sender_type, body, sender_contact_id")
+    .eq("chat_id", chatId)
+    .order("wa_timestamp", { ascending: false })
+    .limit(HISTORY_MESSAGES);
+
+  const rows = (recent ?? []).reverse().filter((m) => m.body);
+  if (rows.length === 0) return [];
+
+  const ids = [
+    ...new Set(rows.map((m) => m.sender_contact_id).filter((id): id is string => Boolean(id))),
+  ];
+
+  const names = new Map<string, string>();
+  if (ids.length) {
+    const { data } = await db.from("contacts").select("id, display_name").in("id", ids);
+    for (const c of data ?? []) {
+      const n = displayName(c.display_name);
+      if (n) names.set(c.id, n);
+    }
+  }
+
+  return rows.map((m) => {
+    const who =
+      m.sender_type === "client"
+        ? (m.sender_contact_id ? names.get(m.sender_contact_id) : null) ?? "Customer"
+        : m.sender_type === "agent"
+          ? "You (a colleague)"
+          : "You";
+    return `${who}: ${m.body}`;
+  });
+}
+
+/** Hotels this lead has already been shown, newest first. */
+async function previouslyQuotedNames(leadId: string | null): Promise<string[]> {
+  if (!leadId) return [];
+  const { data } = await supabaseAdmin()
+    .from("leads")
+    .select("quoted_hotel_ids")
+    .eq("id", leadId)
+    .maybeSingle();
+
+  const ids = (data?.quoted_hotel_ids ?? []) as string[];
+  if (ids.length === 0) return [];
+
+  const { data: hotels } = await supabaseAdmin()
+    .from("hotels")
+    .select("name")
+    .in("id", ids.slice(-8));
+  return (hotels ?? []).map((h) => h.name);
+}
+
+/** Adds this turn's options to the lead's "already seen" set. */
+async function recordQuotedHotels(leadId: string | null, hotels: HotelResult[]) {
+  if (!leadId || hotels.length === 0) return;
+  const db = supabaseAdmin();
+  const { data } = await db
+    .from("leads").select("quoted_hotel_ids").eq("id", leadId).maybeSingle();
+
+  const merged = [
+    ...new Set([...((data?.quoted_hotel_ids ?? []) as string[]), ...hotels.map((h) => h.hotel_id)]),
+  ];
+  // Capped: the list exists to stop repetition within one negotiation, and an
+  // unbounded array on a long-running lead would eventually crowd the prompt.
+  await db.from("leads").update({ quoted_hotel_ids: merged.slice(-20) }).eq("id", leadId);
 }
 
 /* ---------------------------------------------------------------------------
@@ -351,28 +596,61 @@ function joinAnd(items: string[]): string {
  * night count into a date. Attempt 3+ never reaches here — runBot hands the chat
  * to a human instead.
  */
-function clarifyAsk(missing: RequiredSlot[], attempt: number, req: Requirements): string {
+function clarifyAsk(
+  missing: RequiredSlot[],
+  attempt: number,
+  req: Requirements,
+  name?: string | null
+): string {
   const ar = req.language === "ar";
   const onlyCheckoutLeft =
     missing.length === 1 && missing[0] === "check_out" && Boolean(req.check_in);
 
+  // In a group the question has to say who it is for, or four people read it and
+  // three of them either ignore it or — worse — answer it.
+  const who = name ? (ar ? `${name}، ` : `${name}, `) : "";
+
   if (attempt >= 2 && onlyCheckoutLeft) {
     return ar
-      ? "لا مشكلة — كم ليلة تنوون الإقامة؟ سأحسب تاريخ المغادرة من ذلك."
-      : "No problem — how many nights are you staying? I'll work out the check-out date from that.";
+      ? `${who}لا مشكلة — كم ليلة تنوون الإقامة؟ سأحسب تاريخ المغادرة من ذلك.`
+      : `${who}no problem — how many nights are you staying? I'll work out the check-out date from that.`;
   }
 
   const labels = missing.map((k) => (ar ? LABELS_AR[k] : LABELS_EN[k]));
 
   if (attempt >= 2) {
     return ar
-      ? `لأتمكن من جلب الأسعار أحتاج ${labels.join("، ")}. مثال: «مكة، ١٢-١٥ سبتمبر».`
-      : `To pull live prices I just need ${joinAnd(labels)}. For example: "Makkah, 12–15 September".`;
+      ? `${who}لأتمكن من جلب الأسعار أحتاج ${labels.join("، ")}. مثال: «مكة، ١٢-١٥ سبتمبر».`
+      : `${who}to pull live prices I just need ${joinAnd(labels)}. For example: "Makkah, 12–15 September".`;
   }
 
   return ar
-    ? `للتحقق من التوفر، نحتاج ${labels.join("، ")}.`
-    : `Happy to check availability — could you confirm ${joinAnd(labels)}?`;
+    ? `${who}للتحقق من التوفر، نحتاج ${labels.join("، ")}.`
+    : `${who}happy to check availability — could you confirm ${joinAnd(labels)}?`;
+}
+
+/** The outstanding question in plain words, for the social composer to carry. */
+function describeMissing(missing: RequiredSlot[], req: Requirements): string | null {
+  if (missing.length === 0) return null;
+  const ar = req.language === "ar";
+  return joinAnd(missing.map((k) => (ar ? LABELS_AR[k] : LABELS_EN[k])));
+}
+
+/**
+ * "Makkah, 2026-09-12 → 2026-09-15, 5 people" — what this person has on the go.
+ *
+ * Given to the social composer so a greeting can be answered in context ("salam
+ * Onais — your Makkah dates are with the team") rather than as if the customer
+ * had just walked in. Nothing here is a price, so there is no risk in it.
+ */
+function describeEnquiry(slots: Slots): string | null {
+  const parts = [
+    slots.city,
+    slots.check_in && slots.check_out ? `${slots.check_in} → ${slots.check_out}` : slots.check_in,
+    slots.pax ? `${slots.pax} people` : null,
+    slots.min_stars ? `${slots.min_stars}-star` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(", ") : null;
 }
 
 /** Sends via Green API, mirrors into messages, and updates the group throttle. */

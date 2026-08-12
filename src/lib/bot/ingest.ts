@@ -13,6 +13,18 @@ export interface IngestResult {
   duplicate: boolean;
   mediaUrl: string | null;
   mediaMime: string | null;
+  /**
+   * Who sent this message — not which chat it arrived in.
+   *
+   * In a group these differ, and until 0018 only the chat was carried forward.
+   * Everything downstream therefore treated five people as one anonymous
+   * "Customer": their requirements were merged into a single lead, and a reply
+   * meant for Onais was addressed to nobody in particular. The bot cannot
+   * remember a person it was never told about.
+   */
+  senderContactId: string | null;
+  senderName: string | null;
+  senderPhone: string;
 }
 
 /**
@@ -40,6 +52,16 @@ export async function ingestInbound(
     : new Date().toISOString();
 
   // ---- contact ----
+  // display_name is only written when WhatsApp actually gave us one. Pushing a
+  // null through the upsert would erase a name we learned on an earlier message
+  // — WhatsApp omits senderName whenever the sender's privacy settings hide it,
+  // so a person the CRM knew as "Onais" would intermittently revert to a bare
+  // phone number and the bot would start addressing them as one.
+  const senderName =
+    hook.senderData?.senderName?.trim() ||
+    hook.senderData?.senderContactName?.trim() ||
+    null;
+
   const { data: contact } = await db
     .from("contacts")
     .upsert(
@@ -47,11 +69,12 @@ export async function ingestInbound(
         org_id: orgId,
         wa_jid: senderJid,
         phone_e164: `+${jidToPhone(senderJid)}`,
-        display_name: hook.senderData?.senderName ?? hook.senderData?.senderContactName ?? null,
+        ...(senderName ? { display_name: senderName } : {}),
+        last_seen_at: waTimestamp,
       },
       { onConflict: "org_id,wa_jid" }
     )
-    .select("id")
+    .select("id, display_name")
     .single();
 
   // ---- chat ----
@@ -95,12 +118,27 @@ export async function ingestInbound(
       .upsert({ chat_id: chatId, contact_id: contact.id }, { onConflict: "chat_id,contact_id" });
   }
 
-  // ---- lead (one open lead per chat for the demo) ----
-  const { data: openLead } = await db
+  // ---- lead: one open lead per PERSON per chat (0018) ----
+  //
+  // This used to be "the newest open lead on this chat", which is why two people
+  // negotiating in the same group overwrote each other's city, dates and party
+  // size all the way to a quote. Scoping the lookup to the sender means Onais
+  // and Bilal each accumulate their own requirements in parallel and the
+  // pipeline shows two real leads rather than one incoherent merge.
+  //
+  // A message whose sender we could not resolve still falls back to a
+  // chat-level lead — losing the thread entirely is worse than sharing one.
+  let leadQuery = db
     .from("leads")
     .select("id")
     .eq("chat_id", chatId)
-    .not("stage", "in", "(closed_won,closed_lost)")
+    .not("stage", "in", "(closed_won,closed_lost)");
+
+  leadQuery = contact?.id
+    ? leadQuery.eq("contact_id", contact.id)
+    : leadQuery.is("contact_id", null);
+
+  const { data: openLead } = await leadQuery
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -118,6 +156,21 @@ export async function ingestInbound(
       .select("id")
       .single();
     leadId = newLead?.id;
+
+    // leads_one_open_per_contact (0018) makes a concurrent insert fail rather
+    // than produce a second lead for the same person — two messages arriving
+    // together are processed in parallel after() callbacks. Losing that race
+    // means the other callback created the row we wanted; read it back.
+    if (!leadId && contact?.id) {
+      const { data: raced } = await db
+        .from("leads")
+        .select("id")
+        .eq("chat_id", chatId)
+        .eq("contact_id", contact.id)
+        .not("stage", "in", "(closed_won,closed_lost)")
+        .maybeSingle();
+      leadId = raced?.id;
+    }
   }
 
   // ---- message ----
@@ -159,6 +212,9 @@ export async function ingestInbound(
     duplicate: !msgErr && !msg,
     mediaUrl,
     mediaMime,
+    senderContactId: contact?.id ?? null,
+    senderName: senderName ?? contact?.display_name ?? null,
+    senderPhone: jidToPhone(senderJid),
   };
 }
 

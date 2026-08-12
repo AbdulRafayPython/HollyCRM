@@ -84,6 +84,12 @@ export interface Message {
   wa_message_id: string | null;
   direction: MsgDirection;
   sender_type: SenderType;
+  /**
+   * Which contact sent it. Written by ingest since 0001 and, until 0020, read
+   * by nothing — which is why every inbound bubble in a group said "Client".
+   * Null on outbound and on senders we could not resolve.
+   */
+  sender_contact_id?: string | null;
   message_type: MsgType;
   body: string | null;
   media_path: string | null;

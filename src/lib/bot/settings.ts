@@ -12,6 +12,9 @@ export interface BotSettings {
   handoff_keywords: string[];
   group_cooldown_seconds: number;
   group_daily_cap: number;
+  /** Answer greetings and thanks at any point, not only on first contact (0018). */
+  smalltalk_enabled: boolean;
+  smalltalk_cooldown_seconds: number;
 }
 
 export const BOT_DEFAULTS: BotSettings = {
@@ -32,6 +35,8 @@ export const BOT_DEFAULTS: BotSettings = {
   handoff_keywords: ["discount", "manager", "human", "خصم"],
   group_cooldown_seconds: 60,
   group_daily_cap: 10,
+  smalltalk_enabled: true,
+  smalltalk_cooldown_seconds: 45,
 };
 
 /**

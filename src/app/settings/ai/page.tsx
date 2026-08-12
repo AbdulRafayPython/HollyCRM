@@ -16,6 +16,8 @@ interface BotForm {
   handoff_keywords: string;
   group_cooldown_seconds: number;
   group_daily_cap: number;
+  smalltalk_enabled: boolean;
+  smalltalk_cooldown_seconds: number;
 }
 
 /**
@@ -44,6 +46,8 @@ export default function AiSettingsPage() {
           handoff_keywords: (s?.handoff_keywords ?? []).join(", "),
           group_cooldown_seconds: s?.group_cooldown_seconds ?? 60,
           group_daily_cap: s?.group_daily_cap ?? 10,
+          smalltalk_enabled: s?.smalltalk_enabled ?? true,
+          smalltalk_cooldown_seconds: s?.smalltalk_cooldown_seconds ?? 45,
         })
       )
       .catch(() => setError("Could not load settings"));
@@ -141,6 +145,32 @@ export default function AiSettingsPage() {
               <textarea rows={3} dir="rtl" className="field resize-none rounded-lg py-2.5 text-meta"
                 placeholder="اتركه فارغاً للتحية الافتراضية"
                 value={form.greeting_ar} onChange={(e) => set("greeting_ar", e.target.value)} />
+            </label>
+          </section>
+
+          <section className="panel space-y-3 p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-h3 text-ink">Answer greetings mid-conversation</h2>
+                <p className="text-caption text-muted">
+                  Replies to “salam”, “are you there?” and “thanks” at any point — not only on
+                  first contact — and carries any outstanding question forward. Switch this off and
+                  the AI stays silent on anything that isn&rsquo;t a booking message.
+                </p>
+              </div>
+              <input type="checkbox" checked={form.smalltalk_enabled}
+                onChange={(e) => set("smalltalk_enabled", e.target.checked)} />
+            </div>
+            <label className="block">
+              <span className="mb-1 block text-meta font-medium text-ink">
+                Minimum gap between social replies (seconds)
+              </span>
+              <input type="number" min={0} max={3600} className="field rounded-lg py-2.5 text-meta"
+                value={form.smalltalk_cooldown_seconds}
+                onChange={(e) => set("smalltalk_cooldown_seconds", Number(e.target.value))} />
+              <span className="mt-1 block text-caption text-subtle">
+                Stops a run of “ok” / “thanks” / 👍 turning into the AI talking to itself.
+              </span>
             </label>
           </section>
 

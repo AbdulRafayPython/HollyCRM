@@ -15,13 +15,25 @@ export default async function SettingsHub() {
   if (!isSupabaseConfigured()) redirect("/setup");
 
   const sb = await supabaseServer();
-  const [user, { data: instances }, { data: bot }, { count: hotelCount }] = await Promise.all([
-    getAuthUser(),
-    sb.from("green_api_instances").select("id, state, is_active, phone"),
-    sb.from("bot_settings").select("enabled, bot_name, updated_at").maybeSingle(),
-    sb.from("hotels").select("id", { count: "exact", head: true }),
-  ]);
+  const [user, { data: instances }, { data: bot }, { count: hotelCount }, { data: sources }] =
+    await Promise.all([
+      getAuthUser(),
+      sb.from("green_api_instances").select("id, state, is_active, phone"),
+      sb.from("bot_settings").select("enabled, bot_name, updated_at").maybeSingle(),
+      sb.from("hotels").select("id", { count: "exact", head: true }),
+      sb.from("knowledge_sources").select("purpose, status, row_count, is_active"),
+    ]);
   if (!user) redirect("/login");
+
+  // Rows sitting in staging are the one state here that needs acting on: they
+  // have been parsed, they are not live, and nothing else in the product will
+  // mention them again until someone opens the page.
+  const awaitingReview = (sources ?? [])
+    .filter((s) => s.purpose === "inventory" && s.status === "pending")
+    .reduce((n, s) => n + (s.row_count ?? 0), 0);
+  const liveDocs = (sources ?? []).filter(
+    (s) => s.purpose === "knowledge" && s.status === "ready" && s.is_active
+  ).length;
 
   const active = (instances ?? []).find((i) => i.is_active);
   const waDone = Boolean(active && active.state === "authorized");
@@ -61,6 +73,17 @@ export default async function SettingsHub() {
       done: invDone,
       status: invDone ? `${hotelCount} hotels loaded` : "No hotels yet",
       tone: invDone ? "wa" : "neutral",
+    },
+    {
+      n: 4, href: "/settings/knowledge", icon: "file", title: "Upload rate sheets & knowledge",
+      blurb: "Import prices from Excel or a Google Sheet, and give the AI your policies, visa and transport documents.",
+      done: liveDocs > 0 || awaitingReview > 0,
+      status: awaitingReview > 0
+        ? `${awaitingReview} imported rows awaiting review`
+        : liveDocs > 0
+          ? `${liveDocs} document${liveDocs === 1 ? "" : "s"} the AI can answer from`
+          : "Nothing uploaded — non-price questions go to a human",
+      tone: awaitingReview > 0 ? "bot" : liveDocs > 0 ? "wa" : "neutral",
     },
   ];
 
