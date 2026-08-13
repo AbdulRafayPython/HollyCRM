@@ -72,10 +72,32 @@ export default {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        /* Workflow canvas. `dash-flow` animates stroke-dashoffset rather than
+           moving the path, so the connector reads as data travelling along it
+           without any layout work per frame — it stays on the compositor. */
+        "dash-flow": {
+          to: { strokeDashoffset: "-24" },
+        },
+        "node-in": {
+          from: { opacity: "0", transform: "translateY(10px) scale(0.96)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        "pulse-ring": {
+          "0%": { opacity: "0.55", transform: "scale(1)" },
+          "70%, 100%": { opacity: "0", transform: "scale(1.5)" },
+        },
+        "drawer-in": {
+          from: { opacity: "0", transform: "translateX(16px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
         "rise-in": "rise-in 180ms cubic-bezier(0.16, 1, 0.3, 1)",
         "fade-in": "fade-in 140ms ease-out",
+        "dash-flow": "dash-flow 900ms linear infinite",
+        "node-in": "node-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "pulse-ring": "pulse-ring 2s cubic-bezier(0.16, 1, 0.3, 1) infinite",
+        "drawer-in": "drawer-in 220ms cubic-bezier(0.16, 1, 0.3, 1)",
       },
     },
   },

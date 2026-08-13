@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Avatar from "./ui/Avatar";
 import Icon, { type IconName } from "./ui/Icon";
+import { usePresence } from "./WorkspaceContext";
 
 export interface ProfileUser {
   name?: string | null;
@@ -32,6 +33,7 @@ export default function ProfileMenu({ user }: { user?: ProfileUser }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const { presence, setPresence } = usePresence();
 
   const name = user?.name?.trim() || null;
   const email = user?.email?.trim() || null;
@@ -76,11 +78,20 @@ export default function ProfileMenu({ user }: { user?: ProfileUser }) {
         }`}
       >
         <span
-          className={`rounded-full transition-shadow duration-150 ease-swift ${
+          className={`relative rounded-full transition-shadow duration-150 ease-swift ${
             open ? "ring-2 ring-wa ring-offset-2 ring-offset-ink" : ""
           }`}
         >
           <Avatar name={name} type="agent" size={32} src={avatar} />
+          {/* Presence dot on the avatar. An agent has to be able to tell, from
+              any screen, whether the router is currently sending them work —
+              otherwise "why am I getting no chats?" has no visible answer. */}
+          <span
+            aria-hidden
+            className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-ink transition-colors duration-200 ease-swift ${
+              presence === "available" ? "bg-wa" : "bg-subtle"
+            }`}
+          />
         </span>
       </button>
 
@@ -98,6 +109,40 @@ export default function ProfileMenu({ user }: { user?: ProfileUser }) {
               </span>
               {email && <span className="block truncate text-meta text-muted">{email}</span>}
             </span>
+          </div>
+
+          {/* Availability sits above navigation because it is the item with a
+              live consequence: while Away, the router routes around you. */}
+          <div className="border-b border-edge p-2">
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-caption font-medium text-muted">Availability</span>
+              <span className={`text-caption font-medium ${presence === "available" ? "text-wa-dark" : "text-subtle"}`}>
+                {presence === "available" ? "Taking chats" : "Not taking chats"}
+              </span>
+            </div>
+            <div className="flex gap-1 rounded-lg bg-surface p-1">
+              {(["available", "away"] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={presence === value}
+                  onClick={() => setPresence(value)}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-caption font-medium transition-all duration-200 ease-swift ${
+                    presence === value
+                      ? "bg-card text-ink shadow-card"
+                      : "text-muted hover:text-ink"
+                  }`}
+                >
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      value === "available" ? "bg-wa" : "bg-subtle"
+                    }`}
+                  />
+                  {value === "available" ? "Available" : "Away"}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="p-1">

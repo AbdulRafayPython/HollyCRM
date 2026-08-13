@@ -128,6 +128,39 @@ export default async function SettingsHub() {
           ))}
 
           <Link
+            href="/settings/routing"
+            className="panel flex items-center gap-4 p-5 transition duration-150 ease-swift hover:shadow-pop"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-muted ring-1 ring-edge">
+              <Icon name="users" size={17} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="text-body font-semibold text-ink">Routing & team</span>
+              <span className="mt-0.5 block text-meta text-muted">
+                Regions by dialling code, who covers them, and what customers hear when
+                nobody is available.
+              </span>
+            </span>
+            <Icon name="chevronRight" size={16} className="shrink-0 text-subtle" />
+          </Link>
+
+          <Link
+            href="/settings/llm"
+            className="panel flex items-center gap-4 p-5 transition duration-150 ease-swift hover:shadow-pop"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-muted ring-1 ring-edge">
+              <Icon name="lock" size={17} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="text-body font-semibold text-ink">Model & API keys</span>
+              <span className="mt-0.5 block text-meta text-muted">
+                Choose the provider and model for this workspace. Keys are encrypted in Vault.
+              </span>
+            </span>
+            <Icon name="chevronRight" size={16} className="shrink-0 text-subtle" />
+          </Link>
+
+          <Link
             href="/settings/team"
             className="panel flex items-center gap-4 p-5 transition duration-150 ease-swift hover:shadow-pop"
           >

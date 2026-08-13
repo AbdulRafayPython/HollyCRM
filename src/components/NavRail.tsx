@@ -5,9 +5,18 @@ import { usePathname } from "next/navigation";
 import Icon, { type IconName } from "./ui/Icon";
 import ProfileMenu, { type ProfileUser } from "./ProfileMenu";
 
+/**
+ * The rail carries what people use daily.
+ *
+ * "AI agent" was buried under Settings alongside data cleanup and the .env
+ * checklist — a section you visit twice a year. It is the thing that answers
+ * every customer, it needs configuring before the product does anything useful,
+ * and it belongs where someone will actually find it.
+ */
 const NAV: { href: string; icon: IconName; label: string }[] = [
   { href: "/inbox", icon: "inbox", label: "Inbox" },
   { href: "/pipeline", icon: "kanban", label: "Pipeline" },
+  { href: "/ai", icon: "bot", label: "AI agent" },
   { href: "/analytics", icon: "chart", label: "Analytics" },
   { href: "/settings", icon: "settings", label: "Settings" },
 ];

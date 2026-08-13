@@ -9,8 +9,9 @@ import {
   thanksReply, type ComposeContext,
 } from "@/lib/deepseek/compose";
 import { displayName, loadProfile, rememberPerson } from "./memory";
+import { buildContext, evaluate, loadRules, recordMatch } from "./rules";
 import { searchKnowledge } from "@/lib/knowledge/retrieve";
-import { getBotSettings, matchesKeyword } from "./settings";
+import { getBotSettings, matchesKeyword, type BotSettings } from "./settings";
 import type { HotelResult, LeadStage } from "@/lib/types";
 import type { IngestResult } from "./ingest";
 
@@ -136,7 +137,22 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
     history,
   };
 
-  // ---- 2. route on what the message actually IS ----
+  /*
+   * ---- 2. the workspace's own if/else ----
+   *
+   * Evaluated before any built-in routing, because that is what "my rule" has
+   * to mean: a workspace that writes "anything mentioning a complaint goes
+   * straight to Ahmed" expects that to beat the bot's opinion about whether the
+   * message looked like a booking enquiry.
+   *
+   * It runs AFTER extraction so conditions can read intent, city, party size
+   * and budget — the things the customer meant, not just the characters they
+   * typed.
+   */
+  const ruleOutcome = await applyRules(ing, orgId, chatJid, req, settings, speakerName);
+  if (ruleOutcome) return ruleOutcome;
+
+  // ---- 3. route on what the message actually IS ----
 
   // User-configured handoff keywords escalate even if the model missed it.
   // Both signals read the LATEST message only — `fresh.wants_human` is scoped to
@@ -147,7 +163,9 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
     fresh.wants_human ||
     matchesKeyword(ing.body, settings.handoff_keywords)
   ) {
-    return handoff(ing, orgId, chatJid, req, "requested_human", holdingReply(req.language));
+    return handoff(
+      ing, orgId, chatJid, req, "requested_human", holdingReply(req.language), settings
+    );
   }
 
   if (isSocial(intent)) {
@@ -155,7 +173,23 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
   }
 
   if (intent === "other_question") {
-    return answerFromKnowledge(ing, orgId, chatJid, req, ctx);
+    return answerFromKnowledge(ing, orgId, chatJid, req, ctx, settings);
+  }
+
+  /*
+   * Quoting switched off entirely.
+   *
+   * Not the same as "no inventory matched": the requirements are still worth
+   * capturing, so the lead is advanced before the handoff and a human picks up
+   * an enquiry that already has the city, dates and party size on it. Used
+   * while a rate sheet is mid-import, so the agent never quotes from half-loaded
+   * inventory.
+   */
+  if (!settings.inventory_enabled) {
+    await advanceStage(ing.leadId, "requirements_gathered", req, 0);
+    return handoff(
+      ing, orgId, chatJid, req, "quoting_disabled", holdingReply(req.language), settings
+    );
   }
 
   // ---- 3. search: exact SQL, never similarity (A3) ----
@@ -202,7 +236,7 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
     if (attempts > MAX_CLARIFY_ATTEMPTS) {
       // Third unanswered ask: fetch a human rather than send it.
       return handoff(
-        ing, orgId, chatJid, req, "clarification_stalled", stalledReply(req.language)
+        ing, orgId, chatJid, req, "clarification_stalled", stalledReply(req.language), settings
       );
     }
 
@@ -216,7 +250,7 @@ export async function runBot(ing: IngestResult, orgId: string, chatJid: string) 
     // "which city?" interrogation over on a lead that had already been quoted.
     await advanceStage(ing.leadId, "requirements_gathered", req, 0);
     return handoff(
-      ing, orgId, chatJid, req, "no_inventory_match", noMatchReply(req.language, req)
+      ing, orgId, chatJid, req, "no_inventory_match", noMatchReply(req.language, req), settings
     );
   }
 
@@ -383,10 +417,20 @@ async function answerFromKnowledge(
   orgId: string,
   chatJid: string,
   req: Requirements,
-  ctx: ComposeContext
+  ctx: ComposeContext,
+  settings: BotSettings
 ) {
   if (ing.isGroup && !ing.mentionsBot) {
     return { sent: false, reason: "group_question_ignored" };
+  }
+
+  // The canvas toggle has to mean something here, or it is decoration. Off
+  // sends every non-price question to a person, which is the correct setting
+  // for a workspace that has not uploaded documents it trusts yet.
+  if (!settings.knowledge_enabled) {
+    return handoff(
+      ing, orgId, chatJid, req, "knowledge_disabled", noKnowledgeReply(req.language), settings
+    );
   }
 
   const hits = await searchKnowledge(orgId, ing.body);
@@ -394,19 +438,131 @@ async function answerFromKnowledge(
     // Nothing documented. A human answers, and the customer is told so rather
     // than being left to wonder whether the message arrived.
     return handoff(
-      ing, orgId, chatJid, req, "no_knowledge_match", noKnowledgeReply(req.language)
+      ing, orgId, chatJid, req, "no_knowledge_match", noKnowledgeReply(req.language), settings
     );
   }
 
   const reply = await composeKnowledgeReply(req, { ...ctx, knowledge: hits });
   if (!reply) {
     return handoff(
-      ing, orgId, chatJid, req, "knowledge_compose_failed", holdingReply(req.language)
+      ing, orgId, chatJid, req, "knowledge_compose_failed", holdingReply(req.language), settings
     );
   }
 
   await deliver(ing, orgId, chatJid, reply);
   return { sent: true, reason: "answered_from_knowledge", sources: hits.length };
+}
+
+/* ---------------------------------------------------------------------------
+ * Operator rules
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Runs the workspace's own if/else and carries out the first matching action.
+ *
+ * Returns a result when a rule took control of the message, or null to let the
+ * built-in flow continue — which is also what happens when a workspace has
+ * written no rules at all, so this is a no-op until somebody uses it.
+ */
+async function applyRules(
+  ing: IngestResult,
+  orgId: string,
+  chatJid: string,
+  req: Requirements,
+  settings: BotSettings,
+  speakerName: string | null
+) {
+  const rules = await loadRules(orgId);
+  if (rules.length === 0) return null;
+
+  const db = supabaseAdmin();
+  const { data: contact } = ing.senderContactId
+    ? await db.from("contacts").select("country_code").eq("id", ing.senderContactId).maybeSingle()
+    : { data: null };
+
+  const ctx = buildContext(req, {
+    message: ing.body,
+    countryCode: contact?.country_code ?? null,
+    isGroup: ing.isGroup,
+  });
+
+  const matched = evaluate(rules, ctx);
+  if (matched.length === 0) return null;
+
+  for (const { rule, action } of matched) {
+    void recordMatch(rule.id);
+
+    switch (action.type) {
+      case "tag":
+        // Note only — the loop continues to whatever rule follows, which is the
+        // whole point of a tagging rule.
+        await db.from("internal_notes").insert({
+          org_id: orgId,
+          chat_id: ing.chatId,
+          lead_id: ing.leadId,
+          body: `Rule "${rule.name}": ${action.tag ?? "tagged"}`,
+        });
+        break;
+
+      case "reply": {
+        if (!action.message?.trim()) break;
+        await deliver(ing, orgId, chatJid, action.message.trim());
+        return { sent: true, reason: `rule_reply:${rule.name}` };
+      }
+
+      case "pause_bot":
+        await db.from("chats")
+          .update({ is_bot_paused: true, bot_resume_at: null })
+          .eq("id", ing.chatId);
+        await db.from("internal_notes").insert({
+          org_id: orgId, chat_id: ing.chatId, lead_id: ing.leadId,
+          body: `Rule "${rule.name}": AI stopped on this chat.`,
+        });
+        return { sent: false, reason: `rule_pause:${rule.name}` };
+
+      case "assign_agent": {
+        if (!action.agent_id) break;
+        // Only claims an unassigned chat. A rule must not pull a conversation
+        // out from under whoever is already mid-reply on it.
+        const { data: claimed } = await db
+          .from("chats")
+          .update({ assigned_agent_id: action.agent_id })
+          .eq("id", ing.chatId)
+          .is("assigned_agent_id", null)
+          .select("id")
+          .maybeSingle();
+        if (ing.leadId && claimed) {
+          await db.from("leads")
+            .update({ assigned_agent_id: action.agent_id })
+            .eq("id", ing.leadId)
+            .is("assigned_agent_id", null);
+        }
+        return handoff(
+          ing, orgId, chatJid, req, `rule:${rule.name}`, holdingReply(req.language), settings
+        );
+      }
+
+      case "assign_region": {
+        // Routing by region still has to respect availability, so this hands to
+        // the normal router rather than picking a name out of the region itself.
+        return handoff(
+          ing, orgId, chatJid, req, `rule:${rule.name}`, holdingReply(req.language), settings
+        );
+      }
+
+      case "handoff":
+        return handoff(
+          ing, orgId, chatJid, req, `rule:${rule.name}`,
+          action.message?.trim() || holdingReply(req.language), settings
+        );
+    }
+  }
+
+  // Every matched rule was a tag, so the built-in flow still runs. `speakerName`
+  // is unused here but kept in the signature: the reply actions will want it as
+  // soon as templates support a name placeholder.
+  void speakerName;
+  return null;
 }
 
 /* ---------------------------------------------------------------------------
@@ -716,7 +872,8 @@ async function deliver(ing: IngestResult, orgId: string, chatJid: string, text: 
  */
 async function handoff(
   ing: IngestResult, orgId: string, chatJid: string,
-  req: Requirements, reason: string, message?: string
+  req: Requirements, reason: string, message: string | undefined,
+  settings: BotSettings
 ) {
   const db = supabaseAdmin();
   /*
@@ -742,6 +899,18 @@ async function handoff(
     return { sent: false, reason: `${reason}_already_handed_off` };
   }
 
+  /*
+   * Find the human before promising one.
+   *
+   * The order matters. Until now this function told every customer "a colleague
+   * will follow up" and then dropped the chat into the unassigned pool, where it
+   * waited for somebody to notice — so on a busy afternoon "shortly" meant
+   * tomorrow, and the system had no mechanism to keep a promise it had already
+   * made. Assigning first means the message we send can be true: a named person
+   * when one is available, and the fallback wording when nobody is.
+   */
+  const routed = await assignConversation(ing.chatId);
+
   if (ing.leadId) {
     // clarify_attempts resets here. A human owns the conversation now, so the
     // bot's outstanding question is void — and a non-zero counter left behind
@@ -756,12 +925,77 @@ async function handoff(
       org_id: orgId,
       chat_id: ing.chatId,
       lead_id: ing.leadId,
-      body: `Bot handed off to a human. Reason: ${reason}.`,
+      body:
+        `Bot handed off to a human. Reason: ${reason}. ` +
+        (routed.assigned
+          ? `Assigned to ${routed.agent_name ?? "an agent"}` +
+            (routed.region ? ` (${routed.region})` : "") +
+            (routed.reason === "assigned_outside_region"
+              ? " — nobody in the customer's own region was available."
+              : ".")
+          : `Not assigned: ${routed.reason}` +
+            (routed.region ? ` for region ${routed.region}` : "") +
+            ". The chat is waiting in the unassigned queue."),
     });
   }
 
-  if (message) await deliver(ing, orgId, chatJid, message);
-  return { sent: Boolean(message), reason };
+  // An unassigned handoff must not tell the customer someone is on their way.
+  // The fallback says a colleague will follow up, without implying imminence —
+  // the difference between an accurate wait and a broken promise.
+  const text =
+    message === undefined
+      ? undefined
+      : routed.assigned
+        ? message
+        : fallbackMessage(req.language, settings);
+
+  if (text) await deliver(ing, orgId, chatJid, text);
+  return { sent: Boolean(text), reason, assignment: routed.reason };
+}
+
+/** Runs the SQL router. Never throws onto the reply path — a routing failure
+ *  must still leave the customer with a message and the chat with a note. */
+async function assignConversation(chatId: string): Promise<AssignResult> {
+  try {
+    const { data, error } = await supabaseAdmin().rpc("assign_conversation", {
+      p_chat_id: chatId,
+    });
+    if (error || !data) return { assigned: false, reason: "router_error" };
+    return data as AssignResult;
+  } catch (err) {
+    console.error("[routing] assign failed", err);
+    return { assigned: false, reason: "router_error" };
+  }
+}
+
+interface AssignResult {
+  assigned: boolean;
+  reason: string;
+  agent_id?: string;
+  agent_name?: string | null;
+  region?: string | null;
+  country_code?: string | null;
+}
+
+/**
+ * What we say when the handoff found nobody.
+ *
+ * Workspace-configurable, because the honest wording depends on the desk: a team
+ * that works one timezone can promise the morning, a 24/7 desk cannot explain
+ * why nobody answered. The built-in text promises follow-up without promising
+ * speed, which is the only thing that is true in every case.
+ */
+function fallbackMessage(language: string, settings: BotSettings): string {
+  const custom = language === "ar" ? settings.fallback_message_ar : settings.fallback_message_en;
+  if (custom?.trim()) return custom.trim();
+
+  if (language === "ar") {
+    return "شكرًا لتواصلكم. فريقنا خارج ساعات العمل حاليًا، وسيتواصل معكم أحد الزملاء فور عودتنا بإذن الله.";
+  }
+  if (language === "ur") {
+    return "آپ کے پیغام کا شکریہ۔ ہماری ٹیم اس وقت دستیاب نہیں، ہم واپس آتے ہی آپ سے رابطہ کریں گے۔";
+  }
+  return "Thanks for your message — our team isn't available right now, but a colleague will get back to you as soon as we're back.";
 }
 
 /**
@@ -780,48 +1014,42 @@ async function advanceStage(
   clarifyAttempts?: number
 ) {
   if (!leadId) return;
-  const db = supabaseAdmin();
-  const order: LeadStage[] = [
-    "new_inquiry", "requirements_gathered", "quotation_sent",
-    "under_negotiation", "closed_won", "closed_lost",
-  ];
 
-  const { data: lead } = await db.from("leads").select("stage").eq("id", leadId).single();
-  const current = (lead?.stage ?? "new_inquiry") as LeadStage;
-
-  const hasRequirements = Boolean(req.city && req.check_in && req.check_out);
-  const effective: LeadStage =
-    target === "new_inquiry" && hasRequirements ? "requirements_gathered" : target;
-
-  // First update carries the extracted requirement fields alongside the stage.
-  // `undefined` is dropped from the JSON body, so a slot we have no value for is
-  // left as-is rather than being nulled out — this write must never erase memory.
-  // `city` is the slot the bot used to forget between turns; persisting it is what
-  // makes the merge in runBot() work at all.
-  const fields = {
-    city: req.city ?? undefined,
-    min_stars: req.min_stars ?? undefined,
-    check_in_date: req.check_in ?? undefined,
-    check_out_date: req.check_out ?? undefined,
-    pax_count: req.pax ?? undefined,
-    rooms_count: req.rooms ?? undefined,
-    room_configuration: req.room_configuration ?? undefined,
-    max_distance_m: req.max_distance_m ?? undefined,
-    budget_amount: req.max_price_per_night ?? undefined,
-    clarify_attempts: clarifyAttempts ?? undefined,
+  /*
+   * One round trip, not up to six.
+   *
+   * The stepping still happens — advance_lead_stage() (0023) walks the funnel a
+   * stage at a time so log_stage_change() fires for each and the report cannot
+   * show more quotes than qualified leads — but it happens inside the database
+   * instead of as a sequence of statements from Node, each with its own network
+   * hop, on the reply path of every single quote.
+   *
+   * Keys are omitted rather than sent as null. The SQL coalesces every field
+   * against its current value, so an absent key means "not mentioned this turn"
+   * and the stored value survives. Sending null would erase the memory that the
+   * whole slot-merge design exists to protect.
+   */
+  const fields: Record<string, unknown> = {};
+  const put = (key: string, value: unknown) => {
+    if (value !== null && value !== undefined) fields[key] = value;
   };
 
-  const from = order.indexOf(current);
-  const to = order.indexOf(effective);
-  if (to <= from) {
-    // No forward movement — still persist any newly extracted requirements.
-    await db.from("leads").update(fields).eq("id", leadId);
-    return;
-  }
+  put("city", req.city);
+  put("min_stars", req.min_stars);
+  put("check_in_date", req.check_in);
+  put("check_out_date", req.check_out);
+  put("pax_count", req.pax);
+  put("rooms_count", req.rooms);
+  put("room_configuration", req.room_configuration);
+  put("max_distance_m", req.max_distance_m);
+  put("budget_amount", req.max_price_per_night);
+  put("clarify_attempts", clarifyAttempts);
 
-  for (let i = from + 1; i <= to; i++) {
-    await db.from("leads")
-      .update({ stage: order[i], ...(i === from + 1 ? fields : {}) })
-      .eq("id", leadId);
-  }
+  const { error } = await supabaseAdmin().rpc("advance_lead_stage", {
+    p_lead_id: leadId,
+    p_target: target,
+    p_fields: fields,
+  });
+
+  if (error) console.error("[stage] advance failed", error.message);
 }

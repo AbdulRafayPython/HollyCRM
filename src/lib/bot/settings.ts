@@ -15,6 +15,15 @@ export interface BotSettings {
   /** Answer greetings and thanks at any point, not only on first contact (0018). */
   smalltalk_enabled: boolean;
   smalltalk_cooldown_seconds: number;
+  /** Branch switches the workflow canvas toggles directly (0024). */
+  knowledge_enabled: boolean;
+  inventory_enabled: boolean;
+  /** Routing (0021). */
+  auto_assign_enabled: boolean;
+  presence_timeout_seconds: number;
+  assign_outside_region: boolean;
+  fallback_message_en: string | null;
+  fallback_message_ar: string | null;
 }
 
 export const BOT_DEFAULTS: BotSettings = {
@@ -37,6 +46,13 @@ export const BOT_DEFAULTS: BotSettings = {
   group_daily_cap: 10,
   smalltalk_enabled: true,
   smalltalk_cooldown_seconds: 45,
+  knowledge_enabled: true,
+  inventory_enabled: true,
+  auto_assign_enabled: true,
+  presence_timeout_seconds: 120,
+  assign_outside_region: true,
+  fallback_message_en: null,
+  fallback_message_ar: null,
 };
 
 /**
@@ -44,12 +60,22 @@ export const BOT_DEFAULTS: BotSettings = {
  * The throttle values are ALSO read inside bot_gate() in SQL — this object
  * feeds the Node-side decisions (keywords, greeting, prompt), the SQL gate
  * feeds the atomic ones (cooldown, cap, kill switch).
+ *
+ * A Map, not a single slot. This used to be one `{ orgId, value, at }` object,
+ * which is a cache of size one keyed by tenant: with two workspaces active at
+ * once, every message evicted the other's entry and the hit rate collapsed to
+ * roughly zero — the cache was costing a comparison and buying nothing. On a
+ * single-tenant demo it looked like it worked, which is why it survived.
  */
-let cache: { orgId: string; value: BotSettings; at: number } | null = null;
+const cache = new Map<string, { value: BotSettings; at: number }>();
 const TTL_MS = 30_000;
+/** Bounded, so a long-lived server serving many workspaces cannot grow this
+ *  without limit. Clearing wholesale beats tracking an LRU for ~200 small rows. */
+const MAX_ENTRIES = 200;
 
 export async function getBotSettings(orgId: string): Promise<BotSettings> {
-  if (cache && cache.orgId === orgId && Date.now() - cache.at < TTL_MS) return cache.value;
+  const hit = cache.get(orgId);
+  if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
 
   try {
     const { data } = await supabaseAdmin()
@@ -65,15 +91,18 @@ export async function getBotSettings(orgId: string): Promise<BotSettings> {
           handoff_keywords: data.handoff_keywords ?? BOT_DEFAULTS.handoff_keywords,
         }
       : BOT_DEFAULTS;
-    cache = { orgId, value, at: Date.now() };
+    if (cache.size >= MAX_ENTRIES) cache.clear();
+    cache.set(orgId, { value, at: Date.now() });
     return value;
   } catch {
     return BOT_DEFAULTS;
   }
 }
 
-export function invalidateBotSettingsCache() {
-  cache = null;
+/** Drop one workspace's cached settings, or all of them. */
+export function invalidateBotSettingsCache(orgId?: string) {
+  if (orgId) cache.delete(orgId);
+  else cache.clear();
 }
 
 /** Case-insensitive whole-ish word match for user-configured keyword lists. */

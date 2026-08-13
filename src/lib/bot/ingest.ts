@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { extractMessage, mentionsOwnJid } from "@/lib/green/client";
 import { isGroupJid, jidToPhone, type GreenWebhook } from "@/lib/green/types";
+import { countryCode } from "@/lib/phone";
 
 export interface IngestResult {
   chatId: string;
@@ -70,6 +71,16 @@ export async function ingestInbound(
         wa_jid: senderJid,
         phone_e164: `+${jidToPhone(senderJid)}`,
         ...(senderName ? { display_name: senderName } : {}),
+        // Resolved once, here, rather than parsed on every routing decision.
+        // The assignment engine keys on this, so it has to exist by the time the
+        // first message finishes being ingested — a handoff on message one still
+        // needs to know which desk the customer belongs to.
+        //
+        // Never from a group jid. senderJid falls back to chatJid when Green API
+        // omits the sender, and a group id like 120363411449511029 prefix-matches
+        // dialling code '1' — which would quietly file that contact under the
+        // US desk and route their chats there for good.
+        country_code: isGroupJid(senderJid) ? null : countryCode(senderJid),
         last_seen_at: waTimestamp,
       },
       { onConflict: "org_id,wa_jid" }

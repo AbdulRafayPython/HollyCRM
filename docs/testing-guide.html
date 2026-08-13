@@ -1,0 +1,1049 @@
+<title>HollyCRM — AI Agent Test Plan</title>
+
+<style>
+  /* ---------------------------------------------------------------------
+     Palette is the product's own (tailwind.config.ts), so the document reads
+     as part of the thing being tested. Neutrals carry a slight cool bias
+     toward the indigo accent rather than sitting at pure grey.
+     Semantic colour (pass / attention / fail) is separate from the accent.
+  --------------------------------------------------------------------- */
+  :root {
+    --ink:        #0F172A;
+    --ink-soft:   #334155;
+    --muted:      #64748B;
+    --subtle:     #94A3B8;
+    --paper:      #F7F8FB;
+    --card:       #FFFFFF;
+    --edge:       #E2E8F0;
+    --edge-soft:  #EDF1F6;
+
+    --brand:      #4F46E5;
+    --brand-soft: #EEF0FE;
+    --pass:       #10B981;
+    --pass-soft:  #ECFDF5;
+    --pass-ink:   #047857;
+    --warn:       #F59E0B;
+    --warn-soft:  #FFFBEB;
+    --warn-ink:   #92400E;
+    --fail:       #EF4444;
+    --fail-soft:  #FEF2F2;
+    --fail-ink:   #991B1B;
+
+    --shadow:     0 1px 2px rgba(15,23,42,.05), 0 1px 3px rgba(15,23,42,.04);
+
+    /* Serif for document furniture (title, test headings) — this is a
+       specification, and the serif says so. Sans for everything read at
+       speed. Mono for anything typed verbatim, where character shape
+       carries meaning. */
+    --display: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink:        #E8ECF5;
+      --ink-soft:   #C2CADB;
+      --muted:      #94A0B8;
+      --subtle:     #6B7793;
+      --paper:      #0D1119;
+      --card:       #161C29;
+      --edge:       #2A3243;
+      --edge-soft:  #212836;
+
+      --brand:      #9A95FA;
+      --brand-soft: #1E1F3D;
+      --pass:       #34D399;
+      --pass-soft:  #0D2A22;
+      --pass-ink:   #6EE7B7;
+      --warn:       #FBBF24;
+      --warn-soft:  #2B2110;
+      --warn-ink:   #FCD34D;
+      --fail:       #F87171;
+      --fail-soft:  #2C1618;
+      --fail-ink:   #FCA5A5;
+
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink:        #E8ECF5;
+    --ink-soft:   #C2CADB;
+    --muted:      #94A0B8;
+    --subtle:     #6B7793;
+    --paper:      #0D1119;
+    --card:       #161C29;
+    --edge:       #2A3243;
+    --edge-soft:  #212836;
+
+    --brand:      #9A95FA;
+    --brand-soft: #1E1F3D;
+    --pass:       #34D399;
+    --pass-soft:  #0D2A22;
+    --pass-ink:   #6EE7B7;
+    --warn:       #FBBF24;
+    --warn-soft:  #2B2110;
+    --warn-ink:   #FCD34D;
+    --fail:       #F87171;
+    --fail-soft:  #2C1618;
+    --fail-ink:   #FCA5A5;
+
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  /* ---- masthead ---- */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.5rem; }
+  .eyebrow {
+    font-size: .6875rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--brand);
+  }
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 1.15;
+    font-weight: 700;
+    margin: .5rem 0 .5rem;
+    text-wrap: balance;
+    letter-spacing: -.015em;
+  }
+  .standfirst {
+    font-size: 1.0625rem;
+    color: var(--ink-soft);
+    max-width: 42rem;
+    margin: 0;
+  }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: .5rem 1.5rem;
+    margin-top: 1.25rem;
+    font-size: .8125rem; color: var(--muted);
+  }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  /* ---- progress ---- */
+  .progress {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 1rem;
+    margin: 0 -1.5rem 2.5rem;
+    padding: .75rem 1.5rem;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--edge);
+    font-size: .8125rem;
+  }
+  .bar { flex: 1; height: 6px; border-radius: 99px; background: var(--edge); overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--pass); border-radius: 99px; transition: width .35s cubic-bezier(.16,1,.3,1); }
+  .count { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .reset {
+    border: 1px solid var(--edge); background: var(--card); color: var(--muted);
+    border-radius: 6px; padding: .25rem .625rem; font: inherit; font-size: .75rem;
+    cursor: pointer;
+  }
+  .reset:hover { color: var(--ink); border-color: var(--subtle); }
+  .reset:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  /* ---- sections ---- */
+  section { margin-top: 3rem; }
+  .sec-head { display: flex; align-items: baseline; gap: .75rem; margin-bottom: .375rem; }
+  .sec-num {
+    font-family: var(--display);
+    font-size: .875rem; font-weight: 700; color: var(--brand);
+    font-variant-numeric: tabular-nums;
+  }
+  h2 {
+    font-family: var(--display);
+    font-size: 1.5rem; font-weight: 700; margin: 0;
+    letter-spacing: -.01em; text-wrap: balance;
+  }
+  .sec-note { color: var(--muted); font-size: .9375rem; margin: 0 0 1.25rem; max-width: 46rem; }
+
+  /* ---- callouts ---- */
+  .callout {
+    border: 1px solid var(--edge); border-left-width: 3px;
+    border-radius: 8px; padding: .875rem 1rem;
+    font-size: .9375rem; margin: 1.25rem 0;
+    background: var(--card);
+  }
+  .callout b { display: block; margin-bottom: .125rem; }
+  .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); color: var(--warn-ink); }
+  .callout.info { border-left-color: var(--brand); background: var(--brand-soft); color: var(--ink); }
+
+  /* ---- test cards ---- */
+  .test {
+    background: var(--card);
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .test-head {
+    display: flex; align-items: flex-start; gap: .875rem;
+    padding: 1rem 1.125rem;
+    border-bottom: 1px solid var(--edge-soft);
+  }
+  .test-id {
+    font-family: var(--mono);
+    font-size: .75rem; font-weight: 600;
+    color: var(--brand); background: var(--brand-soft);
+    border-radius: 5px; padding: .1875rem .4375rem;
+    white-space: nowrap; margin-top: .125rem;
+  }
+  .test-title { font-weight: 650; font-size: 1.0625rem; margin: 0; line-height: 1.35; }
+  .test-goal { color: var(--muted); font-size: .875rem; margin: .1875rem 0 0; }
+
+  .check { margin-left: auto; display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+  .check label { font-size: .75rem; color: var(--muted); cursor: pointer; user-select: none; }
+  .check input {
+    width: 1.25rem; height: 1.25rem; cursor: pointer;
+    accent-color: var(--pass);
+  }
+  .check input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .test-body { padding: 1.125rem; display: grid; gap: 1rem; }
+
+  .lbl {
+    font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 650; color: var(--subtle); margin: 0 0 .4375rem;
+  }
+
+  ol.steps, ul.plain { margin: 0; padding-left: 1.25rem; }
+  ol.steps > li, ul.plain > li { margin-bottom: .3125rem; }
+  ol.steps > li::marker { color: var(--subtle); font-variant-numeric: tabular-nums; }
+
+  .send {
+    font-family: var(--mono);
+    font-size: .875rem;
+    background: var(--paper);
+    border: 1px solid var(--edge);
+    border-radius: 7px;
+    padding: .625rem .75rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .send + .send { margin-top: .375rem; }
+
+  .expect {
+    border-radius: 7px; padding: .75rem .875rem;
+    background: var(--pass-soft);
+    border: 1px solid color-mix(in srgb, var(--pass) 30%, transparent);
+    font-size: .9375rem;
+    color: var(--pass-ink);
+  }
+  .expect .lbl { color: color-mix(in srgb, var(--pass-ink) 75%, transparent); }
+  .expect ul { margin: 0; padding-left: 1.125rem; }
+  .expect li { margin-bottom: .25rem; }
+  .expect li:last-child { margin-bottom: 0; }
+
+  .where { font-size: .875rem; color: var(--muted); }
+  .where b { color: var(--ink-soft); font-weight: 600; }
+
+  code {
+    font-family: var(--mono); font-size: .8125em;
+    background: var(--edge-soft); border-radius: 4px;
+    padding: .0625rem .3125rem;
+    color: var(--ink);
+  }
+  .expect code { background: color-mix(in srgb, var(--pass) 15%, transparent); color: inherit; }
+
+  /* ---- prerequisite rows ---- */
+  .prereq { display: grid; gap: .5rem; }
+  .prow {
+    display: flex; align-items: flex-start; gap: .75rem;
+    background: var(--card); border: 1px solid var(--edge);
+    border-radius: 8px; padding: .8125rem .9375rem;
+  }
+  .prow input { width: 1.125rem; height: 1.125rem; margin-top: .1875rem; accent-color: var(--brand); cursor: pointer; flex-shrink: 0; }
+  .prow input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .prow div { min-width: 0; }
+  .prow strong { font-weight: 620; display: block; font-size: .9375rem; }
+  .prow span { color: var(--muted); font-size: .8438rem; }
+
+  /* ---- results table ---- */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--edge); border-radius: 9px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: .875rem; min-width: 34rem; }
+  th, td { text-align: left; padding: .625rem .875rem; border-bottom: 1px solid var(--edge-soft); }
+  th { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle); font-weight: 650; }
+  tr:last-child td { border-bottom: 0; }
+  td.sig { font-family: var(--mono); color: var(--muted); }
+
+  footer {
+    margin-top: 3.5rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--edge);
+    color: var(--muted); font-size: .875rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  @media print {
+    .progress, .reset { display: none; }
+    body { background: #fff; }
+    .test, .prow, .tablewrap { break-inside: avoid; box-shadow: none; }
+    .wrap { padding-top: 0; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Test plan &middot; HollyCRM</div>
+    <h1>Testing the WhatsApp AI sales agent</h1>
+    <p class="standfirst">
+      Eighteen checks covering how the agent replies, what it remembers, where it
+      gets its prices, and who it hands a conversation to. Work top to bottom —
+      later tests depend on setup done in earlier ones.
+    </p>
+    <div class="meta">
+      <span><b>Time needed</b> about 40 minutes</span>
+      <span><b>You need</b> supervisor access + a phone with WhatsApp</span>
+      <span><b>Safe to run</b> on the live workspace</span>
+    </div>
+  </header>
+
+  <div class="progress">
+    <span class="count"><span id="done">0</span> / <span id="total">0</span> checks</span>
+    <span class="bar"><i id="fill"></i></span>
+    <button class="reset" id="reset" type="button">Clear all</button>
+  </div>
+
+  <!-- ================= SETUP ================= -->
+  <section id="setup">
+    <div class="sec-head"><span class="sec-num">00</span><h2>Before you start</h2></div>
+    <p class="sec-note">
+      Five things must be true or most tests below will fail for the wrong reason.
+      Tick each one off.
+    </p>
+
+    <div class="prereq">
+      <label class="prow">
+        <input type="checkbox" data-check="p1">
+        <div>
+          <strong>You are signed in and set to Available</strong>
+          <span>Click your avatar, bottom-left of the sidebar. The dot on it should be green.
+          If you are Away, the agent will never assign a chat to you.</span>
+        </div>
+      </label>
+
+      <label class="prow">
+        <input type="checkbox" data-check="p2">
+        <div>
+          <strong>The model shows Connected</strong>
+          <span>Settings &rarr; Model &amp; API keys. The badge at the top should read
+          <em>Connected &middot; DeepSeek &middot; deepseek-chat</em> in green. If it says
+          <em>Connection failed</em>, stop — nothing else will work.</span>
+        </div>
+      </label>
+
+      <label class="prow">
+        <input type="checkbox" data-check="p3">
+        <div>
+          <strong>You cover a region</strong>
+          <span>Settings &rarr; Routing &amp; team &rarr; open a region &rarr; add dialling code
+          <code>92</code> &rarr; click your own name so it highlights. This is what
+          routes Pakistani numbers to you.</span>
+        </div>
+      </label>
+
+      <label class="prow">
+        <input type="checkbox" data-check="p4">
+        <div>
+          <strong>The sample knowledge document is uploaded</strong>
+          <span>Settings &rarr; Knowledge &amp; imports &rarr; Upload file &rarr; choose
+          <code>knowledge-base-sample.md</code>. Wait until it says
+          <em>Live &middot; N passages</em>. Tests 05 and 06 need this.</span>
+        </div>
+      </label>
+
+      <label class="prow">
+        <input type="checkbox" data-check="p5">
+        <div>
+          <strong>There is hotel inventory</strong>
+          <span>Settings &rarr; Inventory should list at least one hotel with room types and
+          dated rates. Without it the agent cannot quote anything.</span>
+        </div>
+      </label>
+    </div>
+
+    <div class="callout warn">
+      <b>The one thing that will confuse you</b>
+      When the agent hands a chat to a human, it <em>pauses itself on that chat</em> so it
+      cannot talk over you. Any message you send after that gets no AI reply — this is
+      correct, not a bug. To carry on testing in the same chat, flip the
+      <b>AI Assistant</b> toggle at the top of the conversation back on.
+    </div>
+  </section>
+
+  <!-- ================= GROUP A ================= -->
+  <section id="replies">
+    <div class="sec-head"><span class="sec-num">01</span><h2>How the agent replies</h2></div>
+    <p class="sec-note">
+      Run these in the built-in tester: <b>AI agent &rarr; Workflow &rarr; Test workflow</b>.
+      Nothing is sent to WhatsApp, no chats are assigned and no leads move, so this is
+      safe to run at any time. Type the message, press <b>Run test</b>.
+    </p>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">A-01</span>
+        <div>
+          <p class="test-title">It greets back properly</p>
+          <p class="test-goal">A greeting should get a warm, short reply — not a sales pitch.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="a1"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send exactly</p>
+          <div class="send">Assalamu alaikum</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Replies with a greeting back, in the same style (<code>Wa alaikum assalam</code>)</li>
+            <li>One or two lines only — no hotel list, no prices</li>
+            <li>Trace shows <b>Understand</b> &rarr; intent <code>greeting</code></li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">A-02</span>
+        <div>
+          <p class="test-title">It answers a greeting mid-conversation</p>
+          <p class="test-goal">The original defect: the agent went silent on any greeting after the first message.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="a2"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send exactly</p>
+          <div class="send">hello are you there?</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>A friendly reply — <b>not</b> silence and <b>not</b> "no options found"</li>
+            <li>If a question was outstanding, it repeats that one question gently</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">A-03</span>
+        <div>
+          <p class="test-title">It quotes real prices</p>
+          <p class="test-goal">Prices must come from the inventory database, never invented by the AI.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="a3"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send exactly</p>
+          <div class="send">5 star hotel in Makkah, 12-15 September, 5 people</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Real hotel names with SAR prices and distance to the Haram</li>
+            <li>Every hotel named appears in Settings &rarr; Inventory — check one</li>
+            <li>Says how many rooms (e.g. <code>2 &times; Quad</code>) — 5 people do not fit in one room</li>
+            <li>Ends with a question that moves the booking forward</li>
+          </ul>
+        </div>
+        <p class="where"><b>Verify:</b> open Settings &rarr; Inventory and confirm the quoted
+        price matches a rate row for those dates. If it does not, that is a critical failure.</p>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">A-04</span>
+        <div>
+          <p class="test-title">It asks instead of guessing</p>
+          <p class="test-goal">Missing dates or city must produce a question, never an assumed booking.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="a4"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send exactly</p>
+          <div class="send">I need a hotel next month</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Asks for the city and dates</li>
+            <li>Does <b>not</b> invent a date or pick a city</li>
+            <li>Trace shows <b>Inventory search</b> skipped, with the reason</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">A-05</span>
+        <div>
+          <p class="test-title">It answers from your uploaded document</p>
+          <p class="test-goal">Policy questions should be answered from your own file, not from the model's general knowledge.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="a5"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send exactly</p>
+          <div class="send">Do you arrange transport from Jeddah airport?</div>
+          <div class="send">What is your cancellation policy?</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Answers using details from the uploaded document — free for 5+ nights,
+              SAR 350 per car otherwise</li>
+            <li>Cancellation answer matches the 30 / 14 day tiers in the file</li>
+            <li>Trace shows <b>Knowledge base</b> matched, listing the source</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">A-06</span>
+        <div>
+          <p class="test-title">It admits when it does not know</p>
+          <p class="test-goal">The most important safety behaviour: no confident invented answers.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="a6"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send exactly</p>
+          <div class="send">Do you offer travel insurance for over 70s?</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Says it does not have the confirmed answer and a colleague will follow up</li>
+            <li>Does <b>not</b> make up a policy, a price or a provider name</li>
+            <li>Trace shows <b>Knowledge base</b> found nothing &rarr; goes to <b>Route &amp; assign</b></li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">A-07</span>
+        <div>
+          <p class="test-title">It never negotiates</p>
+          <p class="test-goal">Discount requests must reach a person, always.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="a7"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send exactly</p>
+          <div class="send">Can I get a discount on that?</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Says a colleague will be in touch — no discount offered, no counter-offer</li>
+            <li>Trace jumps straight to <b>Route &amp; assign</b>, skipping inventory</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= GROUP B ================= -->
+  <section id="memory">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Memory and knowing who is talking</h2></div>
+    <p class="sec-note">
+      These need <b>real WhatsApp messages</b> to the connected business number, because
+      they test memory that builds up across a conversation. Send from your own phone
+      and watch the chat in the Inbox.
+    </p>
+
+    <div class="callout info">
+      <b>Between tests</b>
+      If the AI stops replying, it has handed the chat to a human. Turn the
+      <b>AI Assistant</b> toggle back on at the top of the conversation before continuing.
+    </div>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">B-08</span>
+        <div>
+          <p class="test-title">It remembers across messages</p>
+          <p class="test-goal">The agent must not re-ask something already answered.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="b8"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">Send these one at a time, waiting for each reply</p>
+          <div class="send">I need a 5 star hotel</div>
+          <div class="send">Makkah</div>
+          <div class="send">12 to 15 September, 4 people</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>After the third message it quotes — it still remembers <b>5 star</b> from
+              the first message and <b>Makkah</b> from the second</li>
+            <li>It never asks for the city twice</li>
+            <li>Quoted hotels are all 5-star</li>
+          </ul>
+        </div>
+        <p class="where"><b>Verify:</b> open the <b>Lead details</b> panel on the right —
+        Guests, Check-in, Check-out should all be filled in.</p>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">B-09</span>
+        <div>
+          <p class="test-title">It handles a non-answer</p>
+          <p class="test-goal">"Don't know" should change the question, then fetch a human — not loop.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="b9"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <div>
+          <p class="lbl">In a fresh chat, send</p>
+          <div class="send">Hotel in Madinah from 20 September</div>
+          <div class="send">dont know</div>
+          <div class="send">not sure</div>
+        </div>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>First it asks for the check-out date</li>
+            <li>Second time it <b>rephrases</b> — asks how many nights instead</li>
+            <li>Third time it stops asking and passes you to a person</li>
+            <li>The same sentence is never sent twice</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">B-10</span>
+        <div>
+          <p class="test-title">It knows who is speaking in a group</p>
+          <p class="test-goal">Group messages must show the sender's real name, not "Client".</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="b10"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Add the business number to a WhatsApp group with at least two other people</li>
+          <li>Have someone send a message mentioning the business number, or containing
+            the word <code>hotel</code></li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>The message bubble in the Inbox is labelled with the <b>sender's name</b></li>
+            <li>The header shows the real participant count, not <code>0 participants</code></li>
+            <li>If the reply addresses someone, it uses their name</li>
+          </ul>
+        </div>
+        <p class="where"><b>Note:</b> in groups the agent stays quiet unless it is mentioned
+        or a trigger word appears. Silence on casual group chatter is correct.</p>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">B-11</span>
+        <div>
+          <p class="test-title">Two people in one group stay separate</p>
+          <p class="test-goal">Different people asking in the same group must not merge into one enquiry.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="b11"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Person 1 sends: <code>hotel in Makkah 12-15 September, 4 people</code></li>
+          <li>Person 2 sends: <code>hotel in Madinah 20-25 September, 2 people</code></li>
+          <li>Person 1 sends: <code>can you do 6 people instead?</code></li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Person 1's follow-up is quoted for <b>Makkah</b>, not Madinah</li>
+            <li>The Pipeline shows <b>two separate leads</b> from that one group</li>
+            <li>Neither person's dates leak into the other's quote</li>
+          </ul>
+        </div>
+        <p class="where"><b>Verify:</b> open <b>Pipeline</b> and confirm two distinct leads
+        exist with different cities.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= GROUP C ================= -->
+  <section id="routing">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Handing over to a salesperson</h2></div>
+    <p class="sec-note">
+      This is the part your team will feel day to day: when the AI gives up, does a real
+      person actually get the chat?
+    </p>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">C-12</span>
+        <div>
+          <p class="test-title">It assigns to an online agent</p>
+          <p class="test-goal">A handover must land on a named person, not an anonymous queue.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="c12"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Confirm you are set to <b>Available</b> (green dot on your avatar)</li>
+          <li>From your phone, send: <code>Can I speak to someone about a discount?</code></li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Customer gets a message saying a colleague will be in touch shortly</li>
+            <li>The chat is now <b>assigned to you</b> — your name replaces "Unassigned"</li>
+            <li>The <b>AI Assistant</b> toggle has switched itself off</li>
+            <li>The <b>Notes</b> tab records who took it and why</li>
+          </ul>
+        </div>
+        <p class="where"><b>Verify:</b> the note should read something like
+        <em>"Bot handed off to a human. Reason: requested_human. Assigned to [your name]."</em></p>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">C-13</span>
+        <div>
+          <p class="test-title">It tells the truth when nobody is available</p>
+          <p class="test-goal">The agent must not promise someone is coming when nobody is there.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="c13"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Set yourself to <b>Away</b> (avatar &rarr; Away). Make sure no colleague is online.</li>
+          <li>From a <em>different</em> phone number, send:
+            <code>I want to complain about my booking</code></li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Customer gets the out-of-hours wording — <b>not</b> "someone will contact you shortly"</li>
+            <li>The chat stays <b>Unassigned</b></li>
+            <li>The note says nobody was available</li>
+          </ul>
+        </div>
+        <p class="where"><b>Why this matters:</b> C-12 and C-13 are the same message with
+        opposite outcomes, decided purely by whether a human is at their desk. Set yourself
+        back to Available afterwards.</p>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">C-14</span>
+        <div>
+          <p class="test-title">It routes by country</p>
+          <p class="test-goal">Customers should reach the desk that handles their market.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="c14"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Settings &rarr; Routing &amp; team &rarr; create a region named
+            <code>Pakistan desk</code> with code <code>92</code>, and assign only yourself</li>
+          <li>Turn <b>off</b> "Allow assignment outside the region"</li>
+          <li>From a <code>+92</code> number, trigger a handover
+            (<code>I need to speak to a manager</code>)</li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Assigned to you, and the note names the region</li>
+            <li>Repeat from a non-<code>+92</code> number with yourself removed from the
+              default region &rarr; nobody is assigned and the fallback message is sent</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= GROUP D ================= -->
+  <section id="rules">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Your own rules</h2></div>
+    <p class="sec-note">
+      Rules are if/else you write yourself. They run before the built-in flow decides
+      anything, so they always win.
+    </p>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">D-15</span>
+        <div>
+          <p class="test-title">A rule overrides the AI</p>
+          <p class="test-goal">Prove the workspace can change behaviour without a developer.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="d15"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Go to <b>AI agent &rarr; Rules &rarr; Add rule</b></li>
+          <li>Name it <code>Big enquiries to me</code></li>
+          <li>Condition: <b>Budget per night</b> &middot; <b>is more than</b> &middot; <code>50000</code></li>
+          <li>Action: <b>Assign to a specific person</b> &rarr; yourself</li>
+          <li>Save, then in the Workflow tester send:
+            <code>Makkah 12-15 September, 4 people, budget 80000 SAR per night</code></li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Trace shows <b>Your rules</b> matched, naming your rule</li>
+            <li>It goes to handover instead of quoting</li>
+            <li>Back on the Rules page, the rule shows <code>matched 1&times;</code></li>
+          </ul>
+        </div>
+        <p class="where"><b>Then check the opposite:</b> send the same message without the
+        budget. The rule must <b>not</b> fire, and a normal quote should come back.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= GROUP E ================= -->
+  <section id="editor">
+    <div class="sec-head"><span class="sec-num">05</span><h2>The workflow editor</h2></div>
+    <p class="sec-note">
+      The visual map of everything above, at <b>AI agent &rarr; Workflow</b>.
+    </p>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">E-16</span>
+        <div>
+          <p class="test-title">Nodes move and stay moved</p>
+          <p class="test-goal">The layout is saved for the whole team, not just this browser.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="e16"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Drag two or three nodes to new positions</li>
+          <li>Wait for <em>Saving…</em> to appear and disappear</li>
+          <li>Reload the page</li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Nodes are exactly where you left them</li>
+            <li><b>Tidy up</b> restores the original arrangement</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">E-17</span>
+        <div>
+          <p class="test-title">Each step shows what it received and produced</p>
+          <p class="test-goal">You can follow one message through the whole flow.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="e17"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Run the test message from A-03</li>
+          <li>Close the test panel, then click the <b>Inventory search</b> node</li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>A window opens in the middle with three columns</li>
+            <li><b>Input</b> shows what Understand extracted — Makkah, the dates, 5 people</li>
+            <li><b>Output</b> shows how many hotels were found, and where it goes next</li>
+            <li>Clicking <b>Understand</b> shows the same data as <em>its</em> output</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="test">
+      <div class="test-head">
+        <span class="test-id">E-18</span>
+        <div>
+          <p class="test-title">Switching a step off actually changes behaviour</p>
+          <p class="test-goal">The toggles must control the live agent, not just the picture.</p>
+        </div>
+        <div class="check"><input type="checkbox" data-check="e18"><label>Pass</label></div>
+      </div>
+      <div class="test-body">
+        <ol class="steps">
+          <li>Switch off the <b>Knowledge base</b> node using the toggle on the node</li>
+          <li>Run <code>What is your cancellation policy?</code> in the tester</li>
+          <li>Switch it back on and run the same message again</li>
+        </ol>
+        <div class="expect">
+          <p class="lbl">Expected</p>
+          <ul>
+            <li>Off &rarr; goes straight to a human, no document answer</li>
+            <li>On &rarr; answers from the document again</li>
+            <li>The node and its connectors dim while switched off</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= SIGNOFF ================= -->
+  <section id="signoff">
+    <div class="sec-head"><span class="sec-num">06</span><h2>What counts as a failure</h2></div>
+    <p class="sec-note">
+      Not every surprise is a bug. These are the ones that matter, ranked.
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Severity</th><th>What you would see</th><th>Why it matters</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sig">Critical</td>
+            <td>A quoted price that is not in Inventory</td>
+            <td>The agency could be held to a price it cannot honour</td>
+          </tr>
+          <tr>
+            <td class="sig">Critical</td>
+            <td>An invented policy, visa rule or refund term</td>
+            <td>A customer acts on it before anyone sees the message</td>
+          </tr>
+          <tr>
+            <td class="sig">High</td>
+            <td>"Someone will contact you" when nobody was assigned</td>
+            <td>A promise the team has no way to keep</td>
+          </tr>
+          <tr>
+            <td class="sig">High</td>
+            <td>Two people's requirements merged into one quote</td>
+            <td>Both customers get the wrong answer</td>
+          </tr>
+          <tr>
+            <td class="sig">Medium</td>
+            <td>The same question asked twice word for word</td>
+            <td>Reads as broken; customers stop replying</td>
+          </tr>
+          <tr>
+            <td class="sig">Medium</td>
+            <td>Silence on a greeting mid-conversation</td>
+            <td>Looks like the number is dead</td>
+          </tr>
+          <tr>
+            <td class="sig">Low</td>
+            <td>Wording that is stiff or slightly off-tone</td>
+            <td>Adjustable in Settings without a code change</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <b>When reporting a problem</b>
+      Include the exact message you sent, the reply you got, and — if it happened in the
+      Workflow tester — which step in the trace looked wrong. That trace turns
+      "it said something odd" into something that can be fixed.
+    </div>
+  </section>
+
+  <footer>
+    Tick boxes are saved in this browser only, so you can close the page and come back.
+    Use <b>Clear all</b> to start a fresh run.
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var boxes = Array.prototype.slice.call(document.querySelectorAll("input[data-check]"));
+    var doneEl = document.getElementById("done");
+    var totalEl = document.getElementById("total");
+    var fill = document.getElementById("fill");
+    var KEY = "hollycrm-test-plan";
+
+    totalEl.textContent = boxes.length;
+
+    // localStorage throws in some embedded contexts; a checklist that cannot
+    // remember is still a usable checklist, so failure here is not fatal.
+    function read() {
+      try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
+      catch (e) { return {}; }
+    }
+    function write(state) {
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function paint() {
+      var n = boxes.filter(function (b) { return b.checked; }).length;
+      doneEl.textContent = n;
+      fill.style.width = boxes.length ? (n / boxes.length * 100) + "%" : "0%";
+    }
+
+    var saved = read();
+    boxes.forEach(function (box) {
+      if (saved[box.dataset.check]) box.checked = true;
+      box.addEventListener("change", function () {
+        var state = read();
+        if (box.checked) state[box.dataset.check] = 1;
+        else delete state[box.dataset.check];
+        write(state);
+        paint();
+      });
+    });
+
+    document.getElementById("reset").addEventListener("click", function () {
+      boxes.forEach(function (b) { b.checked = false; });
+      write({});
+      paint();
+    });
+
+    paint();
+  })();
+</script>

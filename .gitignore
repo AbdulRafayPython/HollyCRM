@@ -22,6 +22,7 @@ node_modules/
 
 # ---- Environment / secrets ----
 # .env.example is the committed template; everything else stays local.
+# .env.local contains real Supabase, Green API, and DeepSeek keys — NEVER push.
 .env
 .env.*
 !.env.example
@@ -79,3 +80,61 @@ $RECYCLE.BIN/
 .turbo/
 tmp/
 temp/
+
+# ===========================================================================
+#  UNUSED / REFERENCE-ONLY ASSETS
+#  These folders contain design references, prototypes, and duplicate images
+#  that are NOT referenced by any source code. Only public/landing-assets/
+#  serves the 8 images actually loaded by the landing page components.
+# ===========================================================================
+
+# -- Root-level duplicate asset folders --
+# Exact byte-for-byte copies of files already in public/landing-assets/
+/landing-assets/
+
+# UI prototype screenshots (not referenced anywhere in src/)
+/frontend Ui/
+
+# -- Stitch / Google design workspace --
+# Contains DESIGN.md, competitor screenshots, and generated design mockups.
+# Only referenced in a tailwind.config.ts comment — not loaded at runtime.
+/stitch_hollycrm_whatsapp_workstation/
+
+# -- Unused files inside public/ --
+
+# Large 20 MB video not used by any component
+public/4dea10d5c1dbe4727dd6cf2469130569.mp4
+
+# UUID-named image (duplicate of ai_quoting_flow_diagram.png) — unused
+public/28405ba1-bc0b-4d04-a969-591e7821f953.png
+
+# Logo JPGs in public root — app uses the SVG <HollyCrmLogo /> component instead
+public/hollycrm_brand_logo.jpg
+public/hollycrm_logo.jpg
+public/logo.jpg
+
+# Standalone quoting flow image in root (code loads /landing-assets/ version)
+public/ai_quoting_flow.png
+
+# 150-frame GIF-to-JPG extraction + its source ZIP — not used anywhere
+public/ezgif-3e207b37f206995c-jpg/
+public/ezgif-3e207b37f206995c-jpg.zip
+
+# UI prototype thumbnails duplicated from "frontend Ui/" — not used in code
+public/frontend-ui/
+
+# Duplicate / timestamped copies inside landing-assets that are NOT referenced.
+# (The shorter-named versions ARE used: ai_agent.jpg, green_api.jpg, etc.)
+public/landing-assets/hollycrm_ai_agent_1786618007990.jpg
+public/landing-assets/hollycrm_ai_flow_1786617850102.jpg
+public/landing-assets/hollycrm_brand_logo.jpg
+public/landing-assets/hollycrm_faq_pricing_widget_1786618595068.jpg
+public/landing-assets/hollycrm_full_landing_page_1786618958289.jpg
+public/landing-assets/hollycrm_green_api_1786617986730.jpg
+public/landing-assets/hollycrm_group_messages_1786618030599.jpg
+public/landing-assets/hollycrm_hero_mockup_1786617835131.jpg
+public/landing-assets/hollycrm_interactive_widgets_1786618565528.jpg
+public/landing-assets/interactive_widgets.jpg
+public/landing-assets/logo.jpg
+public/landing-assets/pricing_faq.jpg
+public/landing-assets/ai_quoting_flow.png
