@@ -8,7 +8,7 @@ import ParallaxShot from "./ParallaxShot";
 const TRUST = ["Direct & group chats", "SQL-grounded pricing", "PDPL & GDPR encrypted"];
 
 export default function LandingHero({ isConfigured = true }: { isConfigured?: boolean }) {
-  const targetRoute = isConfigured ? "/inbox" : "/setup";
+  const targetRoute = isConfigured ? "/home" : "/setup";
 
   // `isolate` keeps the -z-10 washes inside this section's stacking context;
   // without it they would paint behind the page's white background.

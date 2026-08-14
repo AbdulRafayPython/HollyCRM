@@ -120,7 +120,7 @@ export default function NotificationSettingsPage() {
                 <div className="space-y-1">
                   <h2 className="text-sm font-bold text-slate-900">In-App WhatsApp Web Banners</h2>
                   <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
-                    Displays sleek WhatsApp Web style floating notification cards on the top-right corner when you are navigating other sections (Home, Insights, Pipeline, AI, Settings).
+                    Displays sleek WhatsApp Web style floating notification cards on the bottom-right corner when you are navigating other sections (Home, Insights, Pipeline, AI, Settings).
                   </p>
                 </div>
 

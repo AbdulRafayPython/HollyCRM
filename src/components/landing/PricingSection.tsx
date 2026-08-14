@@ -68,7 +68,7 @@ const PLANS: Plan[] = [
 
 export default function PricingSection({ isConfigured = true }: { isConfigured?: boolean }) {
   const [isAnnual, setIsAnnual] = useState(true);
-  const targetRoute = isConfigured ? "/inbox" : "/setup";
+  const targetRoute = isConfigured ? "/home" : "/setup";
 
   return (
     <section id="pricing" className="scroll-mt-24 py-16 sm:py-20">

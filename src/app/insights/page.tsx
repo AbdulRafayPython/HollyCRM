@@ -158,7 +158,7 @@ export default async function InsightsPage({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 
             {/* Widget 1: Deal / Task Status */}
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+            <div className="animate-card-in [animation-delay:0ms] rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                   <Icon name="kanban" size={15} className="text-purple-600" />
@@ -181,28 +181,28 @@ export default async function InsightsPage({
                 </div>
               </div>
 
-              {/* Segmented Gradient Bar */}
+              {/* Segmented Gradient Bar with Horizontal Left-to-Right Animation */}
               <div className="mt-5 flex h-4 w-full overflow-hidden rounded-lg bg-slate-100 p-0.5 gap-1">
                 <div
-                  className="rounded-md bg-gradient-to-r from-purple-700 to-indigo-600 transition-all duration-300"
-                  style={{ width: `${Math.max(inProgressPct, 15)}%` }}
+                  className="animate-grow-right rounded-md bg-gradient-to-r from-purple-700 to-indigo-600 transition-all duration-300"
+                  style={{ width: `${Math.max(inProgressPct, 15)}%`, animationDelay: "100ms" }}
                   title={`In progress: ${inProgressPct}%`}
                 />
                 <div
-                  className="rounded-md bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-300"
-                  style={{ width: `${Math.max(quotedPct, 15)}%` }}
+                  className="animate-grow-right rounded-md bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-300"
+                  style={{ width: `${Math.max(quotedPct, 15)}%`, animationDelay: "220ms" }}
                   title={`Quoted: ${quotedPct}%`}
                 />
                 <div
-                  className="rounded-md bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300"
-                  style={{ width: `${Math.max(wonPct, 15)}%` }}
+                  className="animate-grow-right rounded-md bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300"
+                  style={{ width: `${Math.max(wonPct, 15)}%`, animationDelay: "340ms" }}
                   title={`Won: ${wonPct}%`}
                 />
               </div>
             </div>
 
             {/* Widget 2: Response Time Sparkline */}
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+            <div className="animate-card-in [animation-delay:80ms] rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                   <Icon name="clock" size={15} className="text-blue-600" />
@@ -219,20 +219,23 @@ export default async function InsightsPage({
                 </p>
               </div>
 
-              {/* Sparkline Scatter Curve */}
+              {/* Sparkline Scatter Curve with Staggered Dot Pop Animation */}
               <div className="mt-4 flex h-6 items-end justify-between px-1">
                 {[12, 18, 14, 22, 19, 28, 24, 32, 29, 36, 42].map((val, idx) => (
                   <span
                     key={idx}
-                    className="h-2 w-2 rounded-full bg-purple-500/80 hover:bg-purple-600 transition-colors"
-                    style={{ marginBottom: `${val * 0.3}px` }}
+                    className="animate-dot-pop h-2 w-2 rounded-full bg-purple-500/80 hover:bg-purple-600 transition-colors"
+                    style={{
+                      marginBottom: `${val * 0.3}px`,
+                      animationDelay: `${idx * 45}ms`,
+                    }}
                   />
                 ))}
               </div>
             </div>
 
             {/* Widget 3: AI Velocity */}
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+            <div className="animate-card-in [animation-delay:160ms] rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                   <Icon name="bolt" size={15} className="text-amber-500" />
@@ -249,20 +252,23 @@ export default async function InsightsPage({
                 </p>
               </div>
 
-              {/* Mini Bar Chart */}
+              {/* Mini Bar Chart with Vertical Upward Grow Animation */}
               <div className="mt-4 flex h-6 items-end justify-between gap-1.5 px-1">
                 {[40, 60, 45, 80, 55, 95, 70, 100].map((h, i) => (
                   <div
                     key={i}
-                    className="w-full rounded-xs bg-amber-400/80 hover:bg-amber-500 transition-colors"
-                    style={{ height: `${h * 0.22}px` }}
+                    className="animate-grow-up w-full rounded-xs bg-amber-400/80 hover:bg-amber-500 transition-colors"
+                    style={{
+                      height: `${h * 0.22}px`,
+                      animationDelay: `${i * 55}ms`,
+                    }}
                   />
                 ))}
               </div>
             </div>
 
             {/* Widget 4: Burndown / Conversion Trend */}
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+            <div className="animate-card-in [animation-delay:240ms] rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                   <Icon name="chart" size={15} className="text-indigo-600" />
@@ -279,7 +285,7 @@ export default async function InsightsPage({
                 </p>
               </div>
 
-              {/* Multi-step chart simulation */}
+              {/* Multi-step chart simulation with Draw Line Animation */}
               <div className="mt-4 relative h-6 w-full overflow-hidden rounded bg-purple-50/50">
                 <div className="absolute inset-0 bg-gradient-to-t from-purple-200/50 to-transparent" />
                 <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 25">
@@ -288,12 +294,14 @@ export default async function InsightsPage({
                     fill="none"
                     stroke="#9333ea"
                     strokeWidth="2"
+                    className="animate-draw-line [animation-delay:150ms]"
                   />
                   <path
                     d="M0 10 Q 25 12, 50 18 T 100 24"
                     fill="none"
                     stroke="#f59e0b"
                     strokeWidth="1.5"
+                    className="animate-draw-line [animation-delay:300ms]"
                   />
                 </svg>
               </div>
@@ -441,7 +449,7 @@ export default async function InsightsPage({
                 <p className="mb-4 text-xs text-slate-400">Leads that reached each milestone in the last {s.window_days} days</p>
 
                 <div className="space-y-3">
-                  {LEAD_STAGES.filter((st) => st !== "closed_lost").map((stage) => {
+                  {LEAD_STAGES.filter((st) => st !== "closed_lost").map((stage, idx) => {
                     const n = reached(stage);
                     const pct = Math.round((n / top) * 100);
                     return (
@@ -454,8 +462,11 @@ export default async function InsightsPage({
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 transition-all duration-300"
-                            style={{ width: `${pct}%` }}
+                            className="animate-grow-right h-full rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 transition-all duration-300"
+                            style={{
+                              width: `${pct}%`,
+                              animationDelay: `${idx * 75}ms`,
+                            }}
                           />
                         </div>
                       </div>

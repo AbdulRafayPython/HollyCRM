@@ -8,20 +8,18 @@ import type { Chat } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-/**
- * The layout itself is SYNCHRONOUS — that is what makes tab switching instant.
- * It paints the sidebar frame immediately; the chat list (the only part that
- * needs the database) streams into the Suspense boundary, and the page slot
- * streams independently behind its own loading.tsx.
- */
-export default function InboxLayout({ children }: { children: React.ReactNode }) {
+export default async function InboxLayout({ children }: { children: React.ReactNode }) {
   if (!isSupabaseConfigured()) redirect("/setup");
+
+  // Top-level auth check ensures clean HTTP redirect before Suspense streaming
+  const user = await getAuthUser();
+  if (!user) redirect("/login");
 
   return (
     <div className="flex h-full">
       <aside className="z-30 w-[280px] xl:w-[300px] shrink-0 border-r border-slate-200/80 bg-white">
         <Suspense fallback={<ChatListFallback />}>
-          <ChatListPanel />
+          <ChatListPanel currentUserId={user.id} />
         </Suspense>
       </aside>
       <section className="min-w-0 flex-1">{children}</section>
@@ -49,30 +47,21 @@ function ChatListFallback() {
   );
 }
 
-/** The old layout body, unchanged in behavior — just moved behind Suspense. */
-async function ChatListPanel() {
+async function ChatListPanel({ currentUserId }: { currentUserId: string }) {
   const sb = await supabaseServer();
 
-  // RLS decides what comes back: own chats + the unassigned pool for agents,
-  // everything in the org for supervisors. Archived rows are fetched too so the
-  // Archived tab works without a second round trip. Auth runs concurrently with
-  // the queries — RLS already guards them, so there is nothing to wait for.
-  const [user, { data: chats }, { data: recent }] = await Promise.all([
-    getAuthUser(),
+  const [{ data: chats }, { data: recent }] = await Promise.all([
     sb
       .from("chats")
       .select("id, chat_jid, chat_type, title, participant_count, assigned_agent_id, is_bot_paused, last_message_at, unread_count, is_archived")
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .limit(200),
-    // Snippets: chats carries no preview column, so take the newest messages the
-    // viewer is allowed to see and keep the first one per chat.
     sb
       .from("messages")
       .select("chat_id, body, sender_type, message_type, wa_timestamp")
       .order("wa_timestamp", { ascending: false })
       .limit(400),
   ]);
-  if (!user) redirect("/login");
 
   const snippets = new Map<string, { body: string | null; sender_type: string; message_type: string }>();
   for (const m of recent ?? []) {
@@ -90,5 +79,5 @@ async function ChatListPanel() {
     snippet: snippets.get(c.id) ?? null,
   }));
 
-  return <ChatList chats={rows} currentUserId={user.id} />;
+  return <ChatList chats={rows} currentUserId={currentUserId} />;
 }

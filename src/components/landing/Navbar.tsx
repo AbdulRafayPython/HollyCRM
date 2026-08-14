@@ -9,7 +9,7 @@ export default function Navbar({
 }: {
   isConfigured?: boolean;
 }) {
-  const targetRoute = isConfigured ? "/inbox" : "/setup";
+  const targetRoute = isConfigured ? "/home" : "/setup";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md transition-all">

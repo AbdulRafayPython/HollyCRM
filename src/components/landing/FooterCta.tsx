@@ -10,7 +10,7 @@ export default function FooterCta({
 }: {
   isConfigured?: boolean;
 }) {
-  const targetRoute = isConfigured ? "/inbox" : "/setup";
+  const targetRoute = isConfigured ? "/home" : "/setup";
 
   return (
     <footer className="bg-slate-950 text-white pt-20 pb-12 relative overflow-hidden border-t border-slate-800">

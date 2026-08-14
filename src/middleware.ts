@@ -4,7 +4,7 @@ import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
-/** Keeps the Supabase auth cookie fresh for server components. */
+/** Keeps the Supabase auth cookie fresh and protects app workstation routes. */
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -40,7 +40,29 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  const isPublicRoute =
+    pathname === "/" ||
+    pathname === "/landing" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname === "/setup" ||
+    pathname.startsWith("/invite") ||
+    pathname.startsWith("/auth/") ||
+    pathname.startsWith("/api/webhook") ||
+    pathname.startsWith("/api/invite");
+
+  // Protect workstation routes against unauthenticated access via clean HTTP redirect
+  if (!user && !isPublicRoute) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
   return response;
 }
 

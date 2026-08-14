@@ -16,7 +16,7 @@ export default function WhatsAppToastContainer() {
     <div
       aria-live="polite"
       aria-label="WhatsApp Notifications"
-      className="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm sm:max-w-md w-full pointer-events-none"
+      className="fixed bottom-6 right-6 z-50 flex flex-col-reverse gap-3 max-w-sm sm:max-w-md w-full pointer-events-none"
     >
       {activeToasts.map((toast) => (
         <ToastItem

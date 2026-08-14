@@ -148,7 +148,7 @@ export default async function HomePage() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {/* Card 1: Active Leads */}
-              <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:0ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Active Leads
@@ -165,11 +165,18 @@ export default async function HomePage() {
                     <span>{activeLeads.length} currently in pipeline</span>
                   </div>
                 </div>
+                {/* Horizontal Progress Animation */}
+                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="animate-grow-right h-full rounded-full bg-gradient-to-r from-purple-600 to-indigo-600"
+                    style={{ width: `${Math.min(100, Math.max(15, (activeLeads.length / Math.max(1, totalLeadCount ?? 1)) * 100))}%`, animationDelay: "150ms" }}
+                  />
+                </div>
                 <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-purple-500/5 blur-xl pointer-events-none" />
               </div>
 
               {/* Card 2: First Response Time */}
-              <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:80ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Response Time
@@ -188,11 +195,21 @@ export default async function HomePage() {
                     <span>⚡ Instant AI acknowledgment</span>
                   </div>
                 </div>
+                {/* Sparkline Dots Animation */}
+                <div className="mt-4 flex h-1.5 items-end justify-between px-0.5">
+                  {[10, 16, 12, 20, 18, 26, 32].map((v, i) => (
+                    <span
+                      key={i}
+                      className="animate-dot-pop h-1.5 w-1.5 rounded-full bg-blue-500/80"
+                      style={{ animationDelay: `${i * 50}ms` }}
+                    />
+                  ))}
+                </div>
                 <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-blue-500/5 blur-xl pointer-events-none" />
               </div>
 
               {/* Card 3: AI Automation */}
-              <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:160ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     AI Automation
@@ -211,11 +228,21 @@ export default async function HomePage() {
                     <span>{bot?.bot_name || "AI Agent"} responding</span>
                   </div>
                 </div>
+                {/* Vertical Mini Bars Animation */}
+                <div className="mt-4 flex h-3 items-end justify-between gap-1 px-0.5">
+                  {[30, 50, 40, 75, 60, 90, 100].map((h, i) => (
+                    <div
+                      key={i}
+                      className="animate-grow-up w-full rounded-xs bg-indigo-400/80"
+                      style={{ height: `${h * 0.12}px`, animationDelay: `${i * 50}ms` }}
+                    />
+                  ))}
+                </div>
                 <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-indigo-500/5 blur-xl pointer-events-none" />
               </div>
 
               {/* Card 4: Quoted Value */}
-              <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:240ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Pipeline Value
@@ -231,6 +258,18 @@ export default async function HomePage() {
                   <div className="mt-1 flex items-center gap-1 text-xs text-emerald-600 font-medium">
                     <span>{hotelCount ?? 0} hotels in inventory</span>
                   </div>
+                </div>
+                {/* Mini SVG Curve Animation */}
+                <div className="mt-4 relative h-3 w-full overflow-hidden">
+                  <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+                    <path
+                      d="M0 18 Q 30 12, 60 8 T 100 2"
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="2"
+                      className="animate-draw-line [animation-delay:250ms]"
+                    />
+                  </svg>
                 </div>
                 <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-emerald-500/5 blur-xl pointer-events-none" />
               </div>
