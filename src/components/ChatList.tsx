@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import Avatar from "./ui/Avatar";
 import Chip from "./ui/Chip";
 import Icon from "./ui/Icon";
 import { useAssistantName } from "./WorkspaceContext";
+import { useLiveRefresh } from "@/lib/realtime/useLiveRefresh";
 import type { Chat } from "@/lib/types";
 
 export interface ChatRow extends Chat {
@@ -33,23 +34,11 @@ export default function ChatList({
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const params = useParams<{ chatId?: string }>();
-  const router = useRouter();
 
-  // Periodic catch-up refresh
-  useEffect(() => {
-    const tick = () => {
-      if (!document.hidden) router.refresh();
-    };
-    const id = setInterval(tick, 30_000);
-    const onVisible = () => {
-      if (!document.hidden) router.refresh();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      clearInterval(id);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [router]);
+  // Live from database events, with polling only as a fallback — this used to
+  // be a bare 30s interval, which is why inbound messages arrived long after
+  // the notification announcing them.
+  useLiveRefresh();
 
   const counts = useMemo(() => {
     return {
