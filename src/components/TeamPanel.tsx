@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "./ui/Avatar";
-import Chip from "./ui/Chip";
 import Dropdown from "./ui/Dropdown";
 import Icon from "./ui/Icon";
 import { ROLE_LABELS, type AppRole } from "@/lib/types";
@@ -33,14 +32,6 @@ interface TeamData {
   invitations: Invitation[];
 }
 
-/**
- * Owner + sales agents for one workspace.
- *
- * Invitations produce a link rather than an email: the workspace runs on
- * Supabase's built-in SMTP, which is rate-limited to a handful of messages an
- * hour and lands in spam, so a link the owner pastes into WhatsApp is the one
- * path that always works. Linear and Notion offer exactly this alongside email.
- */
 export default function TeamPanel() {
   const [data, setData] = useState<TeamData | null>(null);
   const [email, setEmail] = useState("");
@@ -116,79 +107,98 @@ export default function TeamPanel() {
   }
 
   if (!data) {
-    return <p className="text-body text-muted">Loading team…</p>;
+    return (
+      <div className="flex h-32 items-center justify-center text-xs text-slate-400">
+        Loading team workspace…
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {error && (
-        <p className="flex items-start gap-2 rounded-lg border border-danger/20 bg-danger-soft px-3 py-2 text-meta text-danger-dark">
-          <Icon name="alert" size={14} className="mt-0.5 shrink-0" />
-          {error}
+        <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+          <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-rose-600" />
+          <span>{error}</span>
         </p>
       )}
 
+      {/* Invite Box */}
       {data.you.is_owner && (
-        <section className="panel p-5">
-          <p className="eyebrow mb-1">Add a sales agent</p>
-          <p className="mb-3 text-meta text-muted">
-            Creates an invite link. Send it however you like — whoever opens it joins{" "}
-            <span className="font-medium text-ink">{data.workspace}</span> and sees only this
-            workspace&apos;s conversations. Links are single use and expire in 7 days.
-          </p>
+        <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-3">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Invite a Sales Agent</h2>
+            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
+              Generates an invitation link for <span className="font-semibold text-slate-800">{data.workspace}</span>. Direct links expire in 7 days and can be shared over WhatsApp.
+            </p>
+          </div>
 
-          <form onSubmit={invite} className="flex flex-wrap items-center gap-2">
+          <form onSubmit={invite} className="flex flex-wrap items-center gap-2 pt-1">
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="agent@company.com"
-              className="field flex-1 basis-56 py-2"
+              className="flex-1 basis-64 rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-xs text-slate-800 focus:border-purple-500 focus:bg-white focus:outline-none transition"
             />
             <Dropdown
               label="Role"
               value={role}
               onChange={setRole}
-              className="rounded border border-edge bg-card px-3 py-2 text-body text-ink hover:border-edge-strong"
+              className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-800 hover:border-slate-300"
               options={[
-                { value: "sales_agent", label: "Sales agent" },
-                { value: "owner", label: "Owner" },
+                { value: "sales_agent", label: "Sales Agent" },
+                { value: "owner", label: "Workspace Owner" },
               ]}
             />
-            <button disabled={busy} className="btn-primary">
-              {busy ? "Creating…" : "Create invite link"}
+            <button
+              disabled={busy}
+              className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition disabled:opacity-50"
+            >
+              {busy ? "Creating…" : "Generate Invite Link"}
             </button>
           </form>
 
           {freshLink && (
-            <div className="mt-3 flex items-center gap-2 rounded-lg border border-wa/25 bg-wa-soft px-3 py-2">
-              <Icon name="check" size={14} className="shrink-0 text-wa-dark" />
-              <code className="min-w-0 flex-1 truncate text-meta text-wa-dark">{freshLink}</code>
-              <span className="shrink-0 text-caption text-wa-dark">copied to clipboard</span>
+            <div className="mt-3 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5">
+              <Icon name="check" size={16} className="shrink-0 text-emerald-600" />
+              <code className="min-w-0 flex-1 truncate text-xs font-mono text-emerald-800">{freshLink}</code>
+              <span className="shrink-0 text-[11px] font-bold text-emerald-700">Copied to clipboard ✓</span>
             </div>
           )}
         </section>
       )}
 
-      <section className="panel">
-        <p className="eyebrow border-b border-edge px-5 py-3">
-          Members · {data.members.filter((m) => m.is_active).length} active
-        </p>
-        <ul>
+      {/* Active Members Card */}
+      <section className="rounded-3xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Active Members ({data.members.filter((m) => m.is_active).length})
+          </h2>
+        </div>
+        <ul className="divide-y divide-slate-100">
           {data.members.map((m) => (
             <li
               key={m.id}
-              className="flex items-center gap-3 border-b border-edge px-5 py-3 last:border-b-0"
+              className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-slate-50/50 transition"
             >
-              <Avatar name={m.full_name} type="agent" size={36} />
+              <Avatar name={m.full_name} type="agent" size={38} />
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-2 text-body font-medium text-ink">
-                  <span className="truncate">{m.full_name ?? "Unnamed"}</span>
-                  {m.is_you && <Chip tone="brand">You</Chip>}
-                  {!m.is_active && <Chip tone="neutral">Deactivated</Chip>}
-                </p>
-                <p className="truncate text-meta text-muted">{m.email ?? "—"}</p>
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-xs font-bold text-slate-900">{m.full_name ?? "Unnamed Agent"}</span>
+                  {m.is_you && (
+                    <span className="rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 ring-1 ring-purple-600/20">
+                      You
+                    </span>
+                  )}
+                  {!m.is_active && (
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                      Deactivated
+                    </span>
+                  )}
+                </div>
+                <p className="truncate text-[11px] text-slate-400">{m.email ?? "—"}</p>
               </div>
 
               {data.you.is_owner && !m.is_you ? (
@@ -197,23 +207,27 @@ export default function TeamPanel() {
                   align="right"
                   value={m.role === "owner" || m.role === "super_admin" ? "owner" : "sales_agent"}
                   onChange={(next) => patchMember(m.id, { role: next })}
-                  className="rounded-full border border-edge bg-surface px-2.5 py-1 text-caption font-medium text-ink hover:border-edge-strong"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-300"
                   options={[
-                    { value: "sales_agent", label: "Sales agent" },
-                    { value: "owner", label: "Owner" },
+                    { value: "sales_agent", label: "Sales Agent" },
+                    { value: "owner", label: "Workspace Owner" },
                   ]}
                 />
               ) : (
-                <Chip tone={m.role === "owner" || m.role === "super_admin" ? "bot" : "neutral"}>
+                <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                   {ROLE_LABELS[m.role] ?? m.role}
-                </Chip>
+                </span>
               )}
 
               {data.you.is_owner && !m.is_you && (
                 <button
                   onClick={() => patchMember(m.id, { is_active: !m.is_active })}
-                  className="btn-ghost px-2 py-1 text-caption"
-                  title={m.is_active ? "Deactivate — they lose access immediately" : "Restore access"}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    m.is_active
+                      ? "text-rose-600 hover:bg-rose-50"
+                      : "text-emerald-600 hover:bg-emerald-50"
+                  }`}
+                  title={m.is_active ? "Deactivate agent" : "Restore access"}
                 >
                   {m.is_active ? "Deactivate" : "Restore"}
                 </button>
@@ -223,32 +237,38 @@ export default function TeamPanel() {
         </ul>
       </section>
 
+      {/* Pending Invitations */}
       {data.you.is_owner && data.invitations.length > 0 && (
-        <section className="panel">
-          <p className="eyebrow border-b border-edge px-5 py-3">
-            Pending invitations · {data.invitations.length}
-          </p>
-          <ul>
+        <section className="rounded-3xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+          <div className="border-b border-slate-100 px-6 py-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Pending Invitations ({data.invitations.length})
+            </h2>
+          </div>
+          <ul className="divide-y divide-slate-100">
             {data.invitations.map((i) => (
               <li
                 key={i.id}
-                className="flex items-center gap-3 border-b border-edge px-5 py-3 last:border-b-0"
+                className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-slate-50/50 transition"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface text-muted ring-1 ring-edge">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-600 ring-1 ring-slate-200">
                   <Icon name="mail" size={16} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-body text-ink">{i.email}</p>
-                  <p className="text-meta text-muted">
+                  <p className="truncate text-xs font-bold text-slate-900">{i.email}</p>
+                  <p className="text-[11px] text-slate-400">
                     {ROLE_LABELS[i.role] ?? i.role} · expires {expiry(i.expires_at)}
                   </p>
                 </div>
-                <button onClick={() => copy(i.token)} className="btn-secondary px-2.5 py-1 text-caption">
-                  {copied === i.token ? "Copied" : "Copy link"}
+                <button
+                  onClick={() => copy(i.token)}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                >
+                  {copied === i.token ? "Copied ✓" : "Copy Link"}
                 </button>
                 <button
                   onClick={() => revoke(i.id)}
-                  className="btn-ghost px-2 py-1 text-caption text-danger hover:bg-danger-soft"
+                  className="rounded-xl px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition"
                 >
                   Revoke
                 </button>
@@ -259,8 +279,8 @@ export default function TeamPanel() {
       )}
 
       {!data.you.is_owner && (
-        <p className="text-meta text-muted">
-          Only the workspace owner can invite or remove people.
+        <p className="text-center text-xs text-slate-400">
+          Only the workspace owner can invite or adjust agent permissions.
         </p>
       )}
     </div>

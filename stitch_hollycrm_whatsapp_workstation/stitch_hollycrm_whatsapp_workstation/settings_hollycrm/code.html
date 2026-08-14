@@ -1,374 +1,284 @@
 <!DOCTYPE html>
-
-<html class="h-full bg-surface" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>HollyCRM - Settings</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<html lang="en" class="h-full">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>HollyCRM - Agent Profile & Workstation Settings</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
-                    "colors": {
-                        "on-primary-fixed": "#0f0069",
-                        "on-secondary-fixed-variant": "#005236",
-                        "primary": "#3525cd",
-                        "surface-bright": "#faf8ff",
-                        "surface-container-high": "#e2e7ff",
-                        "on-tertiary": "#ffffff",
-                        "tertiary": "#3130c0",
-                        "surface-variant": "#dae2fd",
-                        "secondary-fixed-dim": "#4edea3",
-                        "on-secondary-container": "#00714d",
-                        "surface-container-low": "#f2f3ff",
-                        "surface-dim": "#d2d9f4",
-                        "on-tertiary-container": "#d9d8ff",
-                        "background": "#faf8ff",
-                        "secondary-fixed": "#6ffbbe",
-                        "primary-container": "#4f46e5",
-                        "primary-fixed": "#e2dfff",
-                        "surface-container-lowest": "#ffffff",
-                        "outline": "#777587",
-                        "surface-container-highest": "#dae2fd",
-                        "on-surface": "#131b2e",
-                        "on-background": "#131b2e",
-                        "on-error": "#ffffff",
-                        "surface": "#faf8ff",
-                        "on-primary-container": "#dad7ff",
-                        "error-container": "#ffdad6",
-                        "inverse-primary": "#c3c0ff",
-                        "inverse-surface": "#283044",
-                        "secondary-container": "#6cf8bb",
-                        "on-secondary-fixed": "#002113",
-                        "tertiary-fixed": "#e1e0ff",
-                        "on-tertiary-fixed-variant": "#2f2ebe",
-                        "on-surface-variant": "#464555",
-                        "inverse-on-surface": "#eef0ff",
-                        "on-error-container": "#93000a",
-                        "tertiary-fixed-dim": "#c0c1ff",
-                        "error": "#ba1a1a",
-                        "tertiary-container": "#4b4dd8",
-                        "on-secondary": "#ffffff",
-                        "secondary": "#006c49",
-                        "on-primary": "#ffffff",
-                        "primary-fixed-dim": "#c3c0ff",
-                        "surface-tint": "#4d44e3",
-                        "on-tertiary-fixed": "#07006c",
-                        "surface-container": "#eaedff",
-                        "outline-variant": "#c7c4d8",
-                        "on-primary-fixed-variant": "#3323cc"
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                            dark: '#0f172a',
+                        },
+                        whatsapp: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            dark: '#064e3b',
+                        },
+                        bot: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            dark: '#78350f',
+                        }
                     },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "spacing": {
-                        "xs": "4px",
-                        "margin-mobile": "16px",
-                        "xl": "32px",
-                        "gutter": "16px",
-                        "base": "4px",
-                        "margin-desktop": "24px",
-                        "sm": "8px",
-                        "lg": "24px",
-                        "md": "16px"
-                    },
-                    "fontFamily": {
-                        "h2": ["Inter"],
-                        "h3": ["Inter"],
-                        "metadata-bold": ["Inter"],
-                        "body-base": ["Inter"],
-                        "body-medium": ["Inter"],
-                        "h1": ["Inter"],
-                        "caption": ["Inter"],
-                        "metadata": ["Inter"]
-                    },
-                    "fontSize": {
-                        "h2": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-                        "h3": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
-                        "metadata-bold": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
-                        "body-base": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
-                        "body-medium": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
-                        "h1": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
-                        "caption": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
-                        "metadata": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     }
                 }
             }
-        }
+        };
     </script>
-<style>
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 4px;
-        }
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        @keyframes pulse-subtle { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-live-dot { animation: pulse-subtle 2s infinite ease-in-out; }
     </style>
 </head>
-<body class="h-full bg-surface text-on-surface antialiased flex overflow-hidden">
-<!-- SideNavBar -->
-<nav class="bg-inverse-surface text-secondary-fixed docked left-0 w-16 h-full border-r border-outline-variant flat no shadows fixed left-0 top-0 h-full flex flex-col justify-between py-margin-desktop z-50">
-<div class="flex flex-col items-center gap-8">
-<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container font-h2 h2 font-black">
+<body class="bg-[#F8FAFC] text-[#0F172A] font-sans antialiased h-full flex overflow-hidden">
+
+    <!-- 1. LEFT NAVIGATION RAIL (64px) -->
+    <aside class="w-16 bg-[#0F172A] flex flex-col items-center py-4 justify-between shrink-0 z-30 border-r border-slate-800">
+        <div class="flex flex-col items-center gap-6 w-full">
+            <!-- Brand Logo -->
+            <a href="../dashboard_hollycrm/code.html" class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30 ring-1 ring-white/20">
                 H
+            </a>
+
+            <!-- Nav Icons -->
+            <nav class="flex flex-col gap-2 w-full px-2">
+                <!-- Dashboard -->
+                <a href="../dashboard_hollycrm/code.html" class="relative group flex items-center justify-center w-full h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+                    <span class="material-symbols-outlined text-[22px]">dashboard</span>
+                    <span class="absolute left-16 bg-slate-900 text-white text-xs px-2.5 py-1 rounded shadow-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">Dashboard & Analytics</span>
+                </a>
+
+                <!-- Shared Inbox -->
+                <a href="../shared_inbox_hollycrm/code.html" class="relative group flex items-center justify-center w-full h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+                    <span class="material-symbols-outlined text-[22px]">chat</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-[#0F172A]"></span>
+                    <span class="absolute left-16 bg-slate-900 text-white text-xs px-2.5 py-1 rounded shadow-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">WhatsApp Inbox (3 New)</span>
+                </a>
+
+                <!-- AI Workflows -->
+                <a href="../ai_workflows_hollycrm/code.html" class="relative group flex items-center justify-center w-full h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+                    <span class="material-symbols-outlined text-[22px]">smart_toy</span>
+                    <span class="absolute left-16 bg-slate-900 text-white text-xs px-2.5 py-1 rounded shadow-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">AI Agent & Workflows</span>
+                </a>
+
+                <!-- Integrations -->
+                <a href="../integrations_hollycrm/code.html" class="relative group flex items-center justify-center w-full h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+                    <span class="material-symbols-outlined text-[22px]">hub</span>
+                    <span class="absolute left-16 bg-slate-900 text-white text-xs px-2.5 py-1 rounded shadow-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">Integrations (Green API)</span>
+                </a>
+
+                <!-- Settings (Active) -->
+                <a href="../profile_settings_hollycrm/code.html" class="relative group flex items-center justify-center w-full h-11 rounded-lg bg-indigo-600/20 text-indigo-400 font-semibold transition-all">
+                    <span class="absolute left-0 top-1.5 bottom-1.5 w-1 bg-indigo-500 rounded-r-full"></span>
+                    <span class="material-symbols-outlined text-[22px]">settings</span>
+                    <span class="absolute left-16 bg-slate-900 text-white text-xs px-2.5 py-1 rounded shadow-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">Agent Profile & Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- User Profile Avatar -->
+        <div class="flex flex-col items-center gap-3">
+            <div class="relative group cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Rafay A." class="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500/70"/>
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#0F172A] rounded-full"></span>
+                <span class="absolute left-16 bg-slate-900 text-white text-xs px-2.5 py-1 rounded shadow-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">Abdul Rafay (Online)</span>
             </div>
-<div class="flex flex-col items-center w-full">
-<!-- Navigation Items -->
-<a class="w-full flex items-center justify-center text-on-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 transition-colors duration-200 ease-in-out group" href="#" title="Home">
-<span class="material-symbols-outlined text-[24px]">dashboard</span>
-</a>
-<a class="w-full flex items-center justify-center text-on-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 transition-colors duration-200 ease-in-out group" href="#" title="Messages">
-<span class="material-symbols-outlined text-[24px]">forum</span>
-</a>
-<a class="w-full flex items-center justify-center text-on-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 transition-colors duration-200 ease-in-out group" href="#" title="Leads">
-<span class="material-symbols-outlined text-[24px]">person_search</span>
-</a>
-<a class="w-full flex items-center justify-center text-on-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 transition-colors duration-200 ease-in-out group" href="#" title="Pipelines">
-<span class="material-symbols-outlined text-[24px]">view_kanban</span>
-</a>
-<a class="w-full flex items-center justify-center text-on-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 transition-colors duration-200 ease-in-out group" href="#" title="Analytics">
-<span class="material-symbols-outlined text-[24px]">analytics</span>
-</a>
-</div>
-</div>
-<div class="flex flex-col items-center w-full">
-<a class="w-full flex items-center justify-center text-secondary-fixed border-l-2 border-secondary-fixed py-3 hover:bg-on-surface-variant/10 transition-colors duration-200 ease-in-out bg-on-surface-variant/10" href="#" title="Settings">
-<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">settings</span>
-</a>
-<a class="w-full flex items-center justify-center text-on-surface-variant opacity-70 py-3 hover:bg-on-surface-variant/10 transition-colors duration-200 ease-in-out" href="#" title="Support">
-<span class="material-symbols-outlined text-[24px]">help</span>
-</a>
-</div>
-</nav>
-<!-- Main Content Wrapper -->
-<div class="flex-1 ml-16 flex flex-col h-full overflow-hidden">
-<!-- TopAppBar -->
-<header class="bg-surface text-primary border-b border-outline-variant flat no shadows flex justify-between items-center h-16 px-margin-desktop shrink-0 z-40">
-<div class="flex items-center gap-4">
-<h1 class="text-h1 font-h1 text-on-surface">Settings</h1>
-</div>
-<div class="flex items-center gap-4 text-on-surface-variant">
-<div class="relative">
-<span class="material-symbols-outlined text-[24px] cursor-pointer hover:text-primary transition-colors">search</span>
-</div>
-<button class="hover:text-primary transition-colors rounded-full p-2 hover:bg-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container">
-<span class="material-symbols-outlined text-[24px]">notifications</span>
-</button>
-<button class="hover:text-primary transition-colors rounded-full p-2 hover:bg-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container">
-<span class="material-symbols-outlined text-[24px]">wifi_off</span>
-</button>
-<button class="hover:text-primary transition-colors rounded-full p-2 hover:bg-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container">
-<span class="material-symbols-outlined text-[24px]">account_circle</span>
-</button>
-</div>
-</header>
-<!-- Main Layout: 3 Panes -->
-<main class="flex-1 flex overflow-hidden bg-surface-container-low">
-<!-- Left Pane: Navigation List (Fixed Width 280px) -->
-<aside class="w-[280px] bg-surface border-r border-outline-variant flex flex-col shrink-0">
-<div class="p-gutter border-b border-outline-variant">
-<h2 class="text-h3 font-h3 text-on-surface">Configuration</h2>
-</div>
-<div class="flex-1 overflow-y-auto custom-scrollbar p-sm space-y-1">
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-colors group" href="#">
-<span class="material-symbols-outlined text-[20px] group-hover:text-primary">storefront</span>
-<span class="text-body-medium font-body-medium">Agency Profile</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-colors group" href="#">
-<span class="material-symbols-outlined text-[20px] group-hover:text-[#25D366]">chat</span>
-<span class="text-body-medium font-body-medium">WhatsApp Integration</span>
-</a>
-<!-- Active State -->
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary-fixed text-on-primary-fixed-variant border-l-[4px] border-primary-container shadow-sm group" href="#">
-<span class="material-symbols-outlined text-[20px] text-primary-container" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
-<span class="text-body-medium font-body-medium font-semibold">Hollyland AI</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-colors group" href="#">
-<span class="material-symbols-outlined text-[20px] group-hover:text-primary">group</span>
-<span class="text-body-medium font-body-medium">Team Management</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-variant transition-colors group" href="#">
-<span class="material-symbols-outlined text-[20px] group-hover:text-primary">credit_card</span>
-<span class="text-body-medium font-body-medium">Billing</span>
-</a>
-</div>
-</aside>
-<!-- Center Pane: Main Content (Fluid) -->
-<section class="flex-1 bg-surface-container-low overflow-y-auto custom-scrollbar p-margin-desktop">
-<div class="max-w-3xl mx-auto space-y-6">
-<div class="mb-8">
-<h2 class="text-h2 font-h2 text-on-surface mb-2">Hollyland AI Configuration</h2>
-<p class="text-body-base font-body-base text-on-surface-variant">Manage how your AI assistant interacts with leads and manages conversations.</p>
-</div>
-<!-- Behavior Toggles Card -->
-<div class="bg-surface rounded-xl border border-outline-variant p-lg shadow-sm">
-<h3 class="text-h3 font-h3 text-on-surface mb-6 border-b border-outline-variant pb-3 flex items-center gap-2">
-<span class="material-symbols-outlined text-[#F59E0B]">psychology</span>
-                            AI Behavior &amp; Timing
-                        </h3>
-<div class="space-y-6">
-<!-- Auto Reply Delay -->
-<div class="flex items-start justify-between gap-4">
-<div>
-<h4 class="text-body-medium font-body-medium text-on-surface">Auto-reply Delay</h4>
-<p class="text-metadata font-metadata text-on-surface-variant mt-1">Time to wait before the AI responds to a new incoming message.</p>
-</div>
-<div class="flex items-center gap-2">
-<select class="form-select border-outline-variant rounded-lg text-body-base font-body-base text-on-surface focus:border-primary-container focus:ring focus:ring-primary-container/20 py-1.5 pl-3 pr-8 bg-surface">
-<option>Instant (0s)</option>
-<option>15 seconds</option>
-<option selected="">30 seconds</option>
-<option>1 minute</option>
-</select>
-</div>
-</div>
-<hr class="border-outline-variant"/>
-<!-- AI Resume Timer -->
-<div class="flex items-start justify-between gap-4">
-<div>
-<h4 class="text-body-medium font-body-medium text-on-surface">AI Resume Timer</h4>
-<p class="text-metadata font-metadata text-on-surface-variant mt-1">Automatically hand back control to AI after human inactivity.</p>
-</div>
-<div class="flex items-center gap-2">
-<select class="form-select border-outline-variant rounded-lg text-body-base font-body-base text-on-surface focus:border-primary-container focus:ring focus:ring-primary-container/20 py-1.5 pl-3 pr-8 bg-surface">
-<option>Disabled</option>
-<option>30 minutes</option>
-<option>1 hour</option>
-<option selected="">2 hours</option>
-<option>24 hours</option>
-</select>
-</div>
-</div>
-</div>
-</div>
-<!-- Knowledge & Logic Card -->
-<div class="bg-surface rounded-xl border border-outline-variant p-lg shadow-sm">
-<h3 class="text-h3 font-h3 text-on-surface mb-6 border-b border-outline-variant pb-3 flex items-center gap-2">
-<span class="material-symbols-outlined text-[#F59E0B]">database</span>
-                            Knowledge &amp; Logic
-                        </h3>
-<div class="space-y-6">
-<!-- Quoting Logic -->
-<div class="flex items-start justify-between gap-4">
-<div class="flex-1">
-<h4 class="text-body-medium font-body-medium text-on-surface">Quoting Logic (Inventory Sources)</h4>
-<p class="text-metadata font-metadata text-on-surface-variant mt-1 mb-3">Select which databases the AI can pull pricing and availability from.</p>
-<div class="flex flex-wrap gap-2">
-<label class="inline-flex items-center bg-surface-variant border border-outline-variant rounded-full px-3 py-1 cursor-pointer hover:bg-surface-container-high transition-colors">
-<input checked="" class="form-checkbox h-4 w-4 text-primary-container rounded border-outline-variant focus:ring-primary-container" type="checkbox"/>
-<span class="ml-2 text-metadata-bold font-metadata-bold text-on-surface">Internal CRM</span>
-</label>
-<label class="inline-flex items-center bg-surface-variant border border-outline-variant rounded-full px-3 py-1 cursor-pointer hover:bg-surface-container-high transition-colors">
-<input checked="" class="form-checkbox h-4 w-4 text-primary-container rounded border-outline-variant focus:ring-primary-container" type="checkbox"/>
-<span class="ml-2 text-metadata-bold font-metadata-bold text-on-surface">Bayut API</span>
-</label>
-<label class="inline-flex items-center bg-surface border border-outline-variant rounded-full px-3 py-1 cursor-pointer hover:bg-surface-variant transition-colors">
-<input class="form-checkbox h-4 w-4 text-primary-container rounded border-outline-variant focus:ring-primary-container" type="checkbox"/>
-<span class="ml-2 text-metadata-bold font-metadata-bold text-on-surface">PropertyFinder API</span>
-</label>
-</div>
-</div>
-</div>
-<hr class="border-outline-variant"/>
-<!-- Language Preferences -->
-<div class="flex items-start justify-between gap-4">
-<div class="flex-1">
-<h4 class="text-body-medium font-body-medium text-on-surface">Language Capabilities</h4>
-<p class="text-metadata font-metadata text-on-surface-variant mt-1 mb-3">Allowed languages for AI conversation. AI will auto-detect and switch.</p>
-<div class="flex gap-4">
-<label class="flex items-center gap-2 cursor-pointer">
-<input checked="" class="form-checkbox h-4 w-4 text-primary-container rounded border-outline-variant focus:ring-primary-container opacity-50 cursor-not-allowed" disabled="" type="checkbox"/>
-<span class="text-body-base font-body-base text-on-surface">English (Required)</span>
-</label>
-<label class="flex items-center gap-2 cursor-pointer">
-<input checked="" class="form-checkbox h-4 w-4 text-primary-container rounded border-outline-variant focus:ring-primary-container" type="checkbox"/>
-<span class="text-body-base font-body-base text-on-surface">Arabic</span>
-</label>
-<label class="flex items-center gap-2 cursor-pointer">
-<input class="form-checkbox h-4 w-4 text-primary-container rounded border-outline-variant focus:ring-primary-container" type="checkbox"/>
-<span class="text-body-base font-body-base text-on-surface">Russian</span>
-</label>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="flex justify-end pt-4">
-<button class="bg-primary-container text-on-primary rounded-lg px-6 py-2 text-body-medium font-body-medium hover:bg-primary transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-container">
-                            Save Changes
-                        </button>
-</div>
-</div>
-</section>
-<!-- Right Pane: Bot Performance (Fixed Width 320px) -->
-<aside class="w-[320px] bg-surface border-l border-outline-variant flex flex-col shrink-0">
-<div class="p-gutter border-b border-outline-variant bg-surface-container-lowest">
-<h2 class="text-h3 font-h3 text-on-surface flex items-center gap-2">
-<span class="material-symbols-outlined text-primary-container">monitoring</span>
-                        Performance Preview
-                    </h2>
-</div>
-<div class="flex-1 overflow-y-auto custom-scrollbar p-gutter space-y-6">
-<!-- Quick Stats -->
-<div class="space-y-3">
-<h4 class="text-caption font-caption text-on-surface-variant uppercase tracking-wider">Last 7 Days</h4>
-<div class="bg-surface-variant/50 rounded-lg p-3 border border-outline-variant">
-<div class="flex justify-between items-center mb-1">
-<span class="text-metadata font-metadata text-on-surface-variant">Conversations Handled</span>
-<span class="text-metadata-bold font-metadata-bold text-on-surface text-[#008a00] flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 12%</span>
-</div>
-<div class="text-h2 font-h2 text-on-surface">1,248</div>
-</div>
-<div class="bg-surface-variant/50 rounded-lg p-3 border border-outline-variant">
-<div class="flex justify-between items-center mb-1">
-<span class="text-metadata font-metadata text-on-surface-variant">Avg. Response Time</span>
-</div>
-<div class="text-h2 font-h2 text-on-surface">1.2s</div>
-</div>
-<div class="bg-surface-variant/50 rounded-lg p-3 border border-outline-variant">
-<div class="flex justify-between items-center mb-1">
-<span class="text-metadata font-metadata text-on-surface-variant">Human Handoff Rate</span>
-<span class="text-metadata-bold font-metadata-bold text-on-surface text-on-surface-variant flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_downward</span> 3%</span>
-</div>
-<div class="text-h2 font-h2 text-on-surface">18%</div>
-</div>
-</div>
-<hr class="border-outline-variant"/>
-<!-- Sample Interaction -->
-<div>
-<h4 class="text-caption font-caption text-on-surface-variant uppercase tracking-wider mb-3">Live Simulation Preview</h4>
-<div class="bg-surface border border-outline-variant rounded-lg p-3 space-y-3 text-body-base font-body-base">
-<div class="flex gap-2 items-end justify-end">
-<div class="bg-surface-variant text-on-surface p-2 rounded-lg rounded-br-none border border-outline-variant shadow-sm max-w-[85%]">
-                                    I'm looking for a 2BR in Downtown Dubai.
-                                </div>
-</div>
-<div class="flex gap-2 items-end justify-start">
-<div class="w-6 h-6 rounded-full bg-[#F59E0B]/20 flex items-center justify-center shrink-0 border border-[#F59E0B]">
-<span class="material-symbols-outlined text-[14px] text-[#92400E]">smart_toy</span>
-</div>
-<div class="bg-[#F59E0B]/10 text-[#92400E] p-2 rounded-lg rounded-bl-none border border-[#F59E0B] shadow-sm max-w-[85%] text-sm">
-                                    Hi there! I can help with that. We have 5 available 2BR units in Downtown Dubai right now. Are you looking to rent or buy?
-                                </div>
-</div>
-<div class="text-caption font-caption text-on-surface-variant text-right italic">
-                                Sourced from: Internal CRM &amp; Bayut
+        </div>
+    </aside>
+
+    <!-- 2. MAIN WORKSPACE -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <!-- Top Header Bar -->
+        <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 z-20">
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Settings</span>
+                        <span class="text-slate-300">/</span>
+                        <span class="text-xs font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Agent Configuration</span>
+                    </div>
+                    <h1 class="text-lg font-bold text-slate-900">My Profile & Workstation Preferences</h1>
+                </div>
+            </div>
+
+            <!-- Save Action Button -->
+            <div class="flex items-center gap-3">
+                <button class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-sm shadow-indigo-500/20 transition-all">
+                    <span class="material-symbols-outlined text-[16px]">check</span>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content Grid -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+
+            <!-- 1. AGENT IDENTITY & AVATAR CARD -->
+            <section class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+                    <div class="flex items-center gap-5">
+                        <!-- Avatar Uploader -->
+                        <div class="relative group cursor-pointer">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" alt="Abdul Rafay" class="w-20 h-20 rounded-2xl object-cover ring-4 ring-slate-100 shadow-md"/>
+                            <div class="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-white text-[20px]">photo_camera</span>
                             </div>
-</div>
-</div>
-</div>
-</aside>
-</main>
-</div>
-</body></html>
+                            <span class="absolute bottom-1 right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-lg font-bold text-slate-900">Abdul Rafay</h2>
+                                <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full border border-indigo-200">Team Lead / Senior Consultant</span>
+                            </div>
+                            <p class="text-xs text-slate-500">Hollyland Hajj & Umrah Travel Services LLC (Makkah Al-Mukarramah Branch)</p>
+                            <div class="flex items-center gap-4 text-xs text-slate-600 pt-1 font-mono">
+                                <span>rafay@hollyland.sa</span>
+                                <span>•</span>
+                                <span class="text-emerald-700 font-semibold">+966 54 892 1100 (WhatsApp Caller ID)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Presence Pill Switcher -->
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1 rounded-xl">
+                        <button class="px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-white animate-live-dot"></span> Online
+                        </button>
+                        <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 text-xs font-medium">Busy</button>
+                        <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 text-xs font-medium">On Break</button>
+                        <button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 text-xs font-medium">Offline</button>
+                    </div>
+                </div>
+
+                <!-- Profile Input Fields (2-col grid) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-5">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">Full Name</label>
+                        <input type="text" value="Abdul Rafay" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"/>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">Agent Email</label>
+                        <input type="email" value="rafay@hollyland.sa" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"/>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">WhatsApp Caller ID & Direct Line</label>
+                        <input type="text" value="+966 54 892 1100" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"/>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">Spoken Languages</label>
+                        <input type="text" value="Arabic (Fluent), English (Fluent), Urdu (Native)" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"/>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. SHIFT & CHAT LOAD ROUTING PREFERENCES -->
+            <section class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="text-base font-bold text-slate-900">Shift Schedule & WhatsApp Lead Routing</h3>
+                    <p class="text-xs text-slate-500">Configure round-robin assignment rules and maximum concurrent chats</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- Shift Schedule -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px] text-indigo-600">schedule</span> Working Hours (Riyadh Time)
+                        </span>
+                        <p class="text-xs text-slate-600">08:00 — 18:00 (Saturday to Thursday)</p>
+                        <span class="inline-block text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Active Shift</span>
+                    </div>
+
+                    <!-- Concurrent Chat Limit -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800">Max Concurrent Chats</span>
+                            <span class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">15 Chats</span>
+                        </div>
+                        <input type="range" min="5" max="30" value="15" class="w-full accent-indigo-600"/>
+                        <p class="text-[10px] text-slate-400">Excess leads automatically route to next available agent.</p>
+                    </div>
+
+                    <!-- Auto-Assign Toggle -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+                        <div class="space-y-0.5">
+                            <span class="text-xs font-bold text-slate-800">Round-Robin Inbound</span>
+                            <p class="text-[11px] text-slate-500">Auto-assign new WhatsApp groups</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="sr-only peer"/>
+                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. SECURITY & ACTIVE SESSIONS TABLE -->
+            <section class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Security & Active Device Sessions</h3>
+                        <p class="text-xs text-slate-500">Manage authenticated devices and multi-factor authentication (2FA)</p>
+                    </div>
+                    <button class="text-xs text-red-600 hover:text-red-700 font-semibold bg-red-50 px-3 py-1.5 rounded-lg border border-red-200">
+                        Revoke All Other Sessions
+                    </button>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <!-- Session 1: Current Windows Browser -->
+                    <div class="py-3 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">laptop_windows</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-900">Windows PC (Chrome 128) · Riyadh, KSA</p>
+                                <p class="text-[11px] text-slate-400 font-mono">IP: 212.138.64.12 · Active Workstation Session</p>
+                            </div>
+                        </div>
+                        <span class="text-emerald-700 bg-emerald-50 border border-emerald-200 text-[11px] font-bold px-2 py-0.5 rounded-full">Current Session</span>
+                    </div>
+
+                    <!-- Session 2: iOS Mobile App -->
+                    <div class="py-3 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">smartphone</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-900">iPhone 15 Pro (HollyCRM Mobile Companion)</p>
+                                <p class="text-[11px] text-slate-400 font-mono">Last active: 22 mins ago · Makkah Al-Mukarramah</p>
+                            </div>
+                        </div>
+                        <button class="text-xs text-slate-400 hover:text-red-600 font-medium">Revoke</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

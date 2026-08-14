@@ -15,20 +15,17 @@ export interface ProfileUser {
 }
 
 const ITEMS: { href: string; icon: IconName; label: string }[] = [
-  { href: "/profile", icon: "user", label: "My profile" },
-  { href: "/settings", icon: "settings", label: "Settings" },
+  { href: "/settings", icon: "user", label: "My profile" },
+  { href: "/settings/whatsapp", icon: "hub", label: "Integration marketplace" },
 ];
 
-/**
- * Account button pinned to the foot of the rail. The rail is icon-only at 64px,
- * so identity lives in the avatar and the name is deferred to the popover —
- * a truncated name in a 64px column reads as noise.
- *
- * Fed by the shell's identity poll, so the photo and name here are the ones the
- * person set in My profile. With no props it degrades to a generic button
- * rather than rendering an empty circle.
- */
-export default function ProfileMenu({ user }: { user?: ProfileUser }) {
+export default function ProfileMenu({
+  user,
+  collapsed = false,
+}: {
+  user?: ProfileUser;
+  collapsed?: boolean;
+}) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -39,8 +36,7 @@ export default function ProfileMenu({ user }: { user?: ProfileUser }) {
   const email = user?.email?.trim() || null;
   const avatar = user?.avatar ?? null;
 
-  /* Click-away and Escape. Escape returns focus to the trigger so keyboard
-     users are not dropped at the top of the document. */
+  /* Click-away and Escape */
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: MouseEvent) => {
@@ -59,68 +55,111 @@ export default function ProfileMenu({ user }: { user?: ProfileUser }) {
     };
   }, [open]);
 
-  /* Navigating away must not leave the popover hanging over the new page. */
+  /* Navigating away closes popover */
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
   return (
-    <div ref={wrapRef} className="relative w-full px-2">
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        title={name ?? "Account"}
-        className={`flex w-full items-center justify-center rounded-lg py-2 transition-colors duration-150 ease-swift ${
-          open ? "bg-white/10" : "hover:bg-white/5"
-        }`}
-      >
-        <span
-          className={`relative rounded-full transition-shadow duration-150 ease-swift ${
-            open ? "ring-2 ring-wa ring-offset-2 ring-offset-ink" : ""
+    <div ref={wrapRef} className="relative w-full z-40">
+      {collapsed ? (
+        /* Collapsed Mode: Icon-only Avatar button */
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          title={name ?? "Account"}
+          className={`flex w-full items-center justify-center rounded-xl p-1.5 transition-colors duration-150 ${
+            open ? "bg-slate-100 ring-2 ring-purple-600/30" : "hover:bg-slate-100"
           }`}
         >
-          <Avatar name={name} type="agent" size={32} src={avatar} />
-          {/* Presence dot on the avatar. An agent has to be able to tell, from
-              any screen, whether the router is currently sending them work —
-              otherwise "why am I getting no chats?" has no visible answer. */}
-          <span
-            aria-hidden
-            className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-ink transition-colors duration-200 ease-swift ${
-              presence === "available" ? "bg-wa" : "bg-subtle"
+          <span className="relative rounded-full">
+            <Avatar name={name} type="agent" size={32} src={avatar} />
+            <span
+              aria-hidden
+              className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white transition-colors duration-200 ${
+                presence === "available" ? "bg-emerald-500" : "bg-slate-400"
+              }`}
+            />
+          </span>
+        </button>
+      ) : (
+        /* Expanded Mode: Full width card */
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          className={`flex w-full items-center justify-between gap-2.5 rounded-xl p-2 text-left transition-colors duration-150 ${
+            open ? "bg-purple-50/80 ring-1 ring-purple-600/20" : "hover:bg-slate-100/80"
+          }`}
+        >
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="relative shrink-0 rounded-full">
+              <Avatar name={name} type="agent" size={32} src={avatar} />
+              <span
+                aria-hidden
+                className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white transition-colors duration-200 ${
+                  presence === "available" ? "bg-emerald-500" : "bg-slate-400"
+                }`}
+              />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-bold text-slate-800">
+                {name ?? "Account"}
+              </p>
+              <p className="truncate text-[11px] font-medium text-slate-400">
+                {email ?? "user@workspace"}
+              </p>
+            </div>
+          </div>
+          <Icon
+            name="chevronDown"
+            size={14}
+            className={`shrink-0 text-slate-400 transition-transform duration-200 ${
+              open ? "rotate-180 text-purple-600" : ""
             }`}
           />
-        </span>
-      </button>
+        </button>
+      )}
 
+      {/* Popover Menu */}
       {open && (
         <div
           role="menu"
           aria-label="Account"
-          className="absolute bottom-0 left-full z-50 ml-2 w-56 origin-bottom-left animate-rise-in overflow-hidden rounded-xl border border-edge bg-card shadow-pop"
+          className={`absolute z-50 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl ring-1 ring-slate-900/10 animate-rise-in ${
+            collapsed
+              ? "bottom-0 left-full ml-3 w-64 origin-bottom-left"
+              : "bottom-full left-0 mb-2 w-full origin-bottom-left"
+          }`}
         >
-          <div className="flex items-center gap-2.5 border-b border-edge px-3 py-2.5">
-            <Avatar name={name} type="agent" size={32} src={avatar} />
-            <span className="min-w-0">
-              <span className="block truncate text-body font-semibold text-ink">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/50 px-3.5 py-3">
+            <Avatar name={name} type="agent" size={34} src={avatar} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-bold text-slate-900">
                 {name ?? "Account"}
-              </span>
-              {email && <span className="block truncate text-meta text-muted">{email}</span>}
-            </span>
+              </p>
+              {email && <p className="truncate text-[11px] text-slate-400">{email}</p>}
+            </div>
           </div>
 
-          {/* Availability sits above navigation because it is the item with a
-              live consequence: while Away, the router routes around you. */}
-          <div className="border-b border-edge p-2">
-            <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-caption font-medium text-muted">Availability</span>
-              <span className={`text-caption font-medium ${presence === "available" ? "text-wa-dark" : "text-subtle"}`}>
-                {presence === "available" ? "Taking chats" : "Not taking chats"}
+          {/* Availability Toggle */}
+          <div className="border-b border-slate-100 p-2.5">
+            <div className="mb-1.5 flex items-center justify-between px-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Availability</span>
+              <span
+                className={`text-[11px] font-bold ${
+                  presence === "available" ? "text-emerald-600" : "text-slate-400"
+                }`}
+              >
+                {presence === "available" ? "Taking chats" : "Away / Paused"}
               </span>
             </div>
-            <div className="flex gap-1 rounded-lg bg-surface p-1">
+            <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
               {(["available", "away"] as const).map((value) => (
                 <button
                   key={value}
@@ -128,15 +167,15 @@ export default function ProfileMenu({ user }: { user?: ProfileUser }) {
                   role="menuitemradio"
                   aria-checked={presence === value}
                   onClick={() => setPresence(value)}
-                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-caption font-medium transition-all duration-200 ease-swift ${
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition-all duration-150 ${
                     presence === value
-                      ? "bg-card text-ink shadow-card"
-                      : "text-muted hover:text-ink"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <span
                     className={`h-2 w-2 rounded-full ${
-                      value === "available" ? "bg-wa" : "bg-subtle"
+                      value === "available" ? "bg-emerald-500" : "bg-slate-400"
                     }`}
                   />
                   {value === "available" ? "Available" : "Away"}
@@ -145,28 +184,30 @@ export default function ProfileMenu({ user }: { user?: ProfileUser }) {
             </div>
           </div>
 
-          <div className="p-1">
+          {/* Links */}
+          <div className="p-1.5">
             {ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 role="menuitem"
-                className="flex items-center gap-2.5 rounded px-2.5 py-2 text-body text-ink transition-colors duration-150 ease-swift hover:bg-surface"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
               >
-                <Icon name={item.icon} size={16} className="text-muted" />
+                <Icon name={item.icon} size={16} className="text-slate-400" />
                 {item.label}
               </Link>
             ))}
           </div>
 
-          <div className="border-t border-edge p-1">
+          {/* Logout */}
+          <div className="border-t border-slate-100 p-1.5">
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
                 role="menuitem"
-                className="flex w-full items-center gap-2.5 rounded px-2.5 py-2 text-body text-danger transition-colors duration-150 ease-swift hover:bg-danger-soft"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
               >
-                <Icon name="logout" size={16} />
+                <Icon name="logout" size={15} />
                 Log out
               </button>
             </form>

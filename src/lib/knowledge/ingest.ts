@@ -44,8 +44,10 @@ export async function processSource(source: SourceRow, columnMap?: ColumnMap): P
 
     if (!text.trim()) {
       throw new Error(
-        "No text could be extracted. If this is a scanned PDF it contains images rather than " +
-          "text, and needs to be re-exported or typed in as a note."
+        source.kind === "pdf"
+          ? "No text could be extracted. If this is a scanned PDF it contains images rather than " +
+              "text, and needs to be re-exported or typed in as a note."
+          : "No text could be extracted from this file. The file appears to be empty."
       );
     }
     await storeChunks(source, text);
@@ -61,7 +63,7 @@ export async function processSource(source: SourceRow, columnMap?: ColumnMap): P
 async function loadContent(
   source: SourceRow
 ): Promise<{ text: string; grid: ParsedGrid | null }> {
-  if (source.kind === "text") {
+  if (source.kind === "text" && !source.storage_path) {
     return { text: source.raw_text ?? "", grid: null };
   }
 
@@ -84,6 +86,10 @@ async function loadContent(
 
   if (source.kind === "pdf") {
     return { text: await parsePdf(bytes), grid: null };
+  }
+
+  if (source.kind === "text") {
+    return { text: new TextDecoder().decode(bytes), grid: null };
   }
 
   const grid = source.kind === "csv"

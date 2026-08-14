@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getAuthUser, supabaseServer } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import PipelineBoard, { type BoardChat } from "@/components/PipelineBoard";
+import Icon from "@/components/ui/Icon";
 import type { Lead } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -20,21 +21,27 @@ export default async function PipelinePage() {
   ]);
   if (!user) redirect("/login");
 
-  // Titles live on chats, not leads. Two flat queries rather than a nested select
-  // so a relationship-name change in the schema can't empty the board.
   const chatIds = [...new Set((leads ?? []).map((l) => l.chat_id))];
   const { data: chats } = chatIds.length
     ? await sb.from("chats").select("id, title, chat_jid, chat_type, is_bot_paused").in("id", chatIds)
     : { data: [] };
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-4 border-b border-edge bg-card px-6">
-        <h1 className="text-h1 text-ink">Pipeline</h1>
-        <span className="text-meta text-muted">{leads?.length ?? 0} open leads</span>
-        <span className="ml-auto text-caption text-subtle">
-          Drag a card to move it · All amounts per night · Asia/Riyadh
-        </span>
+    <div className="flex h-full flex-col bg-[#F8FAFC]">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold text-slate-900">Pipeline</h1>
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+            {leads?.length ?? 0} active leads
+          </span>
+        </div>
+
+        <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Drag cards to progress stages
+          </span>
+        </div>
       </header>
 
       <PipelineBoard leads={(leads ?? []) as Lead[]} chats={(chats ?? []) as BoardChat[]} />

@@ -1,0 +1,292 @@
+"use client";
+
+import React from "react";
+import SettingsNav from "@/components/settings/SettingsNav";
+import Icon from "@/components/ui/Icon";
+import { useNotifications } from "@/components/notifications/NotificationContext";
+
+export default function NotificationSettingsPage() {
+  const {
+    soundEnabled,
+    soundVolume,
+    inAppToastEnabled,
+    browserPushEnabled,
+    browserPermission,
+    notifyScope,
+    toastDuration,
+    playTestChime,
+    sendTestNotification,
+    requestBrowserPermission,
+    updateSettings,
+  } = useNotifications();
+
+  return (
+    <div className="flex h-full bg-[#F8FAFC]">
+      <SettingsNav />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        {/* Top Header */}
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Notification Settings</h1>
+            <p className="text-xs text-slate-400">Configure WhatsApp Web message sounds, in-app banners, and browser push alerts</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={sendTestNotification}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+            >
+              <Icon name="bell" size={14} />
+              <span>Preview Toast Alert</span>
+            </button>
+            <button
+              onClick={playTestChime}
+              className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+            >
+              <Icon name="volume" size={14} />
+              <span>Test Audio Chime</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+          <div className="max-w-4xl mx-auto space-y-6">
+
+            {/* CARD 1: Desktop Browser Notifications */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-slate-900">Desktop Browser Push Notifications</h2>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                        browserPermission === "granted"
+                          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                          : browserPermission === "denied"
+                          ? "bg-rose-50 text-rose-700 ring-1 ring-rose-600/20"
+                          : "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          browserPermission === "granted"
+                            ? "bg-emerald-500"
+                            : browserPermission === "denied"
+                            ? "bg-rose-500"
+                            : "bg-amber-500"
+                        }`}
+                      />
+                      {browserPermission === "granted"
+                        ? "Permission Granted ✓"
+                        : browserPermission === "denied"
+                        ? "Blocked in Browser"
+                        : "Permission Required"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
+                    Delivers OS-level notification popups when WhatsApp inquiries arrive, even when HollyCRM is in a background tab or minimized.
+                  </p>
+                </div>
+
+                {browserPermission !== "granted" ? (
+                  <button
+                    onClick={() => void requestBrowserPermission()}
+                    className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition shrink-0"
+                  >
+                    Enable Browser Push
+                  </button>
+                ) : (
+                  <label className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-emerald-500">
+                    <input
+                      type="checkbox"
+                      checked={browserPushEnabled}
+                      onChange={(e) => updateSettings({ browserPushEnabled: e.target.checked })}
+                      className="sr-only"
+                    />
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        browserPushEnabled ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </label>
+                )}
+              </div>
+            </section>
+
+            {/* CARD 2: In-App WhatsApp Web Banners */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <h2 className="text-sm font-bold text-slate-900">In-App WhatsApp Web Banners</h2>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
+                    Displays sleek WhatsApp Web style floating notification cards on the top-right corner when you are navigating other sections (Home, Insights, Pipeline, AI, Settings).
+                  </p>
+                </div>
+
+                <label
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    inAppToastEnabled ? "bg-emerald-500" : "bg-slate-300"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={inAppToastEnabled}
+                    onChange={(e) => updateSettings({ inAppToastEnabled: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      inAppToastEnabled ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </label>
+              </div>
+
+              {inAppToastEnabled && (
+                <div className="border-t border-slate-100 pt-4 flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800">Banner Auto-Dismiss Time</span>
+                    <p className="text-[11px] text-slate-400">How long the notification stays visible before closing</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {[
+                      { label: "3 Seconds", value: 3000 },
+                      { label: "6 Seconds (Default)", value: 6000 },
+                      { label: "10 Seconds", value: 10000 },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => updateSettings({ toastDuration: opt.value })}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                          toastDuration === opt.value
+                            ? "bg-purple-50 text-purple-700 ring-1 ring-purple-600/30"
+                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* CARD 3: Audio Notification Chimes */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <h2 className="text-sm font-bold text-slate-900">Message Audio Chimes</h2>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
+                    Plays the signature WhatsApp double-tone harmonic chime whenever a new incoming message or quotation inquiry arrives.
+                  </p>
+                </div>
+
+                <label
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    soundEnabled ? "bg-emerald-500" : "bg-slate-300"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={soundEnabled}
+                    onChange={(e) => updateSettings({ soundEnabled: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      soundEnabled ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </label>
+              </div>
+
+              {soundEnabled && (
+                <div className="border-t border-slate-100 pt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">Chime Volume</span>
+                    <span className="text-xs font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+                      {soundVolume}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Icon name={soundVolume === 0 ? "volumeOff" : "volume"} size={16} className="text-slate-400" />
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={soundVolume}
+                      onChange={(e) => updateSettings({ soundVolume: Number(e.target.value) })}
+                      className="w-full accent-purple-600 cursor-pointer"
+                    />
+                    <button
+                      type="button"
+                      onClick={playTestChime}
+                      className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      Play Test
+                    </button>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* CARD 4: Notification Scope & Routing Filter */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Notification Triggers</h2>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Choose which incoming conversations trigger notification alerts
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-1">
+                {[
+                  {
+                    key: "all",
+                    title: "All Incoming Messages (Direct & Groups)",
+                    desc: "Notify for every direct message and group customer interaction across the agency.",
+                  },
+                  {
+                    key: "direct",
+                    title: "Direct Customer Inquiries Only",
+                    desc: "Mute busy agency group chats and only notify on 1-on-1 private WhatsApp messages.",
+                  },
+                  {
+                    key: "mine",
+                    title: "My Assigned Chats & Unassigned Inquiries",
+                    desc: "Only trigger alerts for chats assigned to you or waiting in the unassigned triage pool.",
+                  },
+                ].map((opt) => (
+                  <label
+                    key={opt.key}
+                    className={`flex cursor-pointer items-start gap-3.5 rounded-2xl border p-4 transition-all duration-150 ${
+                      notifyScope === opt.key
+                        ? "border-purple-300 bg-purple-50/70 ring-1 ring-purple-600/20"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="notifyScope"
+                      className="mt-1 accent-purple-600"
+                      checked={notifyScope === opt.key}
+                      onChange={() => updateSettings({ notifyScope: opt.key as any })}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-slate-900">{opt.title}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-500 leading-relaxed">{opt.desc}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import Icon from "@/components/ui/Icon";
+import BackButton from "@/components/ui/BackButton";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import {
   ACTION_LABEL, ACTIONS, FIELD_LABEL, FIELDS, OPERATOR_LABEL, OPERATORS,
@@ -65,63 +66,74 @@ export default function RulesPage() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <Link href="/ai/workflow" className="btn-ghost rounded-full p-1.5" title="Back to workflow">
-          <Icon name="chevronRight" size={16} className="rotate-180" />
-        </Link>
-        <h1 className="text-h1 text-ink">Rules</h1>
-        <Chip tone="neutral">{rules.filter((r) => r.is_active).length} active</Chip>
+    <div className="flex h-full flex-col bg-[#F8FAFC]">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8 z-10">
+        <div className="flex items-center gap-3">
+          <BackButton fallbackHref="/ai/workflow" title="Back to Workflow" />
+          <h1 className="text-xl font-bold text-slate-900">Business Routing Rules</h1>
+          <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-bold text-purple-700 ring-1 ring-purple-600/20">
+            {rules.filter((r) => r.is_active).length} active
+          </span>
+        </div>
+
         <button
           onClick={() => setEditing({ name: "", match_type: "all", priority: 100, conditions: [], action: { type: "handoff" } })}
-          className="btn-primary ml-auto flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-meta"
+          className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
         >
-          <Icon name="plus" size={14} />Add rule
+          <Icon name="plus" size={14} />
+          <span>Add New Rule</span>
         </button>
       </header>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6">
-        <div className="mx-auto max-w-3xl space-y-4">
+      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6 md:p-8">
+        <div className="mx-auto max-w-4xl space-y-4">
           {error && (
-            <p className="flex items-start gap-2 rounded-lg border border-danger/25 bg-danger-soft p-3 text-meta text-danger-dark">
-              <Icon name="alert" size={15} className="mt-px shrink-0" />{error}
+            <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+              <Icon name="alert" size={16} className="mt-0.5 text-rose-600 shrink-0" />
+              <span>{error}</span>
             </p>
           )}
 
-          <p className="rounded-lg border border-edge bg-card p-3 text-caption leading-relaxed text-muted">
-            Rules run on every message, in order, straight after the AI works out what the
-            customer wants — so you can test what they <em>meant</em> (&ldquo;wants a human&rdquo;,
-            &ldquo;budget over 50,000&rdquo;), not just what they typed. The first rule that
-            matches wins and the rest are skipped.
-          </p>
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 text-xs text-slate-500 leading-relaxed shadow-xs flex items-start gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 ring-1 ring-purple-600/20 mt-0.5">
+              <Icon name="info" size={14} />
+            </span>
+            <p>
+              Rules execute in sequence on every incoming message after intent detection. The first matching condition triggers its destination desk, routing VIP inquiries, language preferences, or human escalations.
+            </p>
+          </div>
 
-          {rules.map((rule, i) => (
-            <RuleCard
-              key={rule.id}
-              rule={rule}
-              index={i}
-              regions={regions}
-              agents={agents}
-              onEdit={() => setEditing(rule)}
-              onToggle={() => send("PATCH", { action: "toggle", id: rule.id, is_active: !rule.is_active })}
-              onDelete={async () => {
-                const ok = await confirm({
-                  title: `Delete “${rule.name}”?`,
-                  body: "Messages will stop being handled by this rule immediately.",
-                  confirmLabel: "Delete rule",
-                  tone: "danger",
-                });
-                if (ok) send("DELETE", null, `/api/settings/rules?id=${rule.id}`);
-              }}
-            />
-          ))}
+          <div className="space-y-3 pt-2">
+            {rules.map((rule, i) => (
+              <RuleCard
+                key={rule.id}
+                rule={rule}
+                index={i}
+                regions={regions}
+                agents={agents}
+                onEdit={() => setEditing(rule)}
+                onToggle={() => send("PATCH", { action: "toggle", id: rule.id, is_active: !rule.is_active })}
+                onDelete={async () => {
+                  const ok = await confirm({
+                    title: `Delete “${rule.name}”?`,
+                    body: "Messages will stop being handled by this rule immediately.",
+                    confirmLabel: "Delete rule",
+                    tone: "danger",
+                  });
+                  if (ok) send("DELETE", null, `/api/settings/rules?id=${rule.id}`);
+                }}
+              />
+            ))}
+          </div>
 
           {rules.length === 0 && (
-            <div className="rounded-lg border border-dashed border-edge p-6 text-center">
-              <p className="text-meta text-muted">No rules yet — the AI uses its built-in flow.</p>
-              <p className="mt-1 text-caption text-subtle">
-                Add one to override it for specific cases, like sending big enquiries
-                straight to your best closer.
+            <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-10 text-center space-y-2">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+                <Icon name="filter" size={24} />
+              </div>
+              <p className="text-sm font-bold text-slate-800">No custom rules configured yet</p>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                The AI will use its standard automated qualification pipeline. Add a custom rule to route specific requests to specialized agent desks.
               </p>
             </div>
           )}
@@ -161,59 +173,75 @@ function RuleCard({ rule, index, regions, agents, onEdit, onToggle, onDelete }: 
         : null;
 
   return (
-    <div className={`panel p-4 ${rule.is_active ? "" : "opacity-60"}`}>
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-surface text-caption font-semibold text-muted">
+    <div className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all ${rule.is_active ? "" : "opacity-60 bg-slate-50/50"}`}>
+      <div className="flex items-start gap-3.5">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600">
           {index + 1}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-body font-semibold text-ink">{rule.name}</span>
-            {!rule.is_active && <Chip tone="neutral">Off</Chip>}
-            {rule.match_count ? <Chip tone="wa">matched {rule.match_count}×</Chip> : <Chip tone="neutral">never matched</Chip>}
+            <span className="text-xs font-bold text-slate-900">{rule.name}</span>
+            {!rule.is_active && (
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                Disabled
+              </span>
+            )}
+            {rule.match_count ? (
+              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+                Matched {rule.match_count}×
+              </span>
+            ) : (
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+                Never matched
+              </span>
+            )}
           </div>
 
-          {/* The rule in words. A list of {field, op, value} objects is data;
-              this is the thing an operator can actually check for correctness. */}
-          <div className="mt-2 space-y-1 text-meta">
-            <p className="text-muted">
-              <span className="font-semibold text-brand-dark">IF</span>{" "}
+          <div className="mt-2.5 space-y-1.5 text-xs rounded-xl bg-slate-50/70 border border-slate-100 p-3">
+            <p className="text-slate-600">
+              <span className="font-bold text-purple-700 mr-1.5 uppercase text-[10px] tracking-wider">IF</span>
               {(rule.conditions ?? []).map((c, i) => (
                 <span key={i}>
                   {i > 0 && (
-                    <span className="font-medium text-subtle">
-                      {" "}{rule.match_type === "any" ? "OR" : "AND"}{" "}
+                    <span className="font-bold text-slate-400 mx-1.5">
+                      {rule.match_type === "any" ? "OR" : "AND"}
                     </span>
                   )}
-                  <span className="text-ink">{FIELD_LABEL[c.field] ?? c.field}</span>{" "}
-                  {OPERATOR_LABEL[c.op] ?? c.op}
-                  {!NO_VALUE.includes(c.op) && <span className="font-medium text-ink"> {c.value}</span>}
+                  <span className="font-semibold text-slate-900">{FIELD_LABEL[c.field] ?? c.field}</span>{" "}
+                  <span className="text-slate-500">{OPERATOR_LABEL[c.op] ?? c.op}</span>
+                  {!NO_VALUE.includes(c.op) && <span className="font-bold text-slate-900 ml-1">“{c.value}”</span>}
                 </span>
               ))}
             </p>
-            <p className="text-muted">
-              <span className="font-semibold text-wa-dark">THEN</span>{" "}
-              <span className="text-ink">{ACTION_LABEL[rule.action?.type] ?? "—"}</span>
-              {target && <span className="text-ink"> · {target}</span>}
+            <p className="text-slate-600">
+              <span className="font-bold text-emerald-700 mr-1.5 uppercase text-[10px] tracking-wider">THEN</span>
+              <span className="font-bold text-slate-900">{ACTION_LABEL[rule.action?.type] ?? "—"}</span>
+              {target && <span className="text-slate-600"> · <strong className="text-slate-900">{target}</strong></span>}
             </p>
           </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <button onClick={onToggle}
+          <button
+            type="button"
+            onClick={onToggle}
             title={rule.is_active ? "Switch off" : "Switch on"}
-            className={`relative h-5 w-9 rounded-full transition-colors duration-200 ease-swift ${
-              rule.is_active ? "bg-wa" : "bg-edge-strong"
-            }`}>
-            <span className="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-card transition-all duration-200 ease-swift"
-              style={{ left: rule.is_active ? 18 : 2 }} />
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              rule.is_active ? "bg-emerald-500" : "bg-slate-300"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                rule.is_active ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
           </button>
         </div>
       </div>
 
-      <div className="mt-3 flex gap-3 border-t border-edge pt-2 text-caption font-medium">
-        <button onClick={onEdit} className="text-brand hover:underline">Edit</button>
-        <button onClick={onDelete} className="ml-auto text-danger hover:underline">Delete</button>
+      <div className="mt-3.5 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs font-semibold">
+        <button onClick={onEdit} className="text-purple-600 hover:text-purple-800 transition">Edit rule…</button>
+        <button onClick={onDelete} className="text-rose-500 hover:text-rose-700 transition">Delete</button>
       </div>
     </div>
   );

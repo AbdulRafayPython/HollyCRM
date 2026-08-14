@@ -29,10 +29,11 @@ export default function ArchiveButton({
     <button
       onClick={toggle}
       disabled={busy}
-      title={archived ? "Move back to the inbox" : "Archive this conversation"}
-      className="btn-ghost rounded-full p-2"
+      type="button"
+      title={archived ? "Move back to inbox" : "Archive conversation"}
+      className="rounded-xl border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition shadow-2xs shrink-0 disabled:opacity-50"
     >
-      <Icon name="archive" size={18} />
+      <Icon name="archive" size={15} />
     </button>
   );
 }

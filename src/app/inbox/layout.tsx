@@ -19,7 +19,7 @@ export default function InboxLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-full">
-      <aside className="z-30 w-[320px] shrink-0 border-r border-edge bg-card">
+      <aside className="z-30 w-[280px] xl:w-[300px] shrink-0 border-r border-slate-200/80 bg-white">
         <Suspense fallback={<ChatListFallback />}>
           <ChatListPanel />
         </Suspense>

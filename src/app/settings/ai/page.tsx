@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import Icon from "@/components/ui/Icon";
+import BackButton from "@/components/ui/BackButton";
+import SettingsNav from "@/components/settings/SettingsNav";
 
 interface BotForm {
   enabled: boolean;
@@ -58,9 +60,8 @@ export default function AiSettingsPage() {
     if (!form) return;
     setBusy(true);
     setError(null);
-    setSaved(false);
     const res = await fetch("/api/settings/bot", {
-      method: "PUT",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
@@ -70,7 +71,7 @@ export default function AiSettingsPage() {
     });
     setBusy(false);
     if (!res.ok) {
-      setError((await res.json().catch(() => ({}))).error ?? "Save failed");
+      setError("Could not save settings");
       return;
     }
     setSaved(true);
@@ -81,30 +82,43 @@ export default function AiSettingsPage() {
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
   if (!form) {
-    return <div className="p-6 text-meta text-muted">{error ?? "Loading…"}</div>;
+    return <div className="p-6 text-xs text-slate-400">Loading AI settings…</div>;
   }
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <Link href="/settings" className="btn-ghost rounded-full p-1.5" title="Back to settings">
-          <Icon name="chevronRight" size={16} className="rotate-180" />
-        </Link>
-        <h1 className="text-h1 text-ink">AI agent</h1>
-        {saved && <Chip tone="wa" icon="check">Saved — live in ~30s</Chip>}
-        <button form="bot-form" disabled={busy} className="btn-primary ml-auto rounded-lg px-4 py-2 text-meta disabled:opacity-40">
-          {busy ? "Saving…" : "Save changes"}
-        </button>
-      </header>
+    <div className="flex h-full bg-[#F8FAFC]">
+      <SettingsNav />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">AI Concierge & Persona</h1>
+            <p className="text-xs text-slate-400">Configure response tone, greetings, keywords, and automated handoff triggers</p>
+          </div>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6">
-        <form id="bot-form" onSubmit={save} className="mx-auto max-w-2xl space-y-4">
-          {error && (
-            <p className="flex items-start gap-2 rounded-lg border border-danger/25 bg-danger-soft p-3 text-meta text-danger-dark">
-              <Icon name="alert" size={15} className="mt-px" />
-              {error}
-            </p>
-          )}
+          <div className="flex items-center gap-3">
+            {saved && (
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+                ✓ Saved — live in ~30s
+              </span>
+            )}
+            <button
+              form="bot-form"
+              disabled={busy}
+              className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition disabled:opacity-50"
+            >
+              {busy ? "Saving…" : "Save Changes"}
+            </button>
+          </div>
+        </header>
+
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+          <form id="bot-form" onSubmit={save} className="max-w-4xl mx-auto space-y-5">
+            {error && (
+              <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+                <Icon name="alert" size={16} className="mt-0.5 text-rose-600 shrink-0" />
+                <span>{error}</span>
+              </p>
+            )}
 
           <section className="panel space-y-4 p-5">
             <div className="flex items-center justify-between">
@@ -225,5 +239,6 @@ export default function AiSettingsPage() {
         </form>
       </div>
     </div>
+  </div>
   );
 }

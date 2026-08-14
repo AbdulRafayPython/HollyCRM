@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import Icon from "@/components/ui/Icon";
+import BackButton from "@/components/ui/BackButton";
 import WorkflowCanvas, { type Layout, type NodeStatus } from "@/components/workflow/WorkflowCanvas";
 import TestPanel, { type TestResult } from "@/components/workflow/TestPanel";
 import NodePanel from "@/components/workflow/NodePanel";
@@ -171,35 +172,40 @@ export default function WorkflowPage() {
   const needsSetup = Object.values(statuses).filter((s) => s.status === "attention").length;
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <Link href="/ai" className="btn-ghost rounded-full p-1.5" title="Back to AI agent">
-          <Icon name="chevronRight" size={16} className="rotate-180" />
-        </Link>
-        <h1 className="text-h1 text-ink">Workflow</h1>
-        {snap && (needsSetup > 0
-          ? <Chip tone="bot">{needsSetup} step{needsSetup === 1 ? "" : "s"} need setup</Chip>
-          : <Chip tone="wa">All steps configured</Chip>)}
+    <div className="flex h-full flex-col bg-[#F8FAFC]">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8 z-10">
+        <div className="flex items-center gap-3">
+          <BackButton fallbackHref="/ai" title="Back to AI agent" />
+          <h1 className="text-xl font-bold text-slate-900">Workflow Canvas</h1>
+          {snap && (needsSetup > 0
+            ? <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700 ring-1 ring-amber-600/20">{needsSetup} step{needsSetup === 1 ? "" : "s"} need setup</span>
+            : <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 ring-1 ring-emerald-600/20">All steps configured</span>)}
+        </div>
 
-        <span className="ml-auto flex items-center gap-3">
-          {error && <span className="text-caption text-danger">{error}</span>}
-          <span className={`text-caption transition-opacity duration-200 ${saving ? "text-muted opacity-100" : "opacity-0"}`}>
-            Saving…
+        <div className="flex items-center gap-3">
+          {error && <span className="text-xs text-rose-600 font-medium">{error}</span>}
+          <span className={`text-xs text-slate-400 font-medium transition-opacity duration-200 ${saving ? "opacity-100" : "opacity-0"}`}>
+            Saving layout…
           </span>
-          <Link href="/ai/rules" className="btn-ghost flex items-center gap-1.5 rounded-lg px-3 py-2 text-meta">
+          <Link
+            href="/ai/rules?from=/ai/workflow"
+            className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+          >
             <Icon name="filter" size={14} />
-            Rules{snap?.rules.active ? ` (${snap.rules.active})` : ""}
+            <span>Rules{snap?.rules.active ? ` (${snap.rules.active})` : ""}</span>
           </Link>
           <button
             onClick={() => { setTesting((v) => !v); setSelected(null); }}
-            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-meta transition-colors duration-150 ${
-              testing ? "btn-ghost" : "btn-primary"
+            className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
+              testing
+                ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                : "bg-purple-600 text-white hover:bg-purple-700"
             }`}
           >
             <Icon name="play" size={14} />
-            {testing ? "Hide test" : "Test workflow"}
+            <span>{testing ? "Close Simulation" : "Test Workflow"}</span>
           </button>
-        </span>
+        </div>
       </header>
 
       <div className="relative flex min-h-0 flex-1">
@@ -249,13 +255,13 @@ async function safe(r: Response) {
 }
 
 const SETTINGS_HREF: Record<string, string> = {
-  rules: "/ai/rules",
-  ai: "/settings/ai",
-  knowledge: "/settings/knowledge",
-  inventory: "/settings/inventory",
-  routing: "/settings/routing",
-  llm: "/settings/llm",
-  whatsapp: "/settings/whatsapp",
+  rules: "/ai/rules?from=/ai/workflow",
+  ai: "/settings/ai?from=/ai/workflow",
+  knowledge: "/settings/knowledge?from=/ai/workflow",
+  inventory: "/settings/inventory?from=/ai/workflow",
+  routing: "/settings/routing?from=/ai/workflow",
+  llm: "/settings/llm?from=/ai/workflow",
+  whatsapp: "/settings/whatsapp?from=/ai/workflow",
 };
 
 const SETTINGS_LABEL: Record<string, string> = {

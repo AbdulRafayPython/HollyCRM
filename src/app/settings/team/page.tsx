@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAuthUser, supabaseServer } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import TeamPanel from "@/components/TeamPanel";
-import Icon from "@/components/ui/Icon";
+import SettingsNav from "@/components/settings/SettingsNav";
 
 export const dynamic = "force-dynamic";
 
@@ -21,20 +20,23 @@ export default async function TeamSettingsPage() {
     .maybeSingle();
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <Link href="/settings" className="btn-ghost p-2" title="Back to settings">
-          <Icon name="chevronRight" size={16} className="rotate-180" />
-        </Link>
-        <div>
-          <h1 className="text-h2 text-ink">Team</h1>
-          <p className="text-meta text-muted">{org?.name ?? "Your workspace"}</p>
-        </div>
-      </header>
+    <div className="flex h-full bg-[#F8FAFC]">
+      <SettingsNav />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Team Management</h1>
+            <p className="text-xs text-slate-400">Manage sales agents, agency roles, and invitation access</p>
+          </div>
+          <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 ring-1 ring-purple-600/20">
+            {org?.name ?? "HollyLand Workspace"}
+          </span>
+        </header>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6">
-        <div className="mx-auto max-w-2xl">
-          <TeamPanel />
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+          <div className="max-w-4xl mx-auto">
+            <TeamPanel />
+          </div>
         </div>
       </div>
     </div>

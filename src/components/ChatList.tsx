@@ -13,13 +13,13 @@ export interface ChatRow extends Chat {
   snippet: { body: string | null; sender_type: string; message_type: string } | null;
 }
 
-type Filter = "all" | "mine" | "unassigned" | "groups" | "archived";
+type Filter = "all" | "mine" | "groups" | "unassigned" | "archived";
 
 const TABS: { key: Filter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "mine", label: "Mine" },
-  { key: "unassigned", label: "Unassigned" },
   { key: "groups", label: "Groups" },
+  { key: "unassigned", label: "Unassigned" },
   { key: "archived", label: "Archived" },
 ];
 
@@ -35,11 +35,7 @@ export default function ChatList({
   const params = useParams<{ chatId?: string }>();
   const router = useRouter();
 
-  // The thread itself is pushed over Realtime Broadcast; the list only needs to
-  // stay roughly current, so a periodic refresh is cheaper than a second channel.
-  // router.refresh() re-runs EVERY server component on the route (layout queries
-  // included), so it must be cheap: 30s, never while the tab is hidden, and one
-  // catch-up refresh when the user comes back.
+  // Periodic catch-up refresh
   useEffect(() => {
     const tick = () => {
       if (!document.hidden) router.refresh();
@@ -55,6 +51,16 @@ export default function ChatList({
     };
   }, [router]);
 
+  const counts = useMemo(() => {
+    return {
+      all: chats.filter((c) => !c.is_archived).length,
+      mine: chats.filter((c) => !c.is_archived && c.assigned_agent_id === currentUserId).length,
+      groups: chats.filter((c) => !c.is_archived && c.chat_type === "group").length,
+      unassigned: chats.filter((c) => !c.is_archived && c.assigned_agent_id === null).length,
+      archived: chats.filter((c) => c.is_archived).length,
+    };
+  }, [chats, currentUserId]);
+
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return chats.filter((c) => {
@@ -68,50 +74,84 @@ export default function ChatList({
   }, [chats, filter, query, currentUserId]);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex shrink-0 flex-col gap-3 border-b border-edge p-4">
+    <div className="flex h-full flex-col bg-white">
+      {/* Header & Search */}
+      <div className="flex shrink-0 flex-col gap-3 border-b border-slate-100 p-3.5">
         <div className="flex items-center justify-between">
-          <h2 className="text-h2">Inbox</h2>
-          <span className="text-caption text-muted">{visible.length} conversations</span>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-extrabold tracking-tight text-slate-900">Conversations</h2>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+              {counts[filter]}
+            </span>
+          </div>
         </div>
 
+        {/* Search Input */}
         <div className="relative">
           <Icon
             name="search"
-            size={16}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle"
+            size={14}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search chats, groups, phone…"
-            className="field bg-surface py-2 pl-9 text-meta"
+            placeholder="Search conversations, phone…"
+            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 py-2 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
           />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <Icon name="close" size={12} />
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setFilter(t.key)}
-              className={`rounded-full px-2.5 py-1 text-caption transition duration-150 ease-swift ${
-                filter === t.key
-                  ? "bg-brand text-white shadow-card"
-                  : "border border-edge bg-card text-muted hover:bg-surface hover:text-ink"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+        {/* Filter Pills without ugly scrollbars */}
+        <div
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className="flex gap-1 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden"
+        >
+          {TABS.map((t) => {
+            const active = filter === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setFilter(t.key)}
+                className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
+                  active
+                    ? "bg-slate-900 text-white shadow-2xs"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <span>{t.label}</span>
+                {counts[t.key] > 0 && (
+                  <span
+                    className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
+                      active ? "bg-white/20 text-white" : "bg-slate-200/70 text-slate-600"
+                    }`}
+                  >
+                    {counts[t.key]}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto">
+      {/* Conversation List Scroll Area */}
+      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto divide-y divide-slate-100/60">
         {visible.length === 0 && (
-          <div className="p-6 text-center">
-            <p className="text-body text-muted">Nothing here yet.</p>
-            <p className="mt-1 text-meta text-subtle">
-              New WhatsApp messages appear the moment they arrive.
+          <div className="p-8 text-center">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <Icon name="chat" size={18} />
+            </div>
+            <p className="mt-3 text-xs font-bold text-slate-700">No conversations</p>
+            <p className="mt-1 text-[11px] text-slate-400">
+              Incoming WhatsApp inquiries will automatically appear here.
             </p>
           </div>
         )}
@@ -133,32 +173,77 @@ function Row({ chat, active }: { chat: ChatRow; active: boolean }) {
   return (
     <Link
       href={`/inbox/${chat.id}`}
-      className={`flex gap-3 border-b border-edge px-4 py-3 transition-colors duration-150 ease-swift ${
+      className={`group relative flex gap-3 px-3.5 py-3 transition-colors duration-150 ${
         active
-          ? "border-l-2 border-l-brand bg-brand-soft pl-[14px]"
-          : "border-l-2 border-l-transparent pl-[14px] hover:bg-surface"
+          ? "bg-slate-100/80 shadow-xs"
+          : "hover:bg-slate-50/80"
       }`}
     >
-      <Avatar name={chat.title} type={isGroup ? "group" : "direct"} />
+      {/* Active Left Indicator Bar */}
+      {active && (
+        <span className="absolute left-0 inset-y-1.5 w-1 rounded-r-md bg-emerald-500" />
+      )}
+
+      {/* Avatar */}
+      <div className="relative shrink-0">
+        <Avatar name={chat.title || name} type={isGroup ? "group" : "direct"} size={40} />
+        {isGroup && (
+          <span
+            className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[9px] text-white ring-2 ring-white"
+            title="WhatsApp Group"
+          >
+            👥
+          </span>
+        )}
+      </div>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="truncate text-body font-medium text-ink">{name}</span>
-          <span className="shrink-0 text-caption text-subtle">{shortTime(chat.last_message_at)}</span>
+        <div className="flex items-baseline justify-between gap-1.5">
+          <span
+            className={`truncate text-xs font-bold ${
+              active ? "text-slate-900" : "text-slate-800 group-hover:text-slate-900"
+            }`}
+          >
+            {name}
+          </span>
+          <span className="shrink-0 text-[10px] font-medium text-slate-400">
+            {shortTime(chat.last_message_at)}
+          </span>
         </div>
 
-        <p className="mt-0.5 truncate text-meta text-muted">{snippet}</p>
+        <p className="mt-0.5 truncate text-[11px] text-slate-500">
+          {snippet}
+        </p>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-1">
           {isGroup ? (
-            <Chip tone="group">GROUP{chat.participant_count ? ` · ${chat.participant_count}` : ""}</Chip>
+            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
+              Group {chat.participant_count ? `(${chat.participant_count})` : ""}
+            </span>
           ) : (
-            <Chip tone="wa">WhatsApp</Chip>
+            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-600/10">
+              WhatsApp
+            </span>
           )}
-          {chat.is_bot_paused && <Chip tone="bot">AI paused</Chip>}
-          {!chat.assigned_agent_id && <Chip tone="neutral">Unassigned</Chip>}
+
+          {!chat.is_bot_paused ? (
+            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">
+              ⚡ AI Live
+            </span>
+          ) : (
+            <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">
+              ⏸ AI Paused
+            </span>
+          )}
+
+          {!chat.assigned_agent_id && (
+            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-400">
+              Unassigned
+            </span>
+          )}
+
           {chat.unread_count > 0 && (
-            <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-wa px-1.5 text-caption font-semibold text-white">
+            <span className="ml-auto inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
               {chat.unread_count}
             </span>
           )}
@@ -173,10 +258,8 @@ function phoneOf(jid: string) {
   return n.startsWith("+") ? n : `+${n}`;
 }
 
-/** "📎 audio" told an agent nothing; a voice note and a passport scan are not
- *  the same kind of thing to walk back to. */
 const MEDIA_PREVIEW: Record<string, string> = {
-  audio: "🎤 Voice message",
+  audio: "🎤 Voice note",
   image: "📷 Photo",
   video: "🎬 Video",
   document: "📄 Document",
@@ -191,7 +274,6 @@ function previewOf(s: ChatRow["snippet"], assistant: string) {
     s.sender_type === "bot" ? `${assistant}: ` : s.sender_type === "agent" ? "You: " : "";
   if (s.message_type !== "text") {
     const label = MEDIA_PREVIEW[s.message_type] ?? "📎 Attachment";
-    // A caption is what the customer actually wrote — show it after the marker.
     return `${prefix}${label}${s.body?.trim() ? ` · ${s.body.trim()}` : ""}`;
   }
   return `${prefix}${s.body ?? ""}`.trim() || "—";

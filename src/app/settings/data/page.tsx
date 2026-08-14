@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Chip from "@/components/ui/Chip";
 import Icon from "@/components/ui/Icon";
+import SettingsNav from "@/components/settings/SettingsNav";
 
 interface Preview {
   total: number;
@@ -74,135 +74,133 @@ export default function DataSettingsPage() {
     {
       key: "archived",
       label: "Archived conversations only",
-      hint: "Chats your team already closed out. The safest option.",
+      hint: "Chats your team already closed out and archived. The safest cleanup option.",
     },
     {
       key: "no_value",
       label: "Test & idle conversations",
-      hint: "Chats that never produced a quote and never closed won — test messages and small talk. Quoted and won conversations are kept.",
+      hint: "Chats that never produced a quote and never converted — test inquiries and small talk. Quoted and won deals are permanently preserved.",
     },
     {
       key: "all",
-      label: "Everything — full reset",
-      hint: "All conversations, messages, leads, quotes, contacts and logs. Hotels, staff accounts and settings are kept.",
+      label: "Everything — full workspace reset",
+      hint: "All conversations, messages, leads, quotes, contacts and logs. Hotel rates, team members and settings are preserved.",
       danger: true,
     },
   ];
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <Link href="/settings" className="btn-ghost rounded-full p-1.5" title="Back to settings">
-          <Icon name="chevronRight" size={16} className="rotate-180" />
-        </Link>
-        <h1 className="text-h1 text-ink">Data cleanup</h1>
-        {preview && (
-          <span className="text-meta text-muted">
-            {preview.total} conversations · {preview.messages} messages
-          </span>
-        )}
-      </header>
+    <div className="flex h-full bg-[#F8FAFC]">
+      <SettingsNav />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Workspace Data Cleanup</h1>
+            <p className="text-xs text-slate-400">Scoped bulk data cleanup and message pruning controls</p>
+          </div>
+          {preview && (
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+              {preview.total} chats · {preview.messages} messages
+            </span>
+          )}
+        </header>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6">
-        <div className="mx-auto max-w-2xl space-y-4">
-          <section className="panel p-5">
-            <h2 className="text-h3 text-ink">Before you clean up</h2>
-            <p className="mt-1.5 text-body text-muted">
-              Disconnecting a WhatsApp number never deletes conversations — that is
-              deliberate, and it matches how Kommo and HubSpot behave. Your history is a
-              business record: it survives the connection so a returning customer keeps
-              their context, and an accidental disconnect can&apos;t wipe your pipeline.
-            </p>
-            {preview && preview.protected > 0 && (
-              <p className="mt-3 flex items-start gap-2 rounded-lg border border-wa/25 bg-wa-soft p-3 text-meta text-ink">
-                <Icon name="check" size={15} className="mt-px text-wa" />
-                <span>
-                  <strong className="font-medium">{preview.protected}</strong> conversation
-                  {preview.protected === 1 ? " has" : "s have"} a quote or a won deal. The first
-                  two options below never touch those.
-                </span>
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-3">
+              <h2 className="text-sm font-bold text-slate-900">About Data Retention</h2>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Disconnecting a WhatsApp number never deletes customer conversations. Your message history serves as a permanent agency record so returning pilgrims keep their booking context.
               </p>
-            )}
-          </section>
-
-          <section className="panel space-y-3 p-5">
-            <h2 className="text-h3 text-ink">What should be deleted?</h2>
-
-            {OPTIONS.map((o) => (
-              <label
-                key={o.key}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition duration-150 ease-swift ${
-                  scope === o.key
-                    ? o.danger
-                      ? "border-danger bg-danger-soft"
-                      : "border-brand bg-brand-soft"
-                    : "border-edge hover:bg-surface"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="scope"
-                  className="mt-1"
-                  checked={scope === o.key}
-                  onChange={() => { setScope(o.key); setConfirmText(""); setError(null); }}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2 text-body font-medium text-ink">
-                    {o.label}
-                    <Chip tone={o.danger ? "danger" : "neutral"}>
-                      {counts[o.key]} chat{counts[o.key] === 1 ? "" : "s"}
-                    </Chip>
+              {preview && preview.protected > 0 && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-900">
+                  <Icon name="check" size={16} className="mt-0.5 text-emerald-600 shrink-0" />
+                  <span>
+                    <strong className="font-bold">{preview.protected}</strong> conversation
+                    {preview.protected === 1 ? " has" : "s have"} an active quotation or won booking deal. Safe cleanup scopes will strictly protect these records.
                   </span>
-                  <span className="mt-0.5 block text-caption text-muted">{o.hint}</span>
-                </span>
-              </label>
-            ))}
-          </section>
+                </div>
+              )}
+            </section>
 
-          <section className="panel space-y-3 p-5">
-            <h2 className="flex items-center gap-2 text-h3 text-danger">
-              <Icon name="alert" size={16} />
-              This cannot be undone
-            </h2>
-            <p className="text-meta text-muted">
-              {counts[scope]} conversation{counts[scope] === 1 ? "" : "s"} and everything attached
-              to {counts[scope] === 1 ? "it" : "them"} — messages, leads, notes, quotes and uploaded
-              files — will be permanently deleted.
-            </p>
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">
+              <h2 className="text-sm font-bold text-slate-900">Select Cleanup Scope</h2>
 
-            <input
-              value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
-              placeholder="Type DELETE to confirm"
-              className="field rounded-lg py-2.5 text-meta"
-            />
+              <div className="space-y-3">
+                {OPTIONS.map((o) => (
+                  <label
+                    key={o.key}
+                    className={`flex cursor-pointer items-start gap-3.5 rounded-2xl border p-4 transition-all duration-150 ${
+                      scope === o.key
+                        ? o.danger
+                          ? "border-rose-300 bg-rose-50/70 ring-1 ring-rose-500/20"
+                          : "border-purple-300 bg-purple-50/70 ring-1 ring-purple-600/20"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="scope"
+                      className="mt-1"
+                      checked={scope === o.key}
+                      onChange={() => { setScope(o.key); setConfirmText(""); setError(null); }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-900">{o.label}</span>
+                        <Chip tone={o.danger ? "danger" : "neutral"}>
+                          {counts[o.key]} chat{counts[o.key] === 1 ? "" : "s"}
+                        </Chip>
+                      </div>
+                      <span className="mt-1 block text-xs text-slate-500 leading-relaxed">{o.hint}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </section>
 
-            {error && (
-              <p className="flex items-start gap-2 rounded-lg border border-danger/25 bg-danger-soft p-3 text-meta text-danger-dark">
-                <Icon name="alert" size={15} className="mt-px" />
-                {error}
+            <section className="rounded-3xl border border-rose-200 bg-rose-50/30 p-6 shadow-xs space-y-4">
+              <div className="flex items-center gap-2 text-rose-700">
+                <Icon name="alert" size={18} />
+                <h2 className="text-sm font-bold">Confirmation Required</h2>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {counts[scope]} conversation{counts[scope] === 1 ? "" : "s"} and all associated data in this scope will be permanently removed.
               </p>
-            )}
-            {done && (
-              <p className="flex items-start gap-2 rounded-lg border border-wa/25 bg-wa-soft p-3 text-meta text-ink">
-                <Icon name="check" size={15} className="mt-px text-wa" />
-                {done}
-              </p>
-            )}
 
-            <button
-              disabled={busy || confirmText !== "DELETE" || counts[scope] === 0}
-              onClick={run}
-              className="w-full rounded-lg bg-danger px-4 py-2.5 text-meta font-medium text-white transition duration-150 ease-swift hover:opacity-90 disabled:opacity-40"
-            >
-              {busy
-                ? "Deleting…"
-                : counts[scope] === 0
-                  ? "Nothing to delete in this scope"
-                  : `Delete ${counts[scope]} conversation${counts[scope] === 1 ? "" : "s"}`}
-            </button>
-            <p className="text-center text-caption text-subtle">Supervisors only.</p>
-          </section>
+              <input
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="Type DELETE to confirm"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-900 focus:border-rose-500 focus:outline-none transition"
+              />
+
+              {error && (
+                <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-800">
+                  <Icon name="alert" size={15} className="mt-0.5 shrink-0" />
+                  <span>{error}</span>
+                </p>
+              )}
+              {done && (
+                <p className="flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-medium text-emerald-800">
+                  <Icon name="check" size={15} className="mt-0.5 shrink-0 text-emerald-600" />
+                  <span>{done}</span>
+                </p>
+              )}
+
+              <button
+                disabled={busy || confirmText !== "DELETE" || counts[scope] === 0}
+                onClick={run}
+                className="w-full rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 transition disabled:opacity-40"
+              >
+                {busy
+                  ? "Deleting…"
+                  : counts[scope] === 0
+                    ? "Nothing to delete in this scope"
+                    : `Permanently Delete ${counts[scope]} Conversation${counts[scope] === 1 ? "" : "s"}`}
+              </button>
+            </section>
+          </div>
         </div>
       </div>
     </div>

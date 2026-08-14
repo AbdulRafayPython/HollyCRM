@@ -186,24 +186,35 @@ export default async function ChatPage({
   );
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-white">
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center gap-4 border-b border-edge bg-card px-6">
-          <Avatar name={chat.title} type={isGroup ? "group" : "direct"} />
+        <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200/80 bg-white px-5 py-3 shadow-2xs z-10">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <Avatar name={chat.title || `+${phone}`} type={isGroup ? "group" : "direct"} size={38} />
 
-          <div className="min-w-0">
-            <h1 className="truncate text-h3 text-ink">{chat.title ?? `+${phone}`}</h1>
-            <p className="flex items-center gap-1.5 text-caption text-muted">
-              <Dot tone={isGroup ? "group" : "wa"} />
-              {isGroup
-                ? `WhatsApp group · ${chat.participant_count} participants`
-                : `+${phone} · WhatsApp`}
-            </p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-sm font-extrabold text-slate-900 leading-tight">
+                  {chat.title ?? `+${phone}`}
+                </h1>
+                {chat.is_archived && (
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 shrink-0">
+                    Archived
+                  </span>
+                )}
+              </div>
+              <p className="flex items-center gap-1.5 text-xs font-medium text-slate-400 truncate mt-0.5">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${isGroup ? "bg-indigo-500" : "bg-emerald-500"}`} />
+                <span className="truncate">
+                  {isGroup
+                    ? `WhatsApp group · ${chat.participant_count} participants`
+                    : `+${phone} · Direct`}
+                </span>
+              </p>
+            </div>
           </div>
 
-          {chat.is_archived && <Chip tone="neutral">Archived</Chip>}
-
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <AssignMenu
               chatId={chat.id}
               assignedTo={chat.assigned_agent_id}

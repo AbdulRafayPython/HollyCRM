@@ -15,15 +15,6 @@ interface Agent {
   onboarded_at: string | null;
 }
 
-/**
- * The AI agent's home.
- *
- * Two completely different screens depending on one fact — whether this
- * workspace has ever been set up. An unconfigured workspace does not need a
- * grid of settings cards; it needs one obvious thing to do next, because the
- * agent is already receiving messages and answering them as nobody in
- * particular.
- */
 export default function AiHomePage() {
   const [agent, setAgent] = useState<Agent | null>(null);
   const [wizard, setWizard] = useState(false);
@@ -41,8 +32,6 @@ export default function AiHomePage() {
     ]);
     setAgent(a?.agent ?? null);
     setHealth({
-      // `connected` covers both a workspace key and the deployment's own — the
-      // agent replying on an env key is configured, whatever the table says.
       model: Boolean(llm?.connected),
       knowledge: (knowledge?.sources ?? []).filter(
         (s: { purpose: string; status: string; is_active: boolean }) =>
@@ -58,90 +47,133 @@ export default function AiHomePage() {
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center bg-surface" />;
+    return <div className="flex h-full items-center justify-center bg-[#F8FAFC]" />;
   }
 
   const configured = Boolean(agent?.onboarded_at);
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <h1 className="text-h1 text-ink">AI agent</h1>
+    <div className="flex h-full flex-col bg-[#F8FAFC]">
+      {/* Header */}
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8 z-10">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold text-slate-900">AI Agent</h1>
+          {configured && (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset ${
+                agent?.enabled
+                  ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+                  : "bg-rose-50 text-rose-700 ring-rose-600/20"
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${agent?.enabled ? "bg-emerald-500" : "bg-rose-500"}`} />
+              {agent?.enabled ? "Live" : "Switched off"}
+            </span>
+          )}
+        </div>
+
         {configured && (
-          <Chip tone={agent?.enabled ? "wa" : "danger"}>
-            {agent?.enabled ? "Live" : "Switched off"}
-          </Chip>
-        )}
-        {configured && (
-          <Link href="/ai/workflow" className="btn-primary ml-auto flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-meta">
-            <Icon name="kanban" size={14} />Open workflow
+          <Link
+            href="/ai/workflow?from=/ai"
+            className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+          >
+            <Icon name="sparkle" size={14} />
+            <span>Open Workflow Canvas</span>
           </Link>
         )}
       </header>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto">
-        {!configured ? <Onboarding onBuild={() => setWizard(true)} /> : (
-          <div className="mx-auto max-w-4xl space-y-6 p-6">
-            <section className="panel flex flex-wrap items-center gap-4 p-5">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
-                <Icon name="bot" size={22} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-h3 text-ink">
-                  {agent?.bot_name} · {agent?.business_name}
-                </h2>
-                <p className="mt-0.5 line-clamp-2 text-caption text-muted">
-                  {agent?.business_description || "No description set."}
-                </p>
+      {/* Main Content */}
+      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6 md:p-8">
+        {!configured ? (
+          <Onboarding onBuild={() => setWizard(true)} />
+        ) : (
+          <div className="mx-auto max-w-5xl space-y-6">
+            {/* Agent Summary Banner Card */}
+            <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+              <div className="flex items-center gap-4 min-w-0 flex-1">
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 ring-1 ring-purple-600/20">
+                  <Icon name="bot" size={26} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-extrabold text-slate-900">
+                      {agent?.bot_name} <span className="font-normal text-slate-400">·</span> {agent?.business_name}
+                    </h2>
+                  </div>
+                  <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 leading-relaxed">
+                    {agent?.business_description || "No agency description configured."}
+                  </p>
+                </div>
               </div>
-              <button onClick={() => setWizard(true)} className="btn-ghost rounded-lg px-4 py-2 text-meta">
-                Edit
+
+              <button
+                onClick={() => setWizard(true)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+              >
+                Edit Persona
               </button>
             </section>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            {/* Sub-tools Configuration Grid */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Card
-                href="/ai/workflow" icon="kanban" title="Workflow"
-                body="Arrange the steps, switch branches on and off, and run a test message through the whole pipeline."
-                chip={{ tone: "brand", text: "Test it" }}
+                href="/ai/workflow?from=/ai"
+                icon="sparkle"
+                title="Workflow Canvas"
+                body="Visual pipeline of AI qualification steps, hotel quotation lookups, and branch logic."
+                chip={{ tone: "brand", text: "Interactive" }}
               />
               <Card
-                href="/ai/rules" icon="filter" title="Rules"
-                body="Your own if/else — send big enquiries to your closer, Urdu speakers to the right desk, complaints straight to a human."
-                chip={health.rules
-                  ? { tone: "wa", text: `${health.rules} active` }
-                  : { tone: "neutral", text: "None yet" }}
+                href="/ai/rules?from=/ai"
+                icon="filter"
+                title="Business Rules"
+                body="Route high-budget VIP inquiries to closers, Arabic/Urdu speakers to designated agents."
+                chip={
+                  health.rules
+                    ? { tone: "wa", text: `${health.rules} active` }
+                    : { tone: "neutral", text: "None yet" }
+                }
               />
               <Card
-                href="/settings/llm" icon="lock" title="Model & API keys"
-                body="Which model answers customers, and with whose key. Encrypted in Vault."
+                href="/settings/llm?from=/ai"
+                icon="lock"
+                title="Model & API Keys"
+                body="Gemini, GPT-4o, and Claude configurations with encrypted secret key storage."
                 chip={health.model ? { tone: "wa", text: "Configured" } : { tone: "danger", text: "No key" }}
               />
               <Card
-                href="/settings/knowledge" icon="file" title="Knowledge & imports"
-                body="Rate sheets, policies, visa rules, FAQs. Excel, PDF, or a Google Sheet."
-                chip={health.knowledge
-                  ? { tone: "wa", text: `${health.knowledge} live` }
-                  : { tone: "bot", text: "Nothing uploaded" }}
+                href="/settings/knowledge?from=/ai"
+                icon="file"
+                title="Knowledge Sources"
+                body="Visa policies, transport guidelines, and general Umrah FAQs for automated answers."
+                chip={
+                  health.knowledge
+                    ? { tone: "wa", text: `${health.knowledge} live docs` }
+                    : { tone: "bot", text: "Empty" }
+                }
               />
               <Card
-                href="/settings/inventory" icon="receipt" title="Hotel inventory"
-                body="Hotels, room types and seasonal rates — the only source of a quoted price."
-                chip={health.hotels
-                  ? { tone: "wa", text: `${health.hotels} hotels` }
-                  : { tone: "bot", text: "Empty" }}
+                href="/settings/inventory?from=/ai"
+                icon="receipt"
+                title="Hotel Inventory"
+                body="Real-time Makkah & Madinah hotel rates, room allotments, and seasonal pricing."
+                chip={
+                  health.hotels
+                    ? { tone: "wa", text: `${health.hotels} hotels live` }
+                    : { tone: "bot", text: "Empty" }
+                }
               />
               <Card
-                href="/settings/routing" icon="users" title="Routing & team"
-                body="Regions by dialling code, who covers them, and what happens when nobody is online."
-                chip={health.online
-                  ? { tone: "wa", text: `${health.online} online` }
-                  : { tone: "bot", text: "Nobody online" }}
-              />
-              <Card
-                href="/settings/ai" icon="compose" title="Tone & wording"
-                body="Greetings, trigger keywords, handoff words and reply limits."
-                chip={{ tone: "neutral", text: "Optional" }}
+                href="/settings/routing?from=/ai"
+                icon="users"
+                title="Routing & Team"
+                body="Dialing code region coverage, working hours, and automatic supervisor escalations."
+                chip={
+                  health.online
+                    ? { tone: "wa", text: `${health.online} online` }
+                    : { tone: "bot", text: "Nobody online" }
+                }
               />
             </div>
           </div>
@@ -159,47 +191,44 @@ export default function AiHomePage() {
   );
 }
 
-/** The pre-setup screen: one thing to do, and why it matters. */
 function Onboarding({ onBuild }: { onBuild: () => void }) {
   return (
-    <div className="mx-auto max-w-3xl px-6 py-12">
-      <div className="text-center">
-        <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft text-brand">
-          <Icon name="bot" size={26} />
-        </span>
-        <h2 className="text-h1 text-ink sm:text-[32px] sm:leading-[40px]">
-          Your agent doesn&rsquo;t know who it works for yet
+    <div className="mx-auto max-w-3xl px-6 py-12 text-center space-y-6">
+      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-purple-50 text-purple-600 ring-1 ring-purple-600/20 shadow-sm">
+        <Icon name="bot" size={32} />
+      </span>
+      <div className="space-y-2">
+        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+          Your AI Assistant is ready to be configured
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-body text-muted">
-          It&rsquo;s already receiving WhatsApp messages and replying with the defaults it
-          shipped with. Tell it about your business and it starts answering as you.
+        <p className="mx-auto max-w-xl text-xs text-slate-500 leading-relaxed">
+          It automatically handles WhatsApp inquiries, quotes verified hotel rates, and routes qualified leads directly to your agency desk.
         </p>
-        <button
-          onClick={onBuild}
-          className="btn-primary mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-body font-medium shadow-pop transition-transform duration-200 ease-swift hover:-translate-y-0.5"
-        >
-          <Icon name="bolt" size={16} />
-          Build my AI agent
-        </button>
-        <p className="mt-2 text-caption text-subtle">Takes about a minute. Everything is editable afterwards.</p>
       </div>
 
-      <div className="mt-12 grid gap-3 sm:grid-cols-3">
+      <button
+        onClick={onBuild}
+        className="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-6 py-3 text-xs font-bold text-white shadow-md hover:bg-purple-700 transition-all transform active:scale-95"
+      >
+        <Icon name="bolt" size={15} />
+        <span>Build my AI Agent</span>
+      </button>
+
+      <div className="mt-10 grid gap-4 sm:grid-cols-3 pt-6 text-left">
         {[
-          { icon: "chat" as IconName, title: "Answers instantly", body: "Greets, understands what's being asked, and replies in the customer's own language." },
-          { icon: "receipt" as IconName, title: "Quotes from your rates", body: "Every price comes out of your inventory. It cannot invent a number." },
-          { icon: "users" as IconName, title: "Knows when to stop", body: "Hands anything it can't answer to the right agent on the right desk." },
-        ].map((f, i) => (
+          { icon: "chat" as IconName, title: "Instant WhatsApp Replies", body: "Understands customer intent and replies in Arabic, English, or Urdu." },
+          { icon: "receipt" as IconName, title: "Exact Rate Sheet Quoting", body: "Every quotation pulls strictly from your verified hotel room inventory." },
+          { icon: "users" as IconName, title: "Seamless Human Handoff", body: "Hands negotiation over to available agents when complex quotes arise." },
+        ].map((f) => (
           <div
             key={f.title}
-            className="panel animate-rise-in p-4"
-            style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
+            className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-2"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-muted">
-              <Icon name={f.icon} size={15} />
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200">
+              <Icon name={f.icon} size={16} />
             </span>
-            <h3 className="mt-2.5 text-meta font-semibold text-ink">{f.title}</h3>
-            <p className="mt-1 text-caption leading-relaxed text-muted">{f.body}</p>
+            <h3 className="text-xs font-bold text-slate-900">{f.title}</h3>
+            <p className="text-[11px] text-slate-400 leading-relaxed">{f.body}</p>
           </div>
         ))}
       </div>
@@ -212,15 +241,28 @@ function Card({ href, icon, title, body, chip }: {
   chip: { tone: "wa" | "bot" | "danger" | "brand" | "neutral"; text: string };
 }) {
   return (
-    <Link href={href} className="panel group flex flex-col gap-2 p-4 transition-all duration-200 ease-swift hover:-translate-y-0.5 hover:shadow-pop">
-      <span className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-muted transition-colors duration-200 group-hover:bg-brand-soft group-hover:text-brand">
-          <Icon name={icon} size={15} />
-        </span>
-        <span className="flex-1 text-body font-semibold text-ink">{title}</span>
-        <Chip tone={chip.tone}>{chip.text}</Chip>
-      </span>
-      <span className="text-caption leading-relaxed text-muted">{body}</span>
+    <Link
+      href={href}
+      className="group flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:border-purple-500 hover:shadow-lg hover:-translate-y-0.5"
+    >
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-600 ring-1 ring-slate-200 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+            <Icon name={icon} size={18} />
+          </span>
+          <Chip tone={chip.tone}>{chip.text}</Chip>
+        </div>
+        <div>
+          <h3 className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
+            {title}
+          </h3>
+          <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{body}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-end border-t border-slate-100 pt-3 text-[11px] font-bold text-purple-600 group-hover:translate-x-0.5 transition-transform">
+        Configure →
+      </div>
     </Link>
   );
 }

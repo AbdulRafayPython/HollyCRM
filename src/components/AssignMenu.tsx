@@ -11,11 +11,6 @@ export interface AgentOption {
   role: string;
 }
 
-/**
- * Claim / release / reassign. The server function decides what's permitted —
- * an agent may claim an unassigned chat and release their own; only supervisors
- * may hand a chat to someone else. Errors surface verbatim.
- */
 export default function AssignMenu({
   chatId,
   assignedTo,
@@ -53,47 +48,55 @@ export default function AssignMenu({
   const owner = agents.find((a) => a.id === assignedTo);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 shrink-0">
       {isSupervisor ? (
         <Dropdown
           label="Assigned agent"
           value={assignedTo ?? ""}
           disabled={busy}
           onChange={(id) => assign(id || null)}
-          className="rounded-full border border-edge bg-surface py-1 pl-1.5 pr-2.5 text-caption font-medium text-ink hover:border-edge-strong"
+          className="rounded-xl border border-slate-200 bg-white py-1.5 pl-2 pr-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
           options={[
             {
               value: "",
               label: "Unassigned",
-              icon: <Avatar name={null} type="agent" size={20} />,
+              icon: <Avatar name={null} type="agent" size={18} />,
             },
             ...agents.map((a) => ({
               value: a.id,
               label: a.full_name ?? "Agent",
               hint: a.id === currentUserId ? "(me)" : undefined,
-              icon: <Avatar name={a.full_name} type="agent" size={20} />,
+              icon: <Avatar name={a.full_name} type="agent" size={18} />,
             })),
           ]}
         />
       ) : (
-        <span className="flex items-center gap-1.5 rounded-full border border-edge bg-surface py-1 pl-1.5 pr-2.5 text-caption font-medium text-ink">
-          <Avatar name={owner?.full_name ?? null} type="agent" size={20} />
-          {assignedTo ? owner?.full_name ?? "Assigned" : "Unassigned"}
+        <span className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white py-1.5 pl-2 pr-2.5 text-xs font-semibold text-slate-700 shadow-2xs">
+          <Avatar name={owner?.full_name ?? null} type="agent" size={18} />
+          <span>{assignedTo ? owner?.full_name ?? "Assigned" : "Unassigned"}</span>
         </span>
       )}
 
       {!isSupervisor && !assignedTo && (
-        <button disabled={busy} onClick={() => assign(currentUserId)} className="btn-primary px-3 py-1.5 text-caption">
+        <button
+          disabled={busy}
+          onClick={() => assign(currentUserId)}
+          className="rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-slate-800 transition"
+        >
           Claim
         </button>
       )}
       {!isSupervisor && mine && (
-        <button disabled={busy} onClick={() => assign(null)} className="btn-secondary px-3 py-1.5 text-caption">
+        <button
+          disabled={busy}
+          onClick={() => assign(null)}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+        >
           Release
         </button>
       )}
 
-      {error && <span className="text-caption text-danger">{error}</span>}
+      {error && <span className="text-[10px] text-rose-600">{error}</span>}
     </div>
   );
 }

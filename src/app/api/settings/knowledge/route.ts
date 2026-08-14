@@ -29,6 +29,7 @@ const KIND_BY_MIME: Record<string, SourceRow["kind"]> = {
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
   "text/plain": "text",
   "text/markdown": "text",
+  "text/x-markdown": "text",
 };
 
 export async function GET() {
@@ -296,7 +297,7 @@ function kindFromName(name: string): SourceRow["kind"] | null {
   if (ext === "pdf") return "pdf";
   if (ext === "csv") return "csv";
   if (ext === "xlsx" || ext === "xls") return "xlsx";
-  if (ext === "txt" || ext === "md") return "text";
+  if (ext === "txt" || ext === "md" || ext === "markdown") return "text";
   return null;
 }
 

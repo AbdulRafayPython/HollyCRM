@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import Icon from "@/components/ui/Icon";
+import BackButton from "@/components/ui/BackButton";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+
+import SettingsNav from "@/components/settings/SettingsNav";
 
 /**
  * Settings → Knowledge. Where a workspace uploads what the agent should know.
@@ -105,116 +108,127 @@ export default function KnowledgePage() {
   const knowledge = sources.filter((s) => s.purpose === "knowledge");
 
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <Link href="/settings" className="btn-ghost rounded-full p-1.5" title="Back to settings">
-          <Icon name="chevronRight" size={16} className="rotate-180" />
-        </Link>
-        <h1 className="text-h1 text-ink">Knowledge & imports</h1>
-        <span className="text-meta text-muted">{sources.length} sources</span>
-      </header>
+    <div className="flex h-full bg-[#F8FAFC]">
+      <SettingsNav />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">AI Knowledge & Sources</h1>
+            <p className="text-xs text-slate-400">Manage uploaded rate sheets, visa rules, and business knowledge documents</p>
+          </div>
+          <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 ring-1 ring-purple-600/20">
+            {sources.length} total source{sources.length === 1 ? "" : "s"}
+          </span>
+        </header>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6">
-        <div className="mx-auto max-w-3xl space-y-8">
-          {error && (
-            <p className="flex items-start gap-2 rounded-lg border border-danger/25 bg-danger-soft p-3 text-meta text-danger-dark">
-              <Icon name="alert" size={15} className="mt-px shrink-0" />
-              <span>{error}</span>
-            </p>
-          )}
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+          <div className="max-w-5xl mx-auto space-y-8">
+            {error && (
+              <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+                <Icon name="alert" size={16} className="mt-0.5 text-rose-600 shrink-0" />
+                <span>{error}</span>
+              </p>
+            )}
 
-          <section className="space-y-3">
-            <SectionHeading
-              icon="receipt"
-              title="Rate sheets"
-              blurb="Excel, CSV or a Google Sheet of hotels, room types and seasonal prices. Parsed into a preview you check before anything goes live — the agent only ever quotes prices from the reviewed result."
-            />
-            <AddSource purpose="inventory" onDone={load} setError={setError} />
-            {inventory.map((s) => (
-              <SourceCard
-                key={s.id}
-                source={s}
-                busy={busy}
-                onPreview={() => openPreview(s.id)}
-                onResync={() => call({
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ action: "resync", id: s.id }),
-                })}
-                onToggle={() => call({
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ action: "toggle", id: s.id, is_active: !s.is_active }),
-                })}
-                onDelete={async () => {
-                  const ok = await confirm({
-                    title: `Delete “${s.title}”?`,
-                    body: "The file and its staged rows are removed. Hotels and rates already imported from it stay — delete those from Inventory if you want them gone.",
-                    confirmLabel: "Delete source",
-                    tone: "danger",
-                  });
-                  if (ok) call({ url: `/api/settings/knowledge?id=${s.id}`, method: "DELETE" });
-                }}
+            {/* Rate Sheets */}
+            <section className="space-y-4">
+              <SectionHeading
+                icon="receipt"
+                title="Verified Hotel Rate Sheets"
+                blurb="Excel, CSV or a Google Sheet of hotels, room types and seasonal prices. Parsed into a review step before anything goes live — the AI agent only ever quotes prices strictly from the reviewed result."
               />
-            ))}
-            {inventory.length === 0 && <Empty>No rate sheets imported yet.</Empty>}
-          </section>
+              <AddSource purpose="inventory" onDone={load} setError={setError} />
+              <div className="space-y-3">
+                {inventory.map((s) => (
+                  <SourceCard
+                    key={s.id}
+                    source={s}
+                    busy={busy}
+                    onPreview={() => openPreview(s.id)}
+                    onResync={() => call({
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ action: "resync", id: s.id }),
+                    })}
+                    onToggle={() => call({
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ action: "toggle", id: s.id, is_active: !s.is_active }),
+                    })}
+                    onDelete={async () => {
+                      const ok = await confirm({
+                        title: `Delete “${s.title}”?`,
+                        body: "The file and its staged rows are removed. Hotels and rates already imported from it stay — delete those from Inventory if you want them gone.",
+                        confirmLabel: "Delete source",
+                        tone: "danger",
+                      });
+                      if (ok) call({ url: `/api/settings/knowledge?id=${s.id}`, method: "DELETE" });
+                    }}
+                  />
+                ))}
+                {inventory.length === 0 && <Empty>No rate sheets uploaded yet.</Empty>}
+              </div>
+            </section>
 
-          <section className="space-y-3">
-            <SectionHeading
-              icon="file"
-              title="Knowledge base"
-              blurb="Visa rules, transport, payment terms, cancellation policy, FAQs — PDF, text or a link. The agent answers questions from these documents, and says a colleague will confirm when they don't cover it. Never used as a price source."
-            />
-            <AddSource purpose="knowledge" onDone={load} setError={setError} />
-            {knowledge.map((s) => (
-              <SourceCard
-                key={s.id}
-                source={s}
-                busy={busy}
-                onResync={s.source_url ? () => call({
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ action: "resync", id: s.id }),
-                }) : undefined}
-                onToggle={() => call({
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ action: "toggle", id: s.id, is_active: !s.is_active }),
-                })}
-                onDelete={async () => {
-                  const ok = await confirm({
-                    title: `Delete “${s.title}”?`,
-                    body: "The agent will stop answering from this document immediately.",
-                    confirmLabel: "Delete source",
-                    tone: "danger",
-                  });
-                  if (ok) call({ url: `/api/settings/knowledge?id=${s.id}`, method: "DELETE" });
-                }}
+            {/* Knowledge Base */}
+            <section className="space-y-4">
+              <SectionHeading
+                icon="file"
+                title="Business Knowledge & FAQs"
+                blurb="Visa requirements, transport guidelines, payment terms, and cancellation policies. PDF, Excel, text or live URL links. The AI bot answers customer questions from these documents."
               />
-            ))}
-            {knowledge.length === 0 && <Empty>No documents yet — the agent hands every non-price question to a human.</Empty>}
-          </section>
+              <AddSource purpose="knowledge" onDone={load} setError={setError} />
+              <div className="space-y-3">
+                {knowledge.map((s) => (
+                  <SourceCard
+                    key={s.id}
+                    source={s}
+                    busy={busy}
+                    onResync={s.source_url || s.status === "failed" ? () => call({
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ action: "resync", id: s.id }),
+                    }) : undefined}
+                    onToggle={() => call({
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ action: "toggle", id: s.id, is_active: !s.is_active }),
+                    })}
+                    onDelete={async () => {
+                      const ok = await confirm({
+                        title: `Delete “${s.title}”?`,
+                        body: "The agent will stop answering from this document immediately.",
+                        confirmLabel: "Delete source",
+                        tone: "danger",
+                      });
+                      if (ok) call({ url: `/api/settings/knowledge?id=${s.id}`, method: "DELETE" });
+                    }}
+                  />
+                ))}
+                {knowledge.length === 0 && <Empty>No knowledge documents uploaded yet.</Empty>}
+              </div>
+            </section>
+          </div>
         </div>
+
+        {preview && (
+          <PreviewModal
+            preview={preview.data}
+            busy={busy}
+            onClose={() => setPreview(null)}
+            onCommit={async () => {
+              const result = await call({
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "commit", id: preview.id }),
+              });
+              if (result) setPreview(null);
+            }}
+          />
+        )}
+
+        {dialog}
       </div>
-
-      {preview && (
-        <PreviewModal
-          preview={preview.data}
-          busy={busy}
-          onClose={() => setPreview(null)}
-          onCommit={async () => {
-            const result = await call({
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ action: "commit", id: preview.id }),
-            });
-            if (result) setPreview(null);
-          }}
-        />
-      )}
-
-      {dialog}
     </div>
   );
 }
@@ -257,7 +271,7 @@ function AddSource({ purpose, onDone, setError }: {
   const accept =
     purpose === "inventory"
       ? ".csv,.xlsx,.xls"
-      : ".pdf,.csv,.xlsx,.xls,.txt,.md";
+      : ".pdf,.csv,.xlsx,.xls,.txt,.md,.markdown";
 
   async function submit(body: BodyInit, headers?: HeadersInit) {
     setError(null);
@@ -442,7 +456,7 @@ function SourceCard({ source, busy, onPreview, onResync, onToggle, onDelete }: {
         )}
         {onResync && (
           <button disabled={busy} onClick={onResync} className="text-muted hover:text-ink disabled:opacity-40">
-            Re-sync
+            {source.status === "failed" ? "Retry" : "Re-sync"}
           </button>
         )}
         <button disabled={busy} onClick={onToggle} className="text-muted hover:text-ink disabled:opacity-40">

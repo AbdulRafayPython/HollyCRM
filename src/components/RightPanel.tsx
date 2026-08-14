@@ -41,60 +41,74 @@ export default function RightPanel({
     { key: "docs", label: "Files" },
     { key: "quotes", label: "Quotes", count: quotes.length },
     ...(chat.chat_type === "group"
-      ? [{ key: "people" as Tab, label: "People", count: participants.length }]
+      ? [{ key: "people" as Tab, label: "Members", count: participants.length }]
       : []),
   ];
 
-  // The component that owns the collapse state must own the width. When the
-  // 340px lived on a wrapper <aside> in the page, collapsing only emptied the
-  // inside and left a 340px blank strip.
   if (!open) {
     return (
-      <aside className="z-30 flex h-full w-12 shrink-0 flex-col items-center gap-3 border-l border-edge bg-card py-4">
-        <button onClick={() => setOpen(true)} className="btn-ghost p-2" title="Show lead details">
-          <Icon name="collapse" size={18} />
+      <aside className="z-30 flex h-full w-11 shrink-0 flex-col items-center gap-3 border-l border-slate-200/80 bg-white py-4">
+        <button
+          onClick={() => setOpen(true)}
+          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+          title="Show lead details"
+        >
+          <Icon name="chevronRight" size={16} className="rotate-180" />
         </button>
         <span
-          className="mt-1 text-caption font-medium text-muted"
+          className="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"
           style={{ writingMode: "vertical-rl" }}
         >
-          Lead details
+          Lead Details
         </span>
       </aside>
     );
   }
 
   return (
-    <aside className="z-30 flex h-full w-[340px] shrink-0 flex-col border-l border-edge bg-card shadow-drawer">
-      <div className="flex shrink-0 items-center justify-between border-b border-edge px-4 py-3">
-        <h2 className="flex items-center gap-2 text-h3 text-ink">
-          <Icon name="contacts" size={18} className="text-brand" />
-          Lead details
+    <aside className="z-30 flex h-full w-[280px] xl:w-[310px] shrink-0 flex-col border-l border-slate-200/80 bg-white shadow-2xs">
+      {/* Header */}
+      <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
+        <h2 className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-800">
+          <Icon name="contacts" size={15} className="text-emerald-600" />
+          <span>Lead Details</span>
         </h2>
-        <button onClick={() => setOpen(false)} className="btn-ghost p-1.5" title="Collapse panel">
-          <Icon name="close" size={16} />
+        <button
+          onClick={() => setOpen(false)}
+          className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+          title="Collapse panel"
+        >
+          <Icon name="close" size={14} />
         </button>
       </div>
 
-      <div className="flex shrink-0 gap-0.5 border-b border-edge px-2">
+      {/* Tabs */}
+      <div className="flex shrink-0 gap-1 border-b border-slate-100 px-3 bg-slate-50/50">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`relative px-2.5 py-2.5 text-caption font-medium transition-colors duration-150 ease-swift ${
-              tab === t.key ? "text-brand" : "text-muted hover:text-ink"
+            className={`relative px-2.5 py-2.5 text-xs font-semibold transition-colors duration-150 ${
+              tab === t.key
+                ? "text-slate-900"
+                : "text-slate-500 hover:text-slate-800"
             }`}
           >
             {t.label}
-            {t.count ? <span className="ml-1 text-subtle">{t.count}</span> : ""}
+            {t.count ? (
+              <span className="ml-1 rounded-full bg-slate-200/70 px-1.5 py-0.2 text-[9px] font-bold text-slate-600">
+                {t.count}
+              </span>
+            ) : null}
             {tab === t.key && (
-              <span className="absolute inset-x-1.5 -bottom-px h-0.5 rounded-t bg-brand" />
+              <span className="absolute inset-x-1 -bottom-px h-0.5 rounded-t bg-emerald-600" />
             )}
           </button>
         ))}
       </div>
 
-      <div className="min-h-0 flex-1">
+      {/* Tab Content */}
+      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto">
         {tab === "lead" && <LeadPanel lead={lead} chat={chat} quotes={quotes} />}
         {tab === "notes" && (
           <NotesPanel chatId={chat.id} leadId={lead?.id ?? null} notes={notes} />
@@ -112,25 +126,29 @@ export default function RightPanel({
 function People({ participants }: { participants: Participant[] }) {
   if (participants.length === 0) {
     return (
-      <p className="p-4 text-meta text-muted">
-        No participants recorded yet. They are captured as members send messages.
-      </p>
+      <div className="p-6 text-center text-xs text-slate-400">
+        No participants recorded yet. Captured automatically as members post messages.
+      </div>
     );
   }
 
   return (
-    <div className="scroll-thin h-full space-y-1 overflow-y-auto p-3">
+    <div className="space-y-1.5 p-3">
       {participants.map((p) => (
         <div
           key={p.contact_id}
-          className="flex items-center gap-2.5 rounded-lg border border-edge bg-card px-2.5 py-2"
+          className="flex items-center gap-2.5 rounded-xl border border-slate-200/70 bg-white p-2.5 shadow-2xs hover:border-slate-300 transition"
         >
-          <Avatar name={p.display_name} size={28} />
+          <Avatar name={p.display_name || p.phone} size={30} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-meta font-medium text-ink">{p.display_name ?? "Unknown"}</p>
-            <p className="truncate text-caption text-muted">{p.phone ?? "—"}</p>
+            <p className="truncate text-xs font-bold text-slate-800">{p.display_name ?? "Member"}</p>
+            <p className="truncate text-[11px] text-slate-400 font-mono">{p.phone ?? "—"}</p>
           </div>
-          {p.is_admin && <Chip tone="brand">admin</Chip>}
+          {p.is_admin && (
+            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+              Admin
+            </span>
+          )}
         </div>
       ))}
     </div>

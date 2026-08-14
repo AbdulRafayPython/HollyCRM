@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import SettingsNav from "@/components/settings/SettingsNav";
+import GreenApiLogo from "@/components/settings/GreenApiLogo";
 import Chip from "@/components/ui/Chip";
-import Icon from "@/components/ui/Icon";
+import Icon, { type IconName } from "@/components/ui/Icon";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 interface InstanceRow {
@@ -16,16 +19,70 @@ interface InstanceRow {
   is_active: boolean;
 }
 
-/**
- * Settings → WhatsApp. Connect a Green API instance with three fields; the
- * server validates the credentials live and pushes the webhook configuration
- * to Green API automatically. Multiple numbers can be registered; the radio
- * chooses which one the CRM sends from.
- */
-export default function WhatsAppSettingsPage() {
+type CategoryTab = "all" | "messengers" | "ai" | "automations" | "leads" | "installed";
+
+interface BannerSlide {
+  id: string;
+  badge: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  actionText: string;
+  href?: string;
+  isModalTrigger?: boolean;
+  theme: "emerald" | "indigo" | "purple";
+}
+
+const BANNER_SLIDES: BannerSlide[] = [
+  {
+    id: "greenapi_whatsapp",
+    badge: "Official Green API Gateway",
+    tag: "Instant 2-Way Sync",
+    title: "You can connect WhatsApp here with Green API.",
+    subtitle: "Seamlessly bridge your Umrah and Hajj agency numbers. Capture direct customer chats, automate multi-agent group negotiations, and quote hotel rates with zero downtime.",
+    image: "/banners/greenapi_whatsapp.jpg",
+    actionText: "Connect WhatsApp",
+    isModalTrigger: true,
+    theme: "emerald",
+  },
+  {
+    id: "ai_concierge",
+    badge: "AI Concierge & Automation",
+    tag: "24/7 Availability",
+    title: "Automate Umrah & Hajj Hotel Inquiries with AI.",
+    subtitle: "Instantly check Makkah & Madinah hotel rates, room configurations, and calculate package pricing in Arabic and English around the clock.",
+    image: "/banners/ai_concierge.jpg",
+    actionText: "Configure AI Agent",
+    href: "/ai",
+    theme: "indigo",
+  },
+  {
+    id: "multiagent_pipeline",
+    badge: "Hospitality CRM Workstation",
+    tag: "Team Routing",
+    title: "Multi-Agent Routing & Real-time Pipeline Velocity.",
+    subtitle: "Empower your team with unified conversation claiming, deal progression Kanban boards, and hospitality conversion analytics.",
+    image: "/banners/multiagent_pipeline.jpg",
+    actionText: "Explore Pipeline",
+    href: "/pipeline",
+    theme: "purple",
+  },
+];
+
+export default function IntegrationMarketplacePage() {
   const [instances, setInstances] = useState<InstanceRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<CategoryTab>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Carousel state
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Form State
   const [apiUrl, setApiUrl] = useState("");
   const [idInstance, setIdInstance] = useState("");
   const [apiToken, setApiToken] = useState("");
@@ -40,12 +97,30 @@ export default function WhatsAppSettingsPage() {
     if (res.ok) setInstances((await res.json()).instances ?? []);
     setLoading(false);
   }
+
   useEffect(() => {
     load();
-    // Prefill the webhook base with the current origin — right when deployed,
-    // needs replacing with the tunnel URL in local dev.
     setWebhookBase(window.location.origin.startsWith("https") ? window.location.origin : "");
   }, []);
+
+  // Auto-swipe carousel every 5.5 seconds unless hovered
+  useEffect(() => {
+    if (isHovered) return;
+    timerRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % BANNER_SLIDES.length);
+    }, 5500);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isHovered]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % BANNER_SLIDES.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length);
+  };
 
   async function connect(e: React.FormEvent) {
     e.preventDefault();
@@ -60,12 +135,12 @@ export default function WhatsAppSettingsPage() {
     const json = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) {
-      setError(json.error ?? "Connection failed");
+      setError(json.error ?? "Connection failed. Please verify your credentials.");
       return;
     }
-    setNotice(json.hint ?? "Connected.");
-    setShowForm(false);
+    setNotice(json.hint ?? "Green API WhatsApp connection successful!");
     setApiToken("");
+    setIdInstance("");
     load();
   }
 
@@ -76,7 +151,7 @@ export default function WhatsAppSettingsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ activate: true }),
     });
-    if (!res.ok) setError((await res.json().catch(() => ({}))).error ?? "Failed");
+    if (!res.ok) setError((await res.json().catch(() => ({}))).error ?? "Failed to activate");
     load();
   }
 
@@ -89,148 +164,593 @@ export default function WhatsAppSettingsPage() {
     });
     if (!ok) return;
     const res = await fetch(`/api/settings/instances/${id}`, { method: "DELETE" });
-    if (!res.ok) setError((await res.json().catch(() => ({}))).error ?? "Failed");
+    if (!res.ok) setError((await res.json().catch(() => ({}))).error ?? "Failed to remove");
     load();
   }
 
+  const activeInstance = instances.find((i) => i.is_active) ?? instances[0];
+  const isConnected = Boolean(activeInstance && activeInstance.state === "authorized");
+
   return (
-    <div className="flex h-full flex-col bg-surface">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-edge bg-card px-6">
-        <Link href="/settings" className="btn-ghost rounded-full p-1.5" title="Back to settings">
-          <Icon name="chevronRight" size={16} className="rotate-180" />
-        </Link>
-        <h1 className="text-h1 text-ink">WhatsApp connections</h1>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="btn-primary ml-auto flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-meta"
-        >
-          <Icon name="plus" size={15} />
-          Connect a number
-        </button>
-      </header>
+    <div className="flex h-full bg-[#F8FAFC]">
+      {dialog}
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6">
-        <div className="mx-auto max-w-2xl space-y-4">
-          {notice && (
-            <p className="flex items-start gap-2 rounded-lg border border-wa/25 bg-wa-soft p-3 text-meta text-ink">
-              <Icon name="check" size={15} className="mt-px text-wa" />
-              {notice}
-            </p>
-          )}
-          {error && (
-            <p className="flex items-start gap-2 rounded-lg border border-danger/25 bg-danger-soft p-3 text-meta text-danger-dark">
-              <Icon name="alert" size={15} className="mt-px" />
-              {error}
-            </p>
-          )}
+      {/* Kommo-style Settings Nav Sidebar */}
+      <SettingsNav />
 
-          {showForm && (
-            <form onSubmit={connect} className="panel space-y-3 p-5">
-              <h2 className="text-h3 text-ink">Connect a Green API instance</h2>
-              <ol className="list-decimal space-y-1 pl-5 text-meta text-muted">
-                <li>Create an instance at <span className="text-ink">console.green-api.com</span> and scan the QR with the WhatsApp you want to use.</li>
-                <li>Copy the three values from the instance page into the fields below.</li>
-                <li>We check them live and set up message delivery automatically — nothing to paste back into the console.</li>
-              </ol>
+      {/* Main Integration Marketplace Content */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        {/* Header Bar */}
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">Integration Marketplace</h1>
+            <p className="text-xs text-slate-400">Connect communication channels and third-party tools</p>
+          </div>
 
-              <Field label="apiUrl" hint="e.g. https://7107.api.greenapi.com">
-                <input className="field rounded-lg py-2.5 text-meta" value={apiUrl} required
-                  placeholder="https://7107.api.greenapi.com"
-                  onChange={(e) => setApiUrl(e.target.value)} />
-              </Field>
-              <Field label="idInstance">
-                <input className="field rounded-lg py-2.5 text-meta" value={idInstance} required
-                  placeholder="7107123456" onChange={(e) => setIdInstance(e.target.value)} />
-              </Field>
-              <Field label="apiTokenInstance">
-                <input className="field rounded-lg py-2.5 text-meta" value={apiToken} required
-                  type="password" placeholder="••••••••••••" onChange={(e) => setApiToken(e.target.value)} />
-              </Field>
-              <Field
-                label="Public app URL"
-                hint="Where WhatsApp messages are delivered. Local dev: paste your tunnel URL (https://…trycloudflare.com)."
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+            >
+              <Icon name="plus" size={14} />
+              <span>Connect Integration</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Body Scroll Area */}
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 space-y-7">
+          <div className="max-w-5xl mx-auto space-y-7">
+
+            {/* KOMMO-STYLE ANIMATED HERO CAROUSEL BANNER */}
+            <div
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-slate-900 shadow-md group"
+            >
+              {/* Slides Track */}
+              <div
+                className="flex transition-transform duration-700 ease-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
               >
-                <input className="field rounded-lg py-2.5 text-meta" value={webhookBase} required
-                  placeholder="https://your-app.example.com"
-                  onChange={(e) => setWebhookBase(e.target.value)} />
-              </Field>
+                {BANNER_SLIDES.map((slide) => (
+                  <div
+                    key={slide.id}
+                    className={`relative w-full shrink-0 min-h-[250px] md:min-h-[280px] flex items-center justify-between p-7 md:p-9 overflow-hidden ${
+                      slide.theme === "emerald"
+                        ? "bg-[#0E4A35] text-white"
+                        : slide.theme === "indigo"
+                        ? "bg-[#181B20] text-white"
+                        : "bg-[#252830] text-white"
+                    }`}
+                  >
+                    {/* Slide Text Content */}
+                    <div className="relative z-10 max-w-lg space-y-3.5">
+                      <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold tracking-wide uppercase text-white backdrop-blur-md ring-1 ring-white/20">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                        {slide.badge}
+                      </div>
 
-              <div className="flex justify-end gap-2 pt-1">
-                <button type="button" onClick={() => setShowForm(false)} className="btn-ghost rounded-lg px-4 py-2 text-meta">
-                  Cancel
-                </button>
-                <button disabled={busy} className="btn-primary rounded-lg px-4 py-2 text-meta disabled:opacity-40">
-                  {busy ? "Checking with Green API…" : "Test & connect"}
-                </button>
+                      <h2 className="text-xl md:text-2xl font-extrabold tracking-tight text-white leading-snug">
+                        {slide.title}
+                      </h2>
+
+                      <p className="text-xs md:text-sm leading-relaxed text-slate-200/90 font-normal">
+                        {slide.subtitle}
+                      </p>
+
+                      <div className="pt-2">
+                        {slide.isModalTrigger ? (
+                          <button
+                            onClick={() => setShowModal(true)}
+                            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-slate-900 shadow-md hover:bg-slate-100 hover:shadow-lg transition-all transform active:scale-95"
+                          >
+                            <span>{slide.actionText}</span>
+                            <Icon name="chevronRight" size={14} />
+                          </button>
+                        ) : (
+                          <Link
+                            href={slide.href || "#"}
+                            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-slate-900 shadow-md hover:bg-slate-100 hover:shadow-lg transition-all transform active:scale-95"
+                          >
+                            <span>{slide.actionText}</span>
+                            <Icon name="chevronRight" size={14} />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Hero Image Card Thumbnail */}
+                    <div className="relative z-10 hidden sm:block w-64 md:w-80 h-44 md:h-52 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/15 shrink-0 ml-4">
+                      <Image
+                        src={slide.image}
+                        alt={slide.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </form>
-          )}
 
-          {loading ? (
-            <p className="text-center text-meta text-muted">Loading…</p>
-          ) : instances.length === 0 && !showForm ? (
-            <div className="panel p-8 text-center">
-              <Icon name="chat" size={28} className="mx-auto text-subtle" />
-              <p className="mt-3 text-body text-muted">No WhatsApp connected yet.</p>
-              <p className="mt-1 text-meta text-subtle">
-                Click “Connect a number” — it takes about two minutes.
-              </p>
+              {/* Prev / Next Arrows */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Previous slide"
+              >
+                <Icon name="chevronRight" size={16} className="rotate-180" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Next slide"
+              >
+                <Icon name="chevronRight" size={16} />
+              </button>
+
+              {/* Carousel Pagination Dots */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-3 py-1 rounded-full">
+                {BANNER_SLIDES.map((slide, idx) => (
+                  <button
+                    key={slide.id}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      currentSlide === idx ? "w-6 bg-white" : "w-2 bg-white/40 hover:bg-white/70"
+                    }`}
+                    aria-label={`Slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
             </div>
-          ) : (
-            instances.map((i) => (
-              <div key={i.id} className="panel flex items-center gap-4 p-4">
-                <input
-                  type="radio"
-                  name="active-instance"
-                  checked={i.is_active}
-                  onChange={() => activate(i.id)}
-                  title="Use this number for sending"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-2 text-body font-medium text-ink">
-                    {i.phone ? `+${i.phone}` : `Instance ${i.instance_id}`}
-                    {i.is_active && <Chip tone="brand">In use</Chip>}
-                  </p>
-                  <p className="mt-0.5 text-caption text-muted">
-                    {i.instance_id} · {i.api_url ?? "default host"}
-                  </p>
-                </div>
-                <Chip tone={i.state === "authorized" ? "wa" : "danger"}>
-                  {i.state === "authorized" ? "Connected" : i.state}
-                </Chip>
-                {i.state !== "authorized" && (
-                  <span className="text-caption text-muted">scan QR in console</span>
-                )}
-                <button
-                  onClick={() => remove(i.id, i.phone ? `+${i.phone}` : `Instance ${i.instance_id}`)}
-                  className="btn-ghost rounded-full p-1.5"
-                  title="Remove connection"
-                >
-                  <Icon name="close" size={15} />
-                </button>
-              </div>
-            ))
-          )}
 
-          <p className="text-center text-caption text-subtle">
-            The AI replies from whichever number is marked “In use”. Switching takes effect within 30 seconds.
-          </p>
+            {/* KOMMO-STYLE CATEGORY FILTER BAR */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {[
+                  { key: "all", label: "All" },
+                  { key: "messengers", label: "Messengers" },
+                  { key: "ai", label: "AI Solutions" },
+                  { key: "automations", label: "Automations" },
+                  { key: "leads", label: "Lead Sources" },
+                  { key: "installed", label: "✓ Installed" },
+                ].map((tab) => {
+                  const active = activeTab === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key as CategoryTab)}
+                      className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                        active
+                          ? "bg-purple-600 text-white shadow-xs"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative w-full sm:w-60">
+                <Icon
+                  name="search"
+                  size={14}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="text"
+                  placeholder="Search integrations…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 py-1.5 pl-8 pr-3 text-xs text-slate-800 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                />
+              </div>
+            </div>
+
+            {/* MESSENGERS SECTION */}
+            {(activeTab === "all" || activeTab === "messengers" || (activeTab === "installed" && isConnected)) && (
+              <div className="space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                    Messengers & Gateways
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {/* CARD 1: WhatsApp Business (Green API) - LIVE & FUNCTIONAL */}
+                  <div
+                    onClick={() => setShowModal(true)}
+                    className="group cursor-pointer flex flex-col justify-between rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-xs transition-all duration-200 hover:border-emerald-500 hover:shadow-lg hover:-translate-y-0.5"
+                  >
+                    <div>
+                      {/* Top App Header Banner with Official Green API + WhatsApp Logo */}
+                      <div className="flex h-20 w-full items-center justify-center rounded-xl bg-emerald-50/80 border border-emerald-100 mb-3 group-hover:bg-emerald-100/70 transition">
+                        <GreenApiLogo size={40} />
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                            WhatsApp (Green API)
+                          </h4>
+                        </div>
+                        <p className="text-[11px] text-slate-500 leading-snug">
+                          Live 2-way messaging, group negotiation bots, and multi-agent routing.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                          isConnected
+                            ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                            : activeInstance
+                            ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            isConnected ? "bg-emerald-500" : activeInstance ? "bg-amber-500" : "bg-slate-400"
+                          }`}
+                        />
+                        {isConnected ? "✓ Installed" : "Ready"}
+                      </span>
+
+                      <button
+                        type="button"
+                        className="rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-bold text-white group-hover:bg-emerald-600 transition"
+                      >
+                        {isConnected ? "Settings" : "+ Install"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* CARD 2: Telegram Gateway */}
+                  {(activeTab !== "installed") && (
+                    <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs opacity-85">
+                      <div>
+                        <div className="flex h-20 w-full items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white mb-3">
+                          <Icon name="send" size={32} />
+                        </div>
+                        <h4 className="text-xs font-bold text-slate-800">Telegram Gateway</h4>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Connect corporate Telegram groups and pilgrim customer channels.
+                        </p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                          Coming soon
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-400">+ Install</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CARD 3: Instagram Direct */}
+                  {(activeTab !== "installed") && (
+                    <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs opacity-85">
+                      <div>
+                        <div className="flex h-20 w-full items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-pink-500 to-amber-500 text-white mb-3">
+                          <Icon name="image" size={32} />
+                        </div>
+                        <h4 className="text-xs font-bold text-slate-800">Instagram DM</h4>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Capture agency leads from Instagram stories and direct message inquiries.
+                        </p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                          Coming soon
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-400">+ Install</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CARD 4: Email & Gmail */}
+                  {(activeTab !== "installed") && (
+                    <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs opacity-85">
+                      <div>
+                        <div className="flex h-20 w-full items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white mb-3">
+                          <Icon name="mail" size={32} />
+                        </div>
+                        <h4 className="text-xs font-bold text-slate-800">Email & Gmail Gateway</h4>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Forward inbound agency emails directly into the unified HolyLand inbox.
+                        </p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                          Coming soon
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-400">+ Install</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* AI & AUTOMATION SOLUTIONS */}
+            {(activeTab === "all" || activeTab === "ai" || activeTab === "automations" || activeTab === "installed") && (
+              <div className="space-y-3.5 pt-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                    AI Solutions & Workflow Automations
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {/* CARD: OpenAI / Claude LLM Hub */}
+                  <Link
+                    href="/settings/llm"
+                    className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs hover:border-purple-500 hover:shadow-lg transition"
+                  >
+                    <div>
+                      <div className="flex h-16 w-full items-center justify-center rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white mb-3">
+                        <Icon name="bot" size={28} className="text-purple-400" />
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition">
+                        OpenAI & Claude LLM Hub
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Connect Gemini, GPT-4o, or Claude for hotel rate extraction and multi-turn chat.
+                      </p>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded ring-1 ring-emerald-600/20">
+                        ✓ Installed
+                      </span>
+                      <span className="text-[11px] font-bold text-purple-600">Configure →</span>
+                    </div>
+                  </Link>
+
+                  {/* CARD: Rate Sheets & Inventory Sync */}
+                  <Link
+                    href="/settings/inventory"
+                    className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs hover:border-purple-500 hover:shadow-lg transition"
+                  >
+                    <div>
+                      <div className="flex h-16 w-full items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 to-orange-700 text-white mb-3">
+                        <Icon name="receipt" size={28} />
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition">
+                        Hotel Rate Sheets & Inventory
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Upload CSV / Excel hotel rate sheets with automatic Makkah & Madinah price mapping.
+                      </p>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded ring-1 ring-emerald-600/20">
+                        ✓ Installed
+                      </span>
+                      <span className="text-[11px] font-bold text-purple-600">View Sheets →</span>
+                    </div>
+                  </Link>
+
+                  {/* CARD: Zapier & Custom Webhooks */}
+                  <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs opacity-85">
+                    <div>
+                      <div className="flex h-16 w-full items-center justify-center rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 text-white mb-3">
+                        <Icon name="share" size={28} />
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-900">
+                        Zapier & Custom Webhooks
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Sync closed-won leads and customer vouchers into external Google Sheets or billing systems.
+                      </p>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
+                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                        Available
+                      </span>
+                      <span className="text-[11px] font-semibold text-slate-500">+ Connect</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
 
-      {dialog}
-    </div>
-  );
-}
+      {/* WHATSAPP / GREEN API CONNECTION POP-UP MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <GreenApiLogo size={36} />
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    Connect WhatsApp via Green API
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Enter your Green API instance credentials to activate live messaging
+                  </p>
+                </div>
+              </div>
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 flex items-baseline gap-2">
-        <span className="text-meta font-medium text-ink">{label}</span>
-        {hint && <span className="text-caption text-subtle">{hint}</span>}
-      </span>
-      {children}
-    </label>
+              <button
+                onClick={() => setShowModal(false)}
+                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              >
+                <Icon name="close" size={18} />
+              </button>
+            </div>
+
+            {/* Modal Scroll Content */}
+            <div className="scroll-thin flex-1 overflow-y-auto p-6 space-y-6">
+              {notice && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-medium text-emerald-800">
+                  <Icon name="check" size={16} className="mt-0.5 text-emerald-600 shrink-0" />
+                  <span>{notice}</span>
+                </div>
+              )}
+
+              {error && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
+                  <Icon name="alert" size={16} className="mt-0.5 text-rose-600 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Active Instances List */}
+              {instances.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                    Registered Instances
+                  </h4>
+                  <div className="space-y-2">
+                    {instances.map((i) => {
+                      const isAuth = i.state === "authorized";
+                      return (
+                        <div
+                          key={i.id}
+                          className={`flex items-center justify-between rounded-2xl border p-4 transition-colors ${
+                            i.is_active
+                              ? "border-emerald-300 bg-emerald-50/40"
+                              : "border-slate-200 bg-slate-50/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="active-instance"
+                              checked={i.is_active}
+                              onChange={() => activate(i.id)}
+                              className="h-4 w-4 text-emerald-600 focus:ring-emerald-500"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-800">
+                                  {i.phone ? `+${i.phone}` : i.instance_id}
+                                </span>
+                                <Chip tone={isAuth ? "wa" : "danger"}>
+                                  {isAuth ? "Authorized" : i.state || "Not paired"}
+                                </Chip>
+                                {i.is_active && (
+                                  <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                                    Primary sender
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-0.5 text-[11px] font-mono text-slate-400">
+                                Instance: {i.instance_id} {i.api_url ? `· ${i.api_url}` : ""}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => remove(i.id, i.phone ? `+${i.phone}` : i.instance_id)}
+                            className="rounded-xl p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                            title="Remove instance"
+                          >
+                            <Icon name="trash" size={15} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Connection Form */}
+              <form onSubmit={connect} className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-4">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-slate-900">
+                    {instances.length > 0 ? "Add Another Green API Instance" : "Instance Credentials"}
+                  </h4>
+                  <ol className="list-decimal space-y-1 pl-4 text-xs text-slate-500">
+                    <li>Create an instance at <a href="https://console.green-api.com" target="_blank" rel="noreferrer" className="text-emerald-700 font-semibold underline">console.green-api.com</a> and scan the QR code with WhatsApp.</li>
+                    <li>Copy your <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[11px]">apiUrl</code>, <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[11px]">idInstance</code>, and <code className="bg-slate-200/80 px-1 py-0.5 rounded text-[11px]">apiTokenInstance</code> into the fields below.</li>
+                  </ol>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700">API URL (apiUrl)</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="https://7107.api.greenapi.com"
+                      value={apiUrl}
+                      onChange={(e) => setApiUrl(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700">Instance ID (idInstance)</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="7107123456"
+                      value={idInstance}
+                      onChange={(e) => setIdInstance(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700">API Token (apiTokenInstance)</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••••••••••••••••••••••••••"
+                    value={apiToken}
+                    onChange={(e) => setApiToken(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700">Public App Webhook URL</label>
+                  <input
+                    type="text"
+                    value={webhookBase}
+                    onChange={(e) => setWebhookBase(e.target.value)}
+                    placeholder="https://your-crm-domain.com or Cloudflare tunnel URL"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs focus:border-emerald-500 focus:outline-none"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Webhook where WhatsApp messages will be delivered automatically.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50 transition"
+                  >
+                    {busy ? "Validating & Connecting…" : "Connect Instance"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -385,13 +385,13 @@ const LABELS: Record<string, string> = {
 };
 
 const SETTINGS_HREF: Record<string, string> = {
-  rules: "/ai/rules",
-  ai: "/settings/ai",
-  knowledge: "/settings/knowledge",
-  inventory: "/settings/inventory",
-  routing: "/settings/routing",
-  llm: "/settings/llm",
-  whatsapp: "/settings/whatsapp",
+  rules: "/ai/rules?from=/ai/workflow",
+  ai: "/settings/ai?from=/ai/workflow",
+  knowledge: "/settings/knowledge?from=/ai/workflow",
+  inventory: "/settings/inventory?from=/ai/workflow",
+  routing: "/settings/routing?from=/ai/workflow",
+  llm: "/settings/llm?from=/ai/workflow",
+  whatsapp: "/settings/whatsapp?from=/ai/workflow",
 };
 
 const SETTINGS_LABEL: Record<string, string> = {

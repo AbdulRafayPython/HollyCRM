@@ -2,10 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import NavRail from "./NavRail";
+import AppSidebar from "./AppSidebar";
 import type { ProfileUser } from "./ProfileMenu";
 import { WorkspaceProvider, type Presence, type Workspace } from "./WorkspaceContext";
 import Icon from "./ui/Icon";
+
+import { NotificationProvider } from "./notifications/NotificationContext";
+import WhatsAppToastContainer from "./notifications/WhatsAppToastContainer";
 
 /** Auth screens: no chrome, but still locked to the viewport like the workspace. */
 const BARE = ["/login", "/signup", "/invite", "/forgot-password", "/reset-password"];
@@ -92,14 +95,6 @@ export default function AppShell({
       }
     };
 
-    /*
-     * The presence heartbeat rides the same tick.
-     *
-     * No `presence` in the body: this is a liveness ping, not an opinion. If it
-     * carried the client's idea of the current value, an agent who set
-     * themselves Away in another tab would be dragged back to Available by this
-     * one every sixty seconds.
-     */
     const beat = async () => {
       try {
         const res = await fetch("/api/presence", { method: "POST" });
@@ -120,48 +115,78 @@ export default function AppShell({
     };
   }, [chromeless]);
 
-  // Memoised so a provider value identity change doesn't re-render every
-  // consumer on each 60s poll tick — the thread and chat list both read it.
   const ctxValue = useMemo<Workspace>(
     () => ({ ...workspace, presence, setPresence }),
     [workspace, presence, setPresence]
   );
 
-  // The marketing site owns its own background and page flow — hand the document
-  // straight through so nothing above it caps the height.
   if (isMarketing(pathname)) {
     return <>{children}</>;
   }
 
-  // Auth screens: chrome-free, but the cards inside size against a full viewport.
   if (BARE.some((p) => pathname.startsWith(p))) {
     return <div className="h-screen overflow-hidden bg-surface">{children}</div>;
   }
 
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const down = !healthy && Boolean(state);
 
   return (
     <WorkspaceProvider value={ctxValue}>
-    <div className="flex h-screen flex-col overflow-hidden bg-surface">
-      {down && (
-        <div className="z-50 flex shrink-0 items-center justify-center gap-2 border-b border-danger/20 bg-danger-soft px-4 py-2 text-danger-dark">
-          <Icon name="wifiOff" size={16} />
-          <span className="text-body font-medium">
-            WhatsApp instance {state} — incoming messages are not being received.
-          </span>
-          <span className="text-meta text-danger-dark/70">
-            Re-link by scanning the QR in the Green API console.
-          </span>
+      <NotificationProvider>
+        <div className="flex h-screen flex-col overflow-hidden bg-surface">
+          {down && (
+            <div className="z-50 flex shrink-0 items-center justify-center gap-2 border-b border-danger/20 bg-danger-soft px-4 py-2 text-danger-dark">
+              <Icon name="wifiOff" size={16} />
+              <span className="text-body font-medium">
+                WhatsApp instance {state} — incoming messages are not being received.
+              </span>
+              <span className="text-meta text-danger-dark/70">
+                Re-link by scanning the QR in the Green API console.
+              </span>
+            </div>
+          )}
+
+          {/* Mobile Top App Bar (Only on < md screens) */}
+          <div className="flex md:hidden h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 z-30">
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(true)}
+              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 transition-colors"
+              aria-label="Open navigation menu"
+            >
+              <Icon name="menu" size={20} />
+            </button>
+
+            <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900">
+              <span>Holly</span>
+              <span className="text-purple-600">CRM</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  healthy && Boolean(state) ? "bg-emerald-500" : "bg-amber-500"
+                }`}
+                title={healthy && Boolean(state) ? "WhatsApp Connected" : "WhatsApp Disconnected"}
+              />
+            </div>
+          </div>
+
+          <div className="flex min-h-0 flex-1">
+            <AppSidebar
+              connected={healthy && Boolean(state)}
+              user={user ?? { name: workspace.user.name, email: workspace.user.email, avatar: workspace.user.avatar }}
+              mobileOpen={mobileNavOpen}
+              onMobileClose={() => setMobileNavOpen(false)}
+            />
+            <main className="min-w-0 flex-1 overflow-hidden">{children}</main>
+          </div>
+
+          {/* Global Floating WhatsApp Web Toast Notifications */}
+          <WhatsAppToastContainer />
         </div>
-      )}
-      <div className="flex min-h-0 flex-1">
-        <NavRail
-          connected={healthy && Boolean(state)}
-          user={user ?? { name: workspace.user.name, email: workspace.user.email, avatar: workspace.user.avatar }}
-        />
-        <main className="min-w-0 flex-1">{children}</main>
-      </div>
-    </div>
+      </NotificationProvider>
     </WorkspaceProvider>
   );
 }

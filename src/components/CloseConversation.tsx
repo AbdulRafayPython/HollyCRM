@@ -6,13 +6,6 @@ import Icon from "./ui/Icon";
 
 const DROP_PRESETS = ["Price too high", "Dates unavailable", "Went with competitor", "No response"];
 
-/**
- * "Close conversation" wraps up without destroying anything: the lead is marked
- * won/lost (or left open), the bot is paused, the chat is archived. Permanent
- * deletion is a separate supervisor-only act inside the dialog's danger zone,
- * intended for spam and test chats — it requires typing DELETE because the
- * cascade takes messages, leads, quotes and analytics history with it.
- */
 export default function CloseConversation({
   chatId,
   chatTitle,
@@ -77,73 +70,92 @@ export default function CloseConversation({
     <>
       <button
         onClick={() => setOpen(true)}
+        type="button"
         title="Close this conversation"
-        className="flex items-center gap-1.5 rounded-lg border border-edge bg-card px-3 py-2 text-meta font-medium text-ink transition duration-150 ease-swift hover:bg-surface"
+        className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs shrink-0"
       >
-        <Icon name="check" size={15} className="text-wa" />
-        Close
+        <Icon name="check" size={13} className="text-emerald-600" />
+        <span>Close</span>
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fade-in"
           onClick={reset}
         >
           <div
-            className="w-full max-w-md rounded-xl border border-edge bg-card p-5 shadow-pop"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             {mode === "close" ? (
               <>
-                <h2 className="text-h3 text-ink">Close this conversation?</h2>
-                <p className="mt-1 text-meta text-muted">
-                  The chat is archived and the AI pauses. Nothing is deleted — messages,
-                  quotes and history stay available, and the customer can always come back.
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h2 className="text-base font-bold text-slate-900">Close this conversation?</h2>
+                  <button onClick={reset} className="text-slate-400 hover:text-slate-700">
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  The chat will be archived and the AI will pause. All message history and analytics are preserved.
                 </p>
 
-                <div className="mt-4 space-y-2">
-                  {(
-                    [
-                      { key: "won", label: "Deal won", hint: "Voucher issued — mark the lead as won", icon: "check", tone: "text-wa" },
-                      { key: "lost", label: "Deal lost", hint: "Archive with a reason for the report", icon: "close", tone: "text-danger" },
-                      { key: "archive_only", label: "Just archive", hint: "No deal outcome — tidy the inbox only", icon: "archive", tone: "text-muted" },
-                    ] as const
-                  ).map((o) => (
-                    <label
-                      key={o.key}
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition duration-150 ease-swift ${
-                        outcome === o.key ? "border-brand bg-brand-soft" : "border-edge hover:bg-surface"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="outcome"
-                        className="mt-1"
-                        checked={outcome === o.key}
-                        onChange={() => setOutcome(o.key)}
-                      />
-                      <span className="min-w-0">
-                        <span className={`flex items-center gap-1.5 text-body font-medium text-ink`}>
-                          <Icon name={o.icon} size={14} className={o.tone} />
-                          {o.label}
-                        </span>
-                        <span className="text-caption text-muted">{o.hint}</span>
-                      </span>
-                    </label>
-                  ))}
+                {error && (
+                  <p className="rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-700 font-medium">
+                    {error}
+                  </p>
+                )}
+
+                <div className="space-y-2">
+                  <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Lead Outcome
+                  </span>
+                  <div className="space-y-1.5">
+                    {[
+                      { key: "won", label: "Mark as Won (Voucher Issued)", desc: "Deal converted successfully" },
+                      { key: "lost", label: "Mark as Lost", desc: "Customer did not convert" },
+                      { key: "archive_only", label: "Leave lead stage unchanged", desc: "Just archive the thread" },
+                    ].map((opt) => (
+                      <label
+                        key={opt.key}
+                        className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
+                          outcome === opt.key
+                            ? "border-purple-600 bg-purple-50/50"
+                            : "border-slate-200 hover:bg-slate-50"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="outcome"
+                          value={opt.key}
+                          checked={outcome === opt.key}
+                          onChange={() => setOutcome(opt.key as typeof outcome)}
+                          className="mt-0.5 text-purple-600 focus:ring-purple-500"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-900">{opt.label}</p>
+                          <p className="text-[11px] text-slate-500">{opt.desc}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
                 {outcome === "lost" && (
-                  <div className="mt-3">
+                  <div className="space-y-2 pt-1">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Reason for closing as lost
+                    </label>
                     <div className="flex flex-wrap gap-1.5">
                       {DROP_PRESETS.map((p) => (
                         <button
                           key={p}
+                          type="button"
                           onClick={() => setDropReason(p)}
-                          className={`rounded-full px-2.5 py-1 text-caption transition duration-150 ease-swift ${
+                          className={`rounded-lg px-2.5 py-1 text-xs transition ${
                             dropReason === p
-                              ? "bg-danger text-white"
-                              : "border border-edge bg-card text-muted hover:bg-surface hover:text-ink"
+                              ? "bg-rose-100 text-rose-800 font-semibold"
+                              : "border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
                           }`}
                         >
                           {p}
@@ -151,79 +163,87 @@ export default function CloseConversation({
                       ))}
                     </div>
                     <input
+                      type="text"
+                      placeholder="Or enter a custom reason…"
                       value={dropReason}
                       onChange={(e) => setDropReason(e.target.value)}
-                      placeholder="Reason (required)"
-                      className="field mt-2 rounded-lg py-2.5 text-meta"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-purple-500 focus:outline-none"
                     />
                   </div>
                 )}
 
-                {error && <p className="mt-3 text-meta text-danger-dark">{error}</p>}
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                  {isSupervisor ? (
+                    <button
+                      type="button"
+                      onClick={() => setMode("delete")}
+                      className="text-xs font-semibold text-rose-600 hover:underline"
+                    >
+                      Delete chat…
+                    </button>
+                  ) : <span />}
 
-                <div className="mt-5 flex items-center justify-end gap-2">
-                  <button onClick={reset} className="btn-ghost rounded-lg px-4 py-2 text-meta">
-                    Cancel
-                  </button>
-                  <button
-                    disabled={busy || (outcome === "lost" && !dropReason.trim())}
-                    onClick={closeConversation}
-                    className="btn-primary rounded-lg px-4 py-2 text-meta disabled:opacity-40"
-                  >
-                    {busy ? "Closing…" : "Close conversation"}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={reset}
+                      className="rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy || (outcome === "lost" && !dropReason.trim())}
+                      onClick={closeConversation}
+                      className="btn-primary rounded-xl px-4 py-2 text-xs font-semibold disabled:opacity-50"
+                    >
+                      {busy ? "Closing…" : "Confirm Close"}
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Danger Zone: Permanent Delete */
+              <>
+                <div className="flex items-center justify-between border-b border-rose-100 pb-3">
+                  <h2 className="text-base font-bold text-rose-700">Delete Conversation?</h2>
+                  <button onClick={reset} className="text-slate-400 hover:text-slate-700">
+                    <Icon name="close" size={16} />
                   </button>
                 </div>
 
-                {isSupervisor && (
-                  <div className="mt-5 border-t border-edge pt-3">
-                    <button
-                      onClick={() => setMode("delete")}
-                      className="text-caption font-medium text-danger hover:underline"
-                    >
-                      Delete this conversation permanently…
-                    </button>
-                    <span className="ml-2 text-caption text-subtle">
-                      for spam or test chats only
-                    </span>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <h2 className="flex items-center gap-2 text-h3 text-danger">
-                  <Icon name="alert" size={16} />
-                  Delete permanently?
-                </h2>
-                <p className="mt-2 text-meta text-muted">
-                  This erases <strong className="text-ink">{chatTitle}</strong> completely:
-                  all messages, the lead, its quotes, documents and analytics history.
-                  There is no undo. Real customer conversations should be{" "}
-                  <strong className="text-ink">closed</strong>, never deleted.
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  This permanently removes the conversation, all messages, and quotes for <span className="font-semibold text-slate-900">{chatTitle}</span>.
                 </p>
 
-                <input
-                  value={confirmText}
-                  onChange={(e) => setConfirmText(e.target.value)}
-                  placeholder='Type DELETE to confirm'
-                  autoFocus
-                  className="field mt-4 rounded-lg py-2.5 text-meta"
-                />
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Type <code className="font-mono font-bold text-rose-600">DELETE</code> to confirm:
+                  </label>
+                  <input
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    placeholder="DELETE"
+                    className="w-full rounded-xl border border-rose-300 px-3.5 py-2 text-xs font-mono focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
 
-                {error && <p className="mt-3 text-meta text-danger-dark">{error}</p>}
-
-                <div className="mt-5 flex items-center justify-between">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                   <button
-                    onClick={() => { setMode("close"); setConfirmText(""); setError(null); }}
-                    className="btn-ghost rounded-lg px-4 py-2 text-meta"
+                    type="button"
+                    onClick={() => setMode("close")}
+                    className="rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100"
                   >
                     Back
                   </button>
                   <button
+                    type="button"
                     disabled={busy || confirmText !== "DELETE"}
                     onClick={deleteConversation}
-                    className="rounded-lg bg-danger px-4 py-2 text-meta font-medium text-white transition duration-150 ease-swift hover:opacity-90 disabled:opacity-40"
+                    className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-rose-700 disabled:opacity-50 transition"
                   >
-                    {busy ? "Deleting…" : "Delete forever"}
+                    {busy ? "Deleting…" : "Permanently Delete"}
                   </button>
                 </div>
               </>
