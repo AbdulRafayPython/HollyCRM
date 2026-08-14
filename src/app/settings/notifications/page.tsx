@@ -14,8 +14,10 @@ export default function NotificationSettingsPage() {
     browserPermission,
     notifyScope,
     toastDuration,
+    assignmentAlertsEnabled,
     playTestChime,
     sendTestNotification,
+    sendTestAssignment,
     requestBrowserPermission,
     updateSettings,
   } = useNotifications();
@@ -111,6 +113,52 @@ export default function NotificationSettingsPage() {
                     />
                   </label>
                 )}
+              </div>
+            </section>
+
+            {/* CARD 1b: Assignment alerts. Deliberately its own switch rather
+                than folded into message alerts — muting chatter should not mute
+                "this conversation is now yours", which is the one notification
+                an agent cannot afford to miss. */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <h2 className="text-sm font-bold text-slate-900">Assigned to me</h2>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
+                    Alerts you the moment a conversation is handed to you — by the AI agent
+                    during a handoff, by one of your rules, or by a colleague. The chat leaves
+                    the unassigned queue and the bot pauses on it, so nobody else is coming.
+                    Every alert is also kept in the bell in the sidebar.
+                  </p>
+                </div>
+
+                <label
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    assignmentAlertsEnabled ? "bg-emerald-500" : "bg-slate-300"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={assignmentAlertsEnabled}
+                    onChange={(e) => updateSettings({ assignmentAlertsEnabled: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      assignmentAlertsEnabled ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </label>
+              </div>
+
+              <div className="border-t border-slate-100 pt-4">
+                <button
+                  type="button"
+                  onClick={sendTestAssignment}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Preview an assignment alert
+                </button>
               </div>
             </section>
 

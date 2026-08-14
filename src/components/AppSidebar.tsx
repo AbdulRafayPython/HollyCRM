@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import HolyCrmLogo from "@/components/ui/HolyCrmLogo";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import ProfileMenu, { type ProfileUser } from "./ProfileMenu";
+import NotificationBell from "./notifications/NotificationBell";
 import { useWorkspace } from "./WorkspaceContext";
 
 interface NavItem {
@@ -313,6 +314,11 @@ export default function AppSidebar({
               </Link>
             );
           })}
+
+          {/* Notifications. Sits with the profile card because an assignment is
+              a fact about you, not about the workspace — and the rail is the
+              only chrome on every workstation route, so it cannot go missing. */}
+          <NotificationBell collapsed={isCollapsed} />
 
           {/* User Card */}
           <div className="mt-1 border-t border-slate-100 pt-1.5">

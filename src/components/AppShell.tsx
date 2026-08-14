@@ -8,6 +8,7 @@ import { WorkspaceProvider, type Presence, type Workspace } from "./WorkspaceCon
 import Icon from "./ui/Icon";
 
 import { NotificationProvider } from "./notifications/NotificationContext";
+import NotificationBell from "./notifications/NotificationBell";
 import WhatsAppToastContainer from "./notifications/WhatsAppToastContainer";
 
 /** Auth screens: no chrome, but still locked to the viewport like the workspace. */
@@ -169,13 +170,16 @@ export default function AppShell({
               <span className="text-purple-600">CRM</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <span
                 className={`h-2 w-2 rounded-full ${
                   healthy && Boolean(state) ? "bg-emerald-500" : "bg-amber-500"
                 }`}
                 title={healthy && Boolean(state) ? "WhatsApp Connected" : "WhatsApp Disconnected"}
               />
+              {/* On mobile the top bar IS the conventional top-right, so the
+                  bell belongs here rather than buried in the drawer. */}
+              <NotificationBell variant="bar" />
             </div>
           </div>
 
