@@ -66,7 +66,9 @@ export default function ProductZoom({ isConfigured = true }: { isConfigured?: bo
               </span>
               <span className="mx-auto flex items-center gap-1.5 rounded-md bg-plate px-3 py-1 ring-1 ring-rule">
                 <Icon name="lock" className="h-3 w-3 text-haze" />
-                <span className="font-plexmono text-[0.66rem] text-stone">holycrm.com</span>
+                <span className="font-plexmono text-[0.66rem] text-stone">
+                  holy-crm.vercel.app
+                </span>
               </span>
             </div>
 

@@ -38,7 +38,23 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+/**
+ * Canonical origin for metadata (canonical links, OG/Twitter image URLs).
+ *
+ * Without `metadataBase` Next resolves those against localhost and warns at
+ * build time, so `/landing`'s `alternates.canonical` was pointing nowhere
+ * useful. `VERCEL_PROJECT_PRODUCTION_URL` is set by Vercel to the project's
+ * production domain, so this follows a domain change on its own rather than
+ * hardcoding one that has to be remembered next time.
+ */
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "HolyCRM",
   description: "Shared WhatsApp inbox, lead pipeline and AI assistant",
 };

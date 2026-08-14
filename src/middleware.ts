@@ -58,7 +58,12 @@ export async function middleware(request: NextRequest) {
 
   // Protect workstation routes against unauthenticated access via clean HTTP redirect
   if (!user && !isPublicRoute) {
-    const loginUrl = new URL("/login", request.url);
+    // `request.nextUrl`, not `request.url`: Next resolves nextUrl against the
+    // forwarded host, so behind Vercel's proxy the redirect stays on the domain
+    // the visitor is actually using instead of jumping to the internal one.
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
