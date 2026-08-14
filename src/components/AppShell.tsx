@@ -61,6 +61,13 @@ export default function AppShell({
       .catch(() => setPresenceState((p) => (p === next ? (next === "away" ? "available" : "away") : p)));
   }, []);
 
+  // Must sit with the other hooks, above the chromeless early returns below:
+  // the marketing and auth branches return before this line, so declaring it
+  // further down made the hook count differ between route types. Navigating
+  // from the landing page into the workstation then tripped React's hook-order
+  // check and blanked the page with a client-side exception.
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   const [workspace, setWorkspace] = useState<Workspace>({
     name: null,
     assistant: "AI Assistant",
@@ -128,7 +135,6 @@ export default function AppShell({
     return <div className="h-screen overflow-hidden bg-surface">{children}</div>;
   }
 
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const down = !healthy && Boolean(state);
 
   return (
