@@ -18,6 +18,8 @@ export interface NodePanelProps {
   settings: Record<string, unknown> | null;
   onToggle: (column: string, next: boolean) => void;
   onSettingChange: (patch: Record<string, unknown>) => void;
+  /** Switches the panel to a neighbouring node, so the flow can be walked. */
+  onNavigate: (nodeId: string) => void;
   onClose: () => void;
 }
 
@@ -37,7 +39,7 @@ export interface NodePanelProps {
  */
 export default function NodePanel({
   node, status, toggles, trace, settings,
-  onToggle, onSettingChange, onClose,
+  onToggle, onSettingChange, onNavigate, onClose,
 }: NodePanelProps) {
   const step = trace?.find((t) => canvasNode(t.node) === node.id) ?? null;
   const upstream = EDGES.filter((e) => e.to === node.id);
@@ -114,11 +116,16 @@ export default function NodePanel({
                   <h4 className="mb-1 text-caption font-semibold uppercase tracking-wide text-subtle">
                     Reaches this step when
                   </h4>
-                  <ul className="space-y-1">
+                  <ul className="space-y-1.5">
                     {upstream.map((e) => (
-                      <li key={`${e.from}-${e.to}`} className="text-caption text-muted">
-                        <span className="text-ink">{labelFor(e.from)}</span>
-                        {e.label ? <> &rarr; <span className="font-medium">{e.label}</span></> : null}
+                      <li key={`${e.from}-${e.to}`}>
+                        <NodeLink
+                          nodeId={e.from}
+                          label={e.label}
+                          muted={e.muted}
+                          direction="back"
+                          onNavigate={onNavigate}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -217,15 +224,14 @@ export default function NodePanel({
                   </h4>
                   <ul className="space-y-1.5">
                     {downstream.map((e) => (
-                      <li
-                        key={`${e.from}-${e.to}`}
-                        className="flex items-center gap-2 rounded-lg border border-edge bg-surface px-2.5 py-1.5"
-                      >
-                        <Icon name="chevronRight" size={12} className="shrink-0 text-subtle" />
-                        <span className="min-w-0 flex-1 truncate text-caption font-medium text-ink">
-                          {labelFor(e.to)}
-                        </span>
-                        {e.label && <Chip tone={e.muted ? "neutral" : "brand"}>{e.label}</Chip>}
+                      <li key={`${e.from}-${e.to}`}>
+                        <NodeLink
+                          nodeId={e.to}
+                          label={e.label}
+                          muted={e.muted}
+                          direction="forward"
+                          onNavigate={onNavigate}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -241,6 +247,52 @@ export default function NodePanel({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * A neighbouring node, as a control that actually goes there.
+ *
+ * These rows carried a chevron and sat in a bordered box, so they read as
+ * buttons — but nothing was wired to them and clicking did nothing. Following
+ * the flow between nodes is the main thing anyone does in this panel, so they
+ * now switch the panel to that node instead of only naming it.
+ */
+function NodeLink({
+  nodeId,
+  label,
+  muted,
+  direction,
+  onNavigate,
+}: {
+  nodeId: string;
+  label?: string;
+  muted?: boolean;
+  direction: "back" | "forward";
+  onNavigate: (id: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate(nodeId)}
+      title={`Open ${labelFor(nodeId)}`}
+      className="group flex w-full items-center gap-2 rounded-lg border border-edge bg-surface px-2.5 py-1.5 text-left
+                 transition-colors duration-150 ease-swift hover:border-brand/40 hover:bg-brand-soft
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+    >
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-card text-muted ring-1 ring-edge">
+        <NodeGlyph name={glyphFor(nodeId)} size={12} />
+      </span>
+      <span className="min-w-0 flex-1 truncate text-caption font-medium text-ink">
+        {labelFor(nodeId)}
+      </span>
+      {label && <Chip tone={muted ? "neutral" : "brand"}>{label}</Chip>}
+      <Icon
+        name={direction === "forward" ? "chevronRight" : "arrowUp"}
+        size={12}
+        className="shrink-0 text-subtle transition-colors duration-150 ease-swift group-hover:text-brand"
+      />
+    </button>
   );
 }
 

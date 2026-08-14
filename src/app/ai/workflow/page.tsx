@@ -243,6 +243,7 @@ export default function WorkflowPage() {
           settings={agentSettings}
           onToggle={onToggle}
           onSettingChange={(p) => { setAgentSettings((s) => ({ ...(s ?? {}), ...p })); patch(p); }}
+          onNavigate={setSelected}
           onClose={() => setSelected(null)}
         />
       )}
