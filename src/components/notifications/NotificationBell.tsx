@@ -65,27 +65,38 @@ export default function NotificationBell({
         className={
           variant === "bar"
             ? "relative rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
-            : `group relative flex items-center gap-3 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-colors
+            : // w-full in both states: the rail's other bottom rows are flex
+              // children that stretch, so a content-width button here sat left
+              // of the icon column instead of centring with them when collapsed.
+              `group relative flex w-full items-center gap-3 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-colors
                ${open ? "bg-purple-50 text-purple-700" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}
-               ${collapsed ? "justify-center px-0" : "w-full"}`
+               ${collapsed ? "justify-center px-0" : ""}`
         }
       >
-        <span className={variant === "bar" ? "" : "text-slate-400 group-hover:text-slate-600"}>
+        {/* The badge anchors to the glyph, not the button. On a full-width
+            collapsed button, anchoring to the button parked it against the far
+            edge of the rail instead of on the bell. */}
+        <span
+          className={`relative ${variant === "bar" ? "" : "text-slate-400 group-hover:text-slate-600"}`}
+        >
           <Icon name="bell" size={16} />
+
+          {unreadCount > 0 && (variant === "bar" || collapsed) && (
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white">
+              {badge}
+            </span>
+          )}
         </span>
 
-        {variant === "sidebar" && !collapsed && <span className="flex-1 truncate text-left">Notifications</span>}
-
-        {unreadCount > 0 && (
-          <span
-            className={
-              variant === "sidebar" && !collapsed
-                ? "flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white"
-                : "absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white ring-2 ring-white"
-            }
-          >
-            {badge}
-          </span>
+        {variant === "sidebar" && !collapsed && (
+          <>
+            <span className="flex-1 truncate text-left">Notifications</span>
+            {unreadCount > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white">
+                {badge}
+              </span>
+            )}
+          </>
         )}
       </button>
 
