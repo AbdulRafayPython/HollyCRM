@@ -69,5 +69,13 @@ export async function middleware(request: NextRequest) {
 export const config = {
   // Everything except static assets and the Green API webhook (which authenticates
   // with its own Bearer token and must never be redirected to a login page).
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/webhook).*)"],
+  //
+  // Files served straight out of public/ (landing imagery, banners, fonts) do
+  // NOT live under _next/static, so without the extension guard below every one
+  // of them 307s a logged-out visitor to /login and the landing page renders
+  // with empty image frames. Signed-in developers never see it locally because
+  // their session cookie makes the redirect branch unreachable.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|bmp|mp4|webm|woff|woff2|ttf|otf|txt|xml|json|pdf|zip)$).*)",
+  ],
 };
