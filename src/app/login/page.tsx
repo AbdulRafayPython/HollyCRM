@@ -175,17 +175,6 @@ export default function LoginPage() {
         <p className="mt-2 text-center text-caption text-subtle">
           New team members can join with their Google account.
         </p>
-
-        {/*
-          This prints the project's Supabase URL. Useful while wiring the app up,
-          not something to put on screen in front of a customer — so it is
-          development-only rather than deleted outright.
-        */}
-        {process.env.NODE_ENV !== "production" && (
-          <p className="mt-6 break-all text-center text-caption text-subtle">
-            Connecting to {CLIENT_URL ?? "(not configured)"}
-          </p>
-        )}
       </form>
     </AuthShell>
   );
