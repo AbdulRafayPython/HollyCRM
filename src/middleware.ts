@@ -8,6 +8,31 @@ type CookieToSet = { name: string; value: string; options?: CookieOptions };
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  /* Rescue an auth callback that arrived at the site root.
+   *
+   * When Supabase will not honour a `redirectTo` — because the exact URL is not
+   * in its redirect allowlist — it silently falls back to the project's Site
+   * URL, which is a bare origin. The user lands on `/?code=…` instead of
+   * `/auth/callback?code=…`, the landing page renders, the code is never
+   * exchanged, and they are still signed out with no error shown.
+   *
+   * Forwarding it here means the sign-in completes either way. It is a safety
+   * net, not a substitute for the allowlist: if the Site URL points at a
+   * different host entirely, that host has to answer first and no code here
+   * can help. */
+  const url = request.nextUrl;
+  if (url.pathname === "/") {
+    const q = url.searchParams;
+    const isAuthCallback =
+      q.has("code") || (q.has("token_hash") && q.has("type")) || q.has("error_description");
+    if (isAuthCallback) {
+      const target = url.clone();
+      target.pathname = "/auth/callback";
+      if (!q.has("next")) target.searchParams.set("next", "/inbox");
+      return NextResponse.redirect(target);
+    }
+  }
+
   // Before .env.local is filled in there is no session to refresh. Pass the
   // request through so the app can render its setup screen instead of throwing
   // an opaque client-construction error on every route.
