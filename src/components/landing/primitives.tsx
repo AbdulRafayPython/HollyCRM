@@ -161,6 +161,7 @@ export function Screenshot({
             alt={alt}
             fill
             priority={priority}
+            unoptimized
             sizes={sizes}
             style={{ objectPosition: trim.position }}
             className="object-cover"
@@ -174,6 +175,7 @@ export function Screenshot({
             width={1376}
             height={768}
             priority={priority}
+            unoptimized
             sizes={sizes}
             style={cropStyle(zoom, focus)}
             className="h-auto w-full"

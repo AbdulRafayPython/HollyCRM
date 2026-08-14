@@ -33,6 +33,7 @@ export default function AiAgentShowcase() {
               src="/landing-assets/ai_agent.jpg"
               alt="HollyCRM Grounded AI Parameter Extraction & SQL Hotel Match"
               fill
+              unoptimized
               className="object-cover group-hover:scale-105 transition-transform duration-700 ease-swift"
             />
           </div>

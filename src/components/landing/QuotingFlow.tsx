@@ -41,6 +41,7 @@ export default function QuotingFlow() {
             }
             width={1855}
             height={848}
+            unoptimized
             sizes="(min-width: 1200px) 1152px, 100vw"
             className="h-auto w-full min-w-[44rem] sm:min-w-0"
           />

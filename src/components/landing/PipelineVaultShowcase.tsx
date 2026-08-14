@@ -65,6 +65,7 @@ export default function PipelineVaultShowcase() {
                     alt={panel.alt}
                     width={1376}
                     height={768}
+                    unoptimized
                     sizes="(min-width: 1024px) 50vw, 100vw"
                     style={cropStyle(1.14)}
                     className="h-auto w-full"

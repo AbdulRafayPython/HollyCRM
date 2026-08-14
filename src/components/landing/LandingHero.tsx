@@ -109,6 +109,7 @@ export default function LandingHero({ isConfigured = true }: { isConfigured?: bo
                   width={1376}
                   height={768}
                   priority
+                  unoptimized
                   sizes="(min-width: 1024px) 55vw, 100vw"
                   style={cropStyle(1.5)}
                   className="h-auto w-full"
