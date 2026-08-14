@@ -30,38 +30,49 @@ export default function Reveal({
     const el = ref.current;
     if (!el) return;
 
-    // If IntersectionObserver is unsupported, reveal immediately
+    let first = 0;
+    let second = 0;
+
+    // Flipping the class in the same frame the element first paints gives the
+    // browser no start value to interpolate from, so the transition is skipped
+    // and the element snaps in. Two rAFs guarantee the pre-reveal state paints
+    // once, which is what makes the entrance actually travel.
+    const reveal = () => {
+      first = window.requestAnimationFrame(() => {
+        second = window.requestAnimationFrame(() => el.classList.add("is-revealed"));
+      });
+    };
+
+    // No observer support: hand the content over rather than hide it.
     if (typeof IntersectionObserver === "undefined") {
-      el.classList.add("is-revealed");
+      reveal();
       return;
     }
 
-    // Elements already above or inside viewport on mount reveal immediately
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      el.classList.add("is-revealed");
-      return;
-    }
-
+    // An observer fires on its first callback for anything already intersecting,
+    // so hero content still enters on load — no separate in-viewport branch is
+    // needed, and going through `reveal()` keeps that entrance animated.
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-        el.classList.add("is-revealed");
+        reveal();
         observer.disconnect();
       },
-      { rootMargin: "0px 0px 80px 0px", threshold: 0.01 }
+      // Negative bottom inset: the element has to clear the fold by 80px before
+      // it enters, so the motion happens where the visitor is looking.
+      { rootMargin: "0px 0px -80px 0px", threshold: 0 }
     );
 
     observer.observe(el);
 
-    // Guaranteed fallback: ensures no element stays permanently hidden
-    const timer = setTimeout(() => {
-      if (el) el.classList.add("is-revealed");
-    }, 600);
-
+    // No time-based fallback here on purpose. A blanket timer reveals every
+    // element on the page a moment after load — including everything below the
+    // fold — and by the time the visitor scrolls there is no motion left to see.
+    // Scripting-off is covered by the <noscript> rule in app/layout.tsx.
     return () => {
-      clearTimeout(timer);
       observer.disconnect();
+      window.cancelAnimationFrame(first);
+      window.cancelAnimationFrame(second);
     };
   }, []);
 
