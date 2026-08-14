@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
+import NodeGlyph, { glyphFor } from "./NodeGlyph";
 import {
   defaultPosition, EDGES, edgePath, KIND_STYLES, NODE_H, NODE_TOGGLE, NODE_W,
   NODES,
@@ -310,7 +311,7 @@ export default function WorkflowCanvas({
             >
               <span className="flex items-center gap-2">
                 <span className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${style.chip}`}>
-                  <Icon name={node.icon} size={13} />
+                  <NodeGlyph name={glyphFor(node.id)} size={15} />
                   {state.status === "attention" && !disabled && (
                     <>
                       <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-bot" />

@@ -6,6 +6,8 @@ import Chip from "@/components/ui/Chip";
 import Icon from "@/components/ui/Icon";
 import { EDGES, NODE_TOGGLE, type WorkflowNode } from "@/lib/workflow";
 import type { TraceStep } from "./TestPanel";
+import DataView, { type DataPacket } from "./DataView";
+import NodeGlyph, { glyphFor } from "./NodeGlyph";
 
 export interface NodePanelProps {
   node: WorkflowNode;
@@ -64,7 +66,7 @@ export default function NodePanel({
       <div className="panel flex h-[86vh] w-full max-w-6xl animate-rise-in flex-col overflow-hidden p-0">
         <header className="flex shrink-0 items-center gap-3 border-b border-edge px-5 py-3.5">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand-dark">
-            <Icon name={node.icon} size={17} />
+            <NodeGlyph name={glyphFor(node.id)} size={19} />
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-h3 text-ink">{node.title}</h2>
@@ -96,31 +98,16 @@ export default function NodePanel({
               }
             />
             <div className="space-y-3 p-4">
-              {upstream.length === 0 ? (
-                <Empty>
-                  This is the first step. The input is a WhatsApp message arriving on your
-                  connected number.
-                </Empty>
-              ) : upstreamSteps.length === 0 ? (
-                <Empty>
-                  Run a test to see the real data that arrives here from{" "}
-                  {upstream.map((e) => labelFor(e.from)).join(" or ")}.
-                </Empty>
-              ) : (
-                upstreamSteps.map((s, i) => (
-                  <div key={i} className="rounded-lg border border-edge bg-surface p-3">
-                    <div className="mb-1.5 flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                      <span className="text-caption font-semibold text-ink">
-                        {labelFor(canvasNode(s.node))}
-                      </span>
-                      <span className="ml-auto text-caption tabular-nums text-subtle">{s.ms}ms</span>
-                    </div>
-                    <p className="text-caption leading-relaxed text-muted">{s.summary}</p>
-                    <DetailList detail={s.detail} />
-                  </div>
-                ))
-              )}
+              <DataView
+                packets={upstreamSteps.map(toPacket)}
+                empty={
+                  upstream.length === 0
+                    ? "This is the first step. Its input is a WhatsApp message arriving on your connected number — run a test to capture one."
+                    : `Run a test to see the real data that arrives here from ${upstream
+                        .map((e) => labelFor(e.from))
+                        .join(" or ")}.`
+                }
+              />
 
               {upstream.length > 0 && (
                 <div>
@@ -218,25 +205,10 @@ export default function NodePanel({
               }
             />
             <div className="space-y-3 p-4">
-              {!step ? (
-                <Empty>
-                  No data yet. Run a test and this shows exactly what this step produced.
-                </Empty>
-              ) : (
-                <div className="rounded-lg border border-edge bg-surface p-3">
-                  <div className="mb-1.5 flex items-center gap-1.5">
-                    <span className={`h-1.5 w-1.5 rounded-full ${
-                      step.status === "ok" ? "bg-wa" : step.status === "skipped" ? "bg-subtle" : "bg-danger"
-                    }`} />
-                    <span className="text-caption font-semibold text-ink">
-                      {step.status === "ok" ? "Produced" : step.status === "skipped" ? "Skipped" : "Failed"}
-                    </span>
-                    <span className="ml-auto text-caption tabular-nums text-subtle">{step.ms}ms</span>
-                  </div>
-                  <p className="text-caption leading-relaxed text-muted">{step.summary}</p>
-                  <DetailList detail={step.detail} />
-                </div>
-              )}
+              <DataView
+                packets={step ? [toPacket(step)] : []}
+                empty="No data yet. Run a test and this shows exactly what this step produced."
+              />
 
               {downstream.length > 0 ? (
                 <div>
@@ -334,24 +306,22 @@ function InlineSettings({ node, settings, onChange }: {
   return null;
 }
 
-function DetailList({ detail }: { detail?: Record<string, unknown> }) {
-  const rows = Object.entries(detail ?? {}).filter(
-    ([, v]) => v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0)
-  );
-  if (rows.length === 0) return null;
-
-  return (
-    <dl className="mt-2 space-y-1 rounded-lg bg-card p-2">
-      {rows.map(([k, v]) => (
-        <div key={k} className="flex gap-2 text-caption">
-          <dt className="w-20 shrink-0 truncate text-subtle">{k.replace(/_/g, " ")}</dt>
-          <dd className="min-w-0 flex-1 break-words font-medium text-ink">
-            {Array.isArray(v) ? v.join(", ") : String(v)}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
+/**
+ * A trace step as an inspectable packet.
+ *
+ * `detail` is the step's own field data — the extracted city, the hotel rows,
+ * the rules that matched — and it is what someone tuning the agent came here to
+ * read. Status, timing and the one-line summary ride alongside it so the JSON
+ * tab answers "what happened" as well as "what came out".
+ */
+function toPacket(s: TraceStep): DataPacket {
+  return {
+    label: labelFor(canvasNode(s.node)),
+    status: s.status,
+    ms: s.ms,
+    summary: s.summary,
+    data: s.detail ?? {},
+  };
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
