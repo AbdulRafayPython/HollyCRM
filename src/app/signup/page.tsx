@@ -126,7 +126,7 @@ export default function SignUpPage() {
         <MobileHero />
 
         <h1 className="text-[1.75rem] font-semibold leading-tight tracking-tight text-ink">
-          Create your HollyCRM workspace
+          Create your HolyCRM workspace
         </h1>
         <p className="mt-1.5 text-body text-muted">
           Your own CRM, your own WhatsApp number, your own team.
@@ -142,7 +142,7 @@ export default function SignUpPage() {
           <AuthInput
             icon="hub"
             label="Company or team name"
-            placeholder="Hollyland Hospitality"
+            placeholder="Holyland Hospitality"
             value={workspace}
             required
             onChange={(e) => setWorkspace(e.target.value)}

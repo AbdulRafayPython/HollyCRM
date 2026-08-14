@@ -37,7 +37,7 @@ export default function GreenApiShowcase() {
           <Reveal variant="right" delay={120}>
             <Screenshot
               src="/landing-assets/green_api.jpg"
-              alt="Green API instance status and live webhook event stream inside HollyCRM"
+              alt="Green API instance status and live webhook event stream inside HolyCRM"
               sizes="(min-width: 1024px) 50vw, 100vw"
               zoom={1.12}
             />

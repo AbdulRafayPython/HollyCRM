@@ -38,7 +38,7 @@ export default function QuotesPanel({ quotes }: { quotes: QuoteRow[] }) {
         <div key={q.id} className="rounded-lg border border-edge bg-card shadow-card">
           <div className="flex items-center justify-between border-b border-edge px-3 py-2">
             <Chip tone={q.by_bot ? "bot" : "brand"} icon={q.by_bot ? "bot" : "user"}>
-              {q.by_bot ? "Hollyland AI" : "Agent"}
+              {q.by_bot ? "Holyland AI" : "Agent"}
             </Chip>
             <span className="text-caption text-subtle">{stamp(q.sent_at ?? q.created_at)}</span>
           </div>

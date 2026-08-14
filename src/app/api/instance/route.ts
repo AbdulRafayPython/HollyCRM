@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  *
  * The workspace identity rides along on the same poll the shell already makes:
  * the account menu needs the signed-in person, and the thread needs the name
- * this workspace gave its assistant — which was hardcoded as "Hollyland AI" in
+ * this workspace gave its assistant — which was hardcoded as "Holyland AI" in
  * five components even though it has been a per-workspace setting all along.
  */
 export async function GET() {

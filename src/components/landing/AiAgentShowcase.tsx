@@ -18,7 +18,7 @@ export default function AiAgentShowcase() {
             <span className="text-purple-600">Never from LLM Imagination.</span>
           </h2>
           <p className="text-base text-slate-600 sm:text-lg">
-            Traditional similarity vector search fails on date ranges and budget ceilings. HollyCRM inverts the AI stack: DeepSeek extracts parameters into structured JSON, Postgres executes exact SQL matching via <code className="bg-purple-100/70 text-purple-900 px-1.5 py-0.5 rounded text-sm font-mono">search_hotels()</code>, and DeepSeek writes the natural reply.
+            Traditional similarity vector search fails on date ranges and budget ceilings. HolyCRM inverts the AI stack: DeepSeek extracts parameters into structured JSON, Postgres executes exact SQL matching via <code className="bg-purple-100/70 text-purple-900 px-1.5 py-0.5 rounded text-sm font-mono">search_hotels()</code>, and DeepSeek writes the natural reply.
           </p>
         </Reveal>
 
@@ -31,7 +31,7 @@ export default function AiAgentShowcase() {
           <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-slate-200">
             <Image
               src="/landing-assets/ai_agent.jpg"
-              alt="HollyCRM Grounded AI Parameter Extraction & SQL Hotel Match"
+              alt="HolyCRM Grounded AI Parameter Extraction & SQL Hotel Match"
               fill
               unoptimized
               className="object-cover group-hover:scale-105 transition-transform duration-700 ease-swift"

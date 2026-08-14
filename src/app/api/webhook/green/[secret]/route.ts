@@ -156,5 +156,5 @@ export async function POST(
 
 /** Green API pings the URL on save. */
 export async function GET() {
-  return NextResponse.json({ ok: true, service: "hollycrm-green-webhook" });
+  return NextResponse.json({ ok: true, service: "holycrm-green-webhook" });
 }

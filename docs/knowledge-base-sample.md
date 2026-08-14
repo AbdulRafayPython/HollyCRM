@@ -1,4 +1,4 @@
-# Hollyland Travel — Customer Information
+# Holyland Travel — Customer Information
 
 Upload this file at Settings → Knowledge & imports → Upload file.
 The AI answers non-price questions from it. Hotel rates always come from
@@ -32,7 +32,7 @@ passengers with luggage.
 Groups of more than eight travellers are moved by coach. Coach transfers must be
 booked at least 48 hours before arrival so we can confirm the vehicle.
 
-Our driver meets you in the arrivals hall holding a Hollyland Travel sign. If
+Our driver meets you in the arrivals hall holding a Holyland Travel sign. If
 your flight is delayed, message us on WhatsApp and the pickup is rescheduled at
 no extra cost.
 

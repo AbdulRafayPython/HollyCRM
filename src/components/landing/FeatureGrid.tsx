@@ -68,7 +68,7 @@ export default function FeatureGrid() {
         <Reveal variant="zoom" delay={100} className="mt-12">
           <Screenshot
             src="/landing-assets/features_overview.jpg"
-            alt="HollyCRM unified operations dashboard showing WhatsApp shared inbox, Umrah deal pipeline, AI quoting engine, and real-time analytics"
+            alt="HolyCRM unified operations dashboard showing WhatsApp shared inbox, Umrah deal pipeline, AI quoting engine, and real-time analytics"
             priority
             sizes="(min-width: 1024px) 90vw, 100vw"
           />

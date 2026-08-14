@@ -165,7 +165,7 @@ export default function AppShell({
             </button>
 
             <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900">
-              <span>Holly</span>
+              <span>Holy</span>
               <span className="text-purple-600">CRM</span>
             </div>
 

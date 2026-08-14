@@ -3,7 +3,7 @@ import AppShell from "@/components/AppShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HollyCRM",
+  title: "HolyCRM",
   description: "Shared WhatsApp inbox, lead pipeline and AI assistant",
 };
 

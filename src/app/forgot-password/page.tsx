@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-body font-bold text-wa">
             H
           </span>
-          <span className="text-h3 tracking-tight text-ink">HollyCRM</span>
+          <span className="text-h3 tracking-tight text-ink">HolyCRM</span>
         </Link>
       </header>
 

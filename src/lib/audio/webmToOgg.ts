@@ -251,7 +251,7 @@ function buildPage(
 }
 
 function opusTags(): Uint8Array {
-  const vendor = new TextEncoder().encode("HollyCRM");
+  const vendor = new TextEncoder().encode("HolyCRM");
   const out = new Uint8Array(8 + 4 + vendor.length + 4);
   out.set(new TextEncoder().encode("OpusTags"), 0);
   const view = new DataView(out.buffer);

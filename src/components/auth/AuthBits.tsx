@@ -66,7 +66,7 @@ export function MobileHero() {
     <div className="mb-6 h-24 overflow-hidden rounded-2xl ring-1 ring-slate-900/5 lg:hidden">
       <Image
         src="/landing-assets/hero_mockup.jpg"
-        alt="The HollyCRM shared WhatsApp inbox beside the lead pipeline board"
+        alt="The HolyCRM shared WhatsApp inbox beside the lead pipeline board"
         width={1376}
         height={768}
         unoptimized

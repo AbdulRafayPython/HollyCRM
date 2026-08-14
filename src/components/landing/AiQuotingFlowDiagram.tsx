@@ -68,7 +68,7 @@ export default function AiQuotingFlowDiagram() {
             Verified Technical Code Flow
           </div>
           <h3 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-            How HollyCRM AI Quoting Executing Step-by-Step
+            How HolyCRM AI Quoting Executing Step-by-Step
           </h3>
           <p className="text-xs sm:text-sm text-slate-300">
             Based on direct codebase execution in <code className="text-purple-300 font-mono">orchestrator.ts</code>, <code className="text-purple-300 font-mono">extract.ts</code>, and Postgres RPC <code className="text-purple-300 font-mono">search_hotels()</code>.

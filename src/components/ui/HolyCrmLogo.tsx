@@ -1,16 +1,16 @@
 import React from "react";
 
-interface HollyCrmLogoProps {
+interface HolyCrmLogoProps {
   size?: number;
   className?: string;
   showText?: boolean;
 }
 
-export default function HollyCrmLogo({
+export default function HolyCrmLogo({
   size = 36,
   className = "",
   showText = true,
-}: HollyCrmLogoProps) {
+}: HolyCrmLogoProps) {
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
       {/* Stylized 'H' Icon Box */}
@@ -41,7 +41,7 @@ export default function HollyCrmLogo({
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
             <span className="font-extrabold text-xl tracking-tight text-slate-900">
-              Holly<span className="text-purple-600">CRM</span>
+              Holy<span className="text-purple-600">CRM</span>
             </span>
             {/* Hidden on narrow screens: beside seven nav links and two
                 buttons, this badge is what tips the header into wrapping. */}

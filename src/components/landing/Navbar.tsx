@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
-import HollyCrmLogo from "@/components/ui/HollyCrmLogo";
+import HolyCrmLogo from "@/components/ui/HolyCrmLogo";
 
 export default function Navbar({
   isConfigured = true,
@@ -16,7 +16,7 @@ export default function Navbar({
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
         {/* Brand Logo with Stylized 'H' */}
         <Link href="/landing" className="group shrink-0">
-          <HollyCrmLogo size={36} showText={true} />
+          <HolyCrmLogo size={36} showText={true} />
         </Link>
 
         {/*

@@ -55,7 +55,7 @@ export default function LandingHero({ isConfigured = true }: { isConfigured?: bo
 
             <Reveal delay={240}>
               <p className="mt-6 text-base leading-relaxed text-slate-600 sm:text-lg">
-                HollyCRM is the WhatsApp-native CRM for Umrah &amp; Hajj agencies. Run
+                HolyCRM is the WhatsApp-native CRM for Umrah &amp; Hajj agencies. Run
                 multi-party family negotiations, auto-advance pipeline stages, and quote
                 real Makkah &amp; Madinah inventory straight from your database.
               </p>
@@ -105,7 +105,7 @@ export default function LandingHero({ isConfigured = true }: { isConfigured?: bo
               <ParallaxShot className="overflow-hidden rounded-2xl shadow-2xl shadow-violet-950/15 ring-1 ring-slate-900/10">
                 <Image
                   src="/landing-assets/hero_mockup.jpg"
-                  alt="HollyCRM shared WhatsApp inbox alongside the Kanban sales pipeline"
+                  alt="HolyCRM shared WhatsApp inbox alongside the Kanban sales pipeline"
                   width={1376}
                   height={768}
                   priority

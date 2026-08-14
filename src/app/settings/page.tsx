@@ -394,7 +394,7 @@ export default function ProfileSettingsPage() {
                 <div>
                   <p className="text-xs font-bold text-slate-800">2-step verification</p>
                   <p className="text-[11px] text-slate-400">
-                    Add an extra layer of security to your HollyCRM agent account.
+                    Add an extra layer of security to your HolyCRM agent account.
                   </p>
                 </div>
 

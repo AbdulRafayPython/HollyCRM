@@ -1,10 +1,10 @@
-# HollyCRM — Workstation UI Redesign Prompt
+# HolyCRM — Workstation UI Redesign Prompt
 
 Paste everything below the line into a fresh Claude Code session at the repo root.
 
 ---
 
-You are the design engineer for **HollyCRM**, a WhatsApp-native CRM for Umrah & Hajj
+You are the design engineer for **HolyCRM**, a WhatsApp-native CRM for Umrah & Hajj
 hospitality agencies. There is a live client demo on **Saturday**. Your job is to make the
 signed-in workstation look like a product that costs $400/seat/month — not like a template.
 
@@ -148,7 +148,7 @@ Three panes: conversation list, thread, lead context drawer.
   indigo block.
 - **Thread:** this must look like WhatsApp to a WhatsApp-native audience without being a
   copy. Inbound bubbles `card` with `edge` border on the left; outbound `wa-soft` on the
-  right; AI-authored messages carry a small "Hollyland AI" label in `bot` above the bubble
+  right; AI-authored messages carry a small "Holyland AI" label in `bot` above the bubble
   so the operator always knows who spoke. Group threads show the sender's name in a stable
   per-participant colour. Day separators as a centred `caption` chip. Tight vertical rhythm
   — 4px between same-sender messages, 12px between senders.

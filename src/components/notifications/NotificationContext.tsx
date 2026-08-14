@@ -32,7 +32,7 @@ interface NotificationContextValue extends NotificationSettings {
   dismissToast: (id: string) => void;
 }
 
-const STORAGE_KEY = "hollycrm_notification_prefs_v1";
+const STORAGE_KEY = "holycrm_notification_prefs_v1";
 
 const DEFAULT_SETTINGS: NotificationSettings = {
   soundEnabled: true,

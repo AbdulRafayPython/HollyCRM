@@ -34,7 +34,7 @@ export default function NavRail({ connected, user }: { connected: boolean; user?
         <Link
           href="/inbox"
           className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-lg font-bold text-wa"
-          title="HollyCRM"
+          title="HolyCRM"
         >
           H
         </Link>

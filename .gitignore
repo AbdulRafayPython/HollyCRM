@@ -108,7 +108,7 @@ public/4dea10d5c1dbe4727dd6cf2469130569.mp4
 # UUID-named image (duplicate of ai_quoting_flow_diagram.png) — unused
 public/28405ba1-bc0b-4d04-a969-591e7821f953.png
 
-# Logo JPGs in public root — app uses the SVG <HollyCrmLogo /> component instead
+# Logo JPGs in public root — app uses the SVG <HolyCrmLogo /> component instead
 public/hollycrm_brand_logo.jpg
 public/hollycrm_logo.jpg
 public/logo.jpg

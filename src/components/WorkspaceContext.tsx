@@ -7,7 +7,7 @@ export type Presence = "available" | "away";
 export interface Workspace {
   /** Company/team name of the workspace the signed-in person belongs to. */
   name: string | null;
-  /** What this workspace calls its AI — "Hollyland AI", "Sales Bot", anything. */
+  /** What this workspace calls its AI — "Holyland AI", "Sales Bot", anything. */
   assistant: string;
   user: { name: string | null; email: string | null; role: string | null; avatar?: string | null };
   /**

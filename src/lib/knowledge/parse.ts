@@ -132,7 +132,7 @@ export async function fetchRemote(
   const res = await fetch(target, {
     redirect: "follow",
     signal: AbortSignal.timeout(30_000),
-    headers: { "user-agent": "HollyCRM/1.0 (+knowledge-sync)" },
+    headers: { "user-agent": "HolyCRM/1.0 (+knowledge-sync)" },
   });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
 

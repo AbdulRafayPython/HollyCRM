@@ -102,7 +102,7 @@ export default function LoginPage() {
         <MobileHero />
 
         <h1 className="text-[1.75rem] font-semibold leading-tight tracking-tight text-ink">
-          Welcome back to HollyCRM
+          Welcome back to HolyCRM
         </h1>
         <p className="mt-1.5 text-body text-muted">Sign in to your workspace</p>
 

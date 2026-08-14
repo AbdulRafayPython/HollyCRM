@@ -313,7 +313,7 @@ export function introReply(language: string, settings?: BotSettings): string {
   }
   if (settings?.greeting_en?.trim()) return settings.greeting_en.trim();
   return (
-    "Welcome to Hollyland Travel! 🕋\n" +
+    "Welcome to Holyland Travel! 🕋\n" +
     "I can instantly check Makkah & Madinah hotel prices and availability for you.\n" +
     "Just tell me: the city, your dates, and how many people.\n" +
     "Example: 5-star hotel in Makkah, 10-15 September, 8 people"

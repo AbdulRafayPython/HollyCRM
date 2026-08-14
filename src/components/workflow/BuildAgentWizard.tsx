@@ -120,7 +120,7 @@ export default function BuildAgentWizard({
                   autoFocus
                   value={draft.business_name}
                   onChange={(e) => set("business_name", e.target.value)}
-                  placeholder="Hollyland Travel"
+                  placeholder="Holyland Travel"
                   className="field w-full rounded-lg py-2.5 text-meta"
                 />
               </label>

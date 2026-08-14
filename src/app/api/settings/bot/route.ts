@@ -28,7 +28,7 @@ export async function PUT(req: Request) {
   const clean = {
     org_id: me.org_id,
     enabled: Boolean(body.enabled),
-    bot_name: String(body.bot_name ?? "Hollyland AI").slice(0, 60) || "Hollyland AI",
+    bot_name: String(body.bot_name ?? "Holyland AI").slice(0, 60) || "Holyland AI",
     greeting_enabled: Boolean(body.greeting_enabled),
     greeting_en: body.greeting_en ? String(body.greeting_en).slice(0, 1000) : null,
     greeting_ar: body.greeting_ar ? String(body.greeting_ar).slice(0, 1000) : null,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import HollyCrmLogo from "@/components/ui/HollyCrmLogo";
+import HolyCrmLogo from "@/components/ui/HolyCrmLogo";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import ProfileMenu, { type ProfileUser } from "./ProfileMenu";
 import { useWorkspace } from "./WorkspaceContext";
@@ -40,7 +40,7 @@ export default function AppSidebar({
   // Read saved collapse state on desktop
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("holly_sidebar_collapsed");
+      const saved = localStorage.getItem("holy_sidebar_collapsed");
       if (saved !== null) setCollapsed(saved === "true");
     } catch {}
   }, []);
@@ -49,7 +49,7 @@ export default function AppSidebar({
     setCollapsed((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem("holly_sidebar_collapsed", String(next));
+        localStorage.setItem("holy_sidebar_collapsed", String(next));
       } catch {}
       return next;
     });
@@ -161,9 +161,9 @@ export default function AppSidebar({
               <Link
                 href="/home"
                 className="flex items-center justify-center transition-opacity hover:opacity-90"
-                title="HollyCRM Home"
+                title="HolyCRM Home"
               >
-                <HollyCrmLogo size={30} showText={false} />
+                <HolyCrmLogo size={30} showText={false} />
               </Link>
               <button
                 onClick={toggleCollapse}
@@ -181,17 +181,17 @@ export default function AppSidebar({
                 href="/home"
                 onClick={onMobileClose}
                 className="flex items-center gap-2.5 overflow-hidden transition-opacity hover:opacity-90"
-                title="HollyCRM"
+                title="HolyCRM"
               >
-                <HollyCrmLogo size={32} showText={false} />
+                <HolyCrmLogo size={32} showText={false} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 leading-none">
                     <span className="text-base font-extrabold tracking-tight text-slate-900">
-                      Holly<span className="text-purple-600">CRM</span>
+                      Holy<span className="text-purple-600">CRM</span>
                     </span>
                   </div>
                   <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
-                    {workspace.name || "workspace.hollycrm.com"}
+                    {workspace.name || "workspace.holycrm.com"}
                   </p>
                 </div>
               </Link>

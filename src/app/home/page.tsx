@@ -48,7 +48,7 @@ export default async function HomePage() {
   const summary = summaryRaw as Summary | null;
   const isWaConnected = Boolean(instance && instance.state === "authorized");
   const userName = me?.full_name?.split(" ")[0] || "there";
-  const orgName = org?.name || "Hollyland Hospitality";
+  const orgName = org?.name || "Holyland Hospitality";
 
   // Calculate Active Leads & Pipeline Value
   const activeLeads = (priorityLeads ?? []).filter(
@@ -122,7 +122,7 @@ export default async function HomePage() {
                 <div>
                   <h2 className="text-sm font-bold">WhatsApp Instance Ready to Connect</h2>
                   <p className="text-xs text-emerald-700">
-                    Link your Green API instance to start receiving Umrah & Hajj inquiries directly in your HollyCRM inbox.
+                    Link your Green API instance to start receiving Umrah & Hajj inquiries directly in your HolyCRM inbox.
                   </p>
                 </div>
               </div>

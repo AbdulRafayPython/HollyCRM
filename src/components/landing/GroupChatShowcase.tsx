@@ -32,7 +32,7 @@ export default function GroupChatShowcase() {
               eyebrowIcon="users"
               title="Negotiate in family groups."
               highlight="Without losing the thread."
-              description="Umrah packages are agreed in an eight-person WhatsApp group, not a one-to-one email chain. HollyCRM makes the conversation the first-class record, so several family leads can live inside one chat."
+              description="Umrah packages are agreed in an eight-person WhatsApp group, not a one-to-one email chain. HolyCRM makes the conversation the first-class record, so several family leads can live inside one chat."
             />
 
             <ul className="mt-8 space-y-4">

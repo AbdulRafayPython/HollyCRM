@@ -1,5 +1,5 @@
 import Image from "next/image";
-import HollyCrmLogo from "@/components/ui/HollyCrmLogo";
+import HolyCrmLogo from "@/components/ui/HolyCrmLogo";
 import Icon from "@/components/ui/Icon";
 
 /**
@@ -33,7 +33,7 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
             <div className="aspect-video overflow-hidden rounded-2xl shadow-xl shadow-slate-900/10 ring-1 ring-slate-900/5">
               <Image
                 src="/landing-assets/hero_mockup.jpg"
-                alt="The HollyCRM shared WhatsApp inbox beside the lead pipeline board"
+                alt="The HolyCRM shared WhatsApp inbox beside the lead pipeline board"
                 width={1376}
                 height={768}
                 priority
@@ -97,7 +97,7 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
         {/* ---- Right: the form column ---- */}
         <div className="flex min-h-0 w-full flex-col lg:w-[45%]">
           <header className="shrink-0 px-6 pt-6 lg:px-10 lg:pt-8">
-            <HollyCrmLogo size={34} />
+            <HolyCrmLogo size={34} />
           </header>
 
           <div className="scroll-thin flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-6 lg:px-10">

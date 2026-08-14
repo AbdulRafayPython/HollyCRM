@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
-import HollyCrmLogo from "@/components/ui/HollyCrmLogo";
+import HolyCrmLogo from "@/components/ui/HolyCrmLogo";
 import Reveal from "./Reveal";
 
 export default function FooterCta({
@@ -26,7 +26,7 @@ export default function FooterCta({
           <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-purple-500/20 blur-3xl" />
           <h2 className="text-3xl font-extrabold sm:text-5xl text-white tracking-tight leading-tight">
             Start Closing More Umrah Bookings Today. <br />
-            <span className="text-purple-300">Launch HollyCRM in Minutes.</span>
+            <span className="text-purple-300">Launch HolyCRM in Minutes.</span>
           </h2>
           <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base text-slate-300">
             Join leading hospitality brokers in Makkah & Madinah. Streamline WhatsApp group negotiations with zero AI hallucinations.
@@ -54,7 +54,7 @@ export default function FooterCta({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 pb-12 border-b border-slate-800 text-xs">
           {/* Brand Col */}
           <div className="col-span-2 space-y-3">
-            <HollyCrmLogo size={32} showText={true} />
+            <HolyCrmLogo size={32} showText={true} />
             <p className="text-slate-400 leading-relaxed max-w-sm">
               The WhatsApp-native CRM for Umrah & Hajj hospitality agencies. Built with DeepSeek AI extraction, exact SQL pricing, and Green API gateway integration.
             </p>
@@ -104,7 +104,7 @@ export default function FooterCta({
         {/* Bottom copyright line */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div>
-            &copy; {new Date().getFullYear()} HollyCRM. All rights reserved. Umrah & Hajj Hospitality CRM.
+            &copy; {new Date().getFullYear()} HolyCRM. All rights reserved. Umrah & Hajj Hospitality CRM.
           </div>
           <div className="flex items-center gap-6">
             <span>Privacy Policy</span>

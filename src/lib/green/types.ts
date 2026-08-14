@@ -1,4 +1,4 @@
-/** Green API webhook payload shapes (the subset HollyCRM consumes). */
+/** Green API webhook payload shapes (the subset HolyCRM consumes). */
 
 export type WebhookType =
   | "incomingMessageReceived"

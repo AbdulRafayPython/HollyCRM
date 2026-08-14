@@ -1,10 +1,10 @@
-# HollyCRM — Login & Sign-up Redesign Prompt
+# HolyCRM — Login & Sign-up Redesign Prompt
 
 Paste everything below the line into a Claude Code session at the repo root.
 
 ---
 
-Redesign the HollyCRM authentication screens as a split-screen layout, closely inspired by
+Redesign the HolyCRM authentication screens as a split-screen layout, closely inspired by
 the attached reference: a single centered card with a soft shadow and ~24px radius, floating
 on a solid brand-coloured background, product imagery on the left, form on the right.
 
@@ -15,7 +15,7 @@ starting.
 
 ## What this product actually is
 
-HollyCRM is a **WhatsApp-native CRM for Umrah & Hajj hospitality agencies**. Agencies run
+HolyCRM is a **WhatsApp-native CRM for Umrah & Hajj hospitality agencies**. Agencies run
 multi-party family negotiations in WhatsApp groups, auto-advance a sales pipeline, and quote
 real Makkah & Madinah hotel inventory. The auth screens should look like the front door to
 *that*, not to a generic sales CRM. Copy that names the actual job beats copy that could sit
@@ -81,11 +81,11 @@ Outer background: solid `brand`, with a subtle indigo→violet gradient. Centere
 
 **Right panel (~45%)** — white, generous padding (~48px), vertically centered:
 
-1. Logo + wordmark top-left. Use the existing `<HollyCrmLogo />` component from
-   [src/components/ui/HollyCrmLogo.tsx](../src/components/ui/HollyCrmLogo.tsx) — the current
+1. Logo + wordmark top-left. Use the existing `<HolyCrmLogo />` component from
+   [src/components/ui/HolyCrmLogo.tsx](../src/components/ui/HolyCrmLogo.tsx) — the current
    login page hand-rolls a square "H" tile instead, which is now inconsistent with the rest of
    the app. Fix that as part of this work.
-2. Heading `ink` ~30px semibold: **"Welcome back to HollyCRM"**
+2. Heading `ink` ~30px semibold: **"Welcome back to HolyCRM"**
 3. Subtext `muted`: "Sign in to your workspace"
 4. **"Continue with Google", full-width, outlined, `h-14`, `rounded-lg`**, with the existing
    inline multi-colour `GoogleG` SVG already in the login file. Keep it above the divider —
@@ -120,8 +120,8 @@ Outer background: solid `brand`, with a subtle indigo→violet gradient. Centere
 Match the fields the page **actually submits** — the source brief's "Full name / Work email /
 Password / Confirm password" does not match this app:
 
-- Heading: "Create your HollyCRM workspace"
-- **Workspace name** (placeholder "Hollyland Hospitality")
+- Heading: "Create your HolyCRM workspace"
+- **Workspace name** (placeholder "Holyland Hospitality")
 - **Full name**
 - **Work email** (placeholder "you@company.com")
 - **Password** (placeholder "At least 8 characters")

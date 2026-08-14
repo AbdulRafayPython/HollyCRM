@@ -24,7 +24,7 @@ const PANELS: {
       "Value, pax count and hotel visible without opening the card",
     ],
     image: "/landing-assets/kanban_pipeline_board.jpg",
-    alt: "The HollyCRM sales pipeline board with New Lead, Qualified, Quoted and Closed columns",
+    alt: "The HolyCRM sales pipeline board with New Lead, Qualified, Quoted and Closed columns",
   },
   {
     icon: "lock",

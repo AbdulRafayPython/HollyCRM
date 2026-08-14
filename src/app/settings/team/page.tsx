@@ -29,7 +29,7 @@ export default async function TeamSettingsPage() {
             <p className="text-xs text-slate-400">Manage sales agents, agency roles, and invitation access</p>
           </div>
           <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 ring-1 ring-purple-600/20">
-            {org?.name ?? "HollyLand Workspace"}
+            {org?.name ?? "HolyLand Workspace"}
           </span>
         </header>
 

@@ -85,7 +85,7 @@ export default function NotificationSettingsPage() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
-                    Delivers OS-level notification popups when WhatsApp inquiries arrive, even when HollyCRM is in a background tab or minimized.
+                    Delivers OS-level notification popups when WhatsApp inquiries arrive, even when HolyCRM is in a background tab or minimized.
                   </p>
                 </div>
 

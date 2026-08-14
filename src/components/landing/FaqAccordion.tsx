@@ -7,14 +7,14 @@ import Reveal from "./Reveal";
 
 const FAQS = [
   {
-    question: "How does HollyCRM guarantee a 0% hallucination rate on hotel prices?",
+    question: "How does HolyCRM guarantee a 0% hallucination rate on hotel prices?",
     answer:
-      "Vector-search RAG returns text that looks similar, which is how invented rates and unavailable dates reach a customer. HollyCRM inverts it: the model converts the message into structured JSON parameters, those parameters go into an exact SQL function, search_hotels(), and rates, allotments and Haram distances come back as database rows. The model only writes prose around rows it was handed — it is never the source of a number.",
+      "Vector-search RAG returns text that looks similar, which is how invented rates and unavailable dates reach a customer. HolyCRM inverts it: the model converts the message into structured JSON parameters, those parameters go into an exact SQL function, search_hotels(), and rates, allotments and Haram distances come back as database rows. The model only writes prose around rows it was handed — it is never the source of a number.",
   },
   {
     question: "How does Green API handle WhatsApp group chats?",
     answer:
-      "HollyCRM connects your agency's own WhatsApp instance through Green API and receives webhooks for direct messages and multi-member groups in under 50ms. Group replies are gated in SQL by bot_gate(), so the assistant only speaks when @mentioned or when an explicit trigger keyword matches, subject to cooldown timers and daily reply caps.",
+      "HolyCRM connects your agency's own WhatsApp instance through Green API and receives webhooks for direct messages and multi-member groups in under 50ms. Group replies are gated in SQL by bot_gate(), so the assistant only speaks when @mentioned or when an explicit trigger keyword matches, subject to cooldown timers and daily reply caps.",
   },
   {
     question: "Can several agents manage different leads inside one group chat?",
@@ -27,7 +27,7 @@ const FAQS = [
       "Identity documents are mirrored into a private storage bucket the moment they arrive. Sharing one with a hotel or visa office generates a short-lived signed URL with a 5–15 minute TTL. Nothing is ever publicly addressable, which is what keeps the workflow inside Saudi PDPL and GDPR requirements.",
   },
   {
-    question: "Can we evaluate HollyCRM without connecting a live WhatsApp number?",
+    question: "Can we evaluate HolyCRM without connecting a live WhatsApp number?",
     answer:
       "Yes. A built-in simulator drives the same extraction and hotel-search path from the browser, so your team can test the engine against real inventory before any number is linked.",
   },
