@@ -101,7 +101,7 @@ export default function LoginPage() {
       <form onSubmit={signIn}>
         <MobileHero />
 
-        <h1 className="text-[1.75rem] font-semibold leading-tight tracking-tight text-ink">
+        <h1 className="mkt-display auth-title font-extrabold normal-case text-ink">
           Welcome back to HolyCRM
         </h1>
         <p className="mt-1.5 text-body text-muted">Sign in to your workspace</p>
@@ -115,13 +115,13 @@ export default function LoginPage() {
           </div>
         )}
 
-        <div className="mt-6">
+        <div className="auth-step">
           <GoogleButton onClick={signInWithGoogle} busy={googleBusy} label="Continue with Google" />
         </div>
 
         <OrDivider />
 
-        <div className="space-y-3">
+        <div className="auth-stack">
           <AuthInput
             icon="mail"
             label="Email"
@@ -143,7 +143,7 @@ export default function LoginPage() {
           />
         </div>
 
-        <div className="mb-6 mt-3 text-right">
+        <div className="mb-[var(--auth-step,1.5rem)] mt-[var(--auth-gap,0.75rem)] text-right">
           <Link
             href="/forgot-password"
             className="rounded text-meta font-medium text-brand transition-colors duration-150 ease-swift hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
@@ -157,12 +157,12 @@ export default function LoginPage() {
 
         <button
           disabled={busy}
-          className="btn-primary h-14 w-full rounded-xl text-body shadow-pop shadow-brand/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+          className="btn-primary auth-control w-full rounded-xl text-body shadow-pop shadow-brand/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
         >
           {busy ? "Signing in…" : "Log in"}
         </button>
 
-        <p className="mt-5 text-center text-meta text-muted">
+        <p className="mt-[clamp(0.75rem,1.8vh,1.25rem)] text-center text-meta text-muted">
           No workspace yet?{" "}
           <Link
             href="/signup"

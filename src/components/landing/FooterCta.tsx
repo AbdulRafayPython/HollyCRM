@@ -1,117 +1,128 @@
-"use client";
-
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import HolyCrmLogo from "@/components/ui/HolyCrmLogo";
 import Reveal from "./Reveal";
 
-export default function FooterCta({
-  isConfigured = true,
-}: {
-  isConfigured?: boolean;
-}) {
+/**
+ * Closing CTA and footer.
+ *
+ * The reference showreel ends by rotating the whole page back in 3D. That is
+ * the video presenting itself as an object, not a page feature — frame 24 has
+ * the navbar inside the tilted plane. So the gesture is kept and the dose cut:
+ * `data-reveal="tilt"` lifts this one card from rotateX(9deg) to flat as it
+ * enters, hinged at its bottom edge.
+ */
+
+const COLUMNS = [
+  {
+    title: "Product",
+    links: [
+      { label: "Shared inbox", href: "#inbox" },
+      { label: "Grounded quoting", href: "#quoting" },
+      { label: "Group handling", href: "#groups" },
+      { label: "Workflow canvas", href: "#workflow" },
+      { label: "Pricing", href: "#pricing" },
+    ],
+  },
+  {
+    title: "Security",
+    links: [
+      { label: "Saudi PDPL compliant", href: "#faq" },
+      { label: "Row-level security", href: "#faq" },
+      { label: "Green API gateway", href: "#faq" },
+      { label: "Encrypted document vault", href: "#faq" },
+    ],
+  },
+  {
+    title: "Get started",
+    links: [
+      { label: "Log in", href: "/login" },
+      { label: "Sign up", href: "/signup" },
+      { label: "Setup checklist", href: "/setup" },
+      { label: "Workstation", href: "/home" },
+    ],
+  },
+];
+
+export default function FooterCta({ isConfigured = true }: { isConfigured?: boolean }) {
   const targetRoute = isConfigured ? "/home" : "/setup";
 
   return (
-    <footer className="bg-slate-950 text-white pt-20 pb-12 relative overflow-hidden border-t border-slate-800">
-      {/* Glow background */}
-      <div className="pointer-events-none absolute left-1/2 bottom-0 -z-0 h-96 w-full -translate-x-1/2 bg-gradient-to-t from-purple-900/30 to-transparent blur-3xl" />
+    <footer className="px-4 pb-10 pt-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <Reveal variant="tilt">
+          <div className="overflow-hidden rounded-3xl bg-graphite text-paper shadow-lift-lg">
+            {/* CTA band */}
+            <div className="border-b border-white/10 px-6 py-14 text-center sm:px-12 sm:py-20">
+              <h2 className="mkt-display mx-auto max-w-3xl text-[2rem] font-extrabold sm:text-[2.9rem]">
+                Start the season with
+                <br />
+                <span className="text-brass">your prices already right</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-lg font-plex text-sm leading-relaxed text-paper/70 sm:text-base">
+                Connect your WhatsApp number, point it at your inventory, and let the
+                thread do the rest.
+              </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link
+                  href={targetRoute}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brass px-7 py-3.5 font-plex text-sm font-semibold text-graphite transition-all duration-200 hover:-translate-y-px hover:brightness-[1.06] sm:w-auto"
+                >
+                  Launch workstation
+                  <Icon name="chevronRight" className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/signup"
+                  className="inline-flex w-full items-center justify-center rounded-full px-7 py-3.5 font-plex text-sm font-semibold text-paper ring-1 ring-white/20 transition-colors hover:bg-white/10 sm:w-auto"
+                >
+                  Create an account
+                </Link>
+              </div>
+            </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* High-Impact CTA Banner Box */}
-        <Reveal
-          variant="zoom"
-          className="rounded-3xl bg-gradient-to-r from-purple-900 via-slate-900 to-purple-950 p-8 sm:p-14 border border-purple-500/30 text-center shadow-2xl mb-16 relative overflow-hidden"
-        >
-          <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-purple-500/20 blur-3xl" />
-          <h2 className="text-3xl font-extrabold sm:text-5xl text-white tracking-tight leading-tight">
-            Start Closing More Umrah Bookings Today. <br />
-            <span className="text-purple-300">Launch HolyCRM in Minutes.</span>
-          </h2>
-          <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base text-slate-300">
-            Join leading hospitality brokers in Makkah & Madinah. Streamline WhatsApp group negotiations with zero AI hallucinations.
-          </p>
+            {/* Directory */}
+            <div className="grid gap-8 px-6 py-12 sm:grid-cols-2 sm:px-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+              <div className="flex flex-col gap-3">
+                <HolyCrmLogo size={30} showText tone="dark" />
+                <p className="max-w-xs font-plex text-xs leading-relaxed text-paper/60">
+                  The WhatsApp-native CRM for Umrah and Hajj hospitality agencies.
+                  Structured extraction, exact SQL pricing, Green API gateway.
+                </p>
+              </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href={targetRoute}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-purple-500 px-8 py-4 text-base font-bold text-white shadow-xl shadow-purple-600/30 hover:bg-purple-600 active:scale-95 transition-all"
-            >
-              <span>Launch Workstation</span>
-              <Icon name="chevronRight" className="h-5 w-5" />
-            </Link>
+              {COLUMNS.map((col) => (
+                <nav key={col.title} className="flex flex-col gap-3">
+                  <span className="font-plex text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-paper/45">
+                    {col.title}
+                  </span>
+                  <ul className="flex flex-col gap-2">
+                    {col.links.map((link) => (
+                      <li key={link.label}>
+                        <Link
+                          href={link.href}
+                          className="font-plex text-xs text-paper/70 transition-colors hover:text-brass"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+            </div>
 
-            <Link
-              href="/signup"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-slate-800 px-7 py-4 text-base font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
-            >
-              <span>Create Free Account</span>
-            </Link>
+            <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 px-6 py-6 font-plex text-[0.7rem] text-paper/45 sm:flex-row sm:px-12">
+              <span>
+                &copy; {new Date().getFullYear()} HolyCRM. Umrah &amp; Hajj hospitality CRM.
+              </span>
+              <span className="flex items-center gap-5">
+                <span>Privacy</span>
+                <span>Terms</span>
+                <span>Status</span>
+              </span>
+            </div>
           </div>
         </Reveal>
-
-        {/* Footer Navigation Columns */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 pb-12 border-b border-slate-800 text-xs">
-          {/* Brand Col */}
-          <div className="col-span-2 space-y-3">
-            <HolyCrmLogo size={32} showText={true} />
-            <p className="text-slate-400 leading-relaxed max-w-sm">
-              The WhatsApp-native CRM for Umrah & Hajj hospitality agencies. Built with DeepSeek AI extraction, exact SQL pricing, and Green API gateway integration.
-            </p>
-          </div>
-
-          {/* Col 1: Product */}
-          <div className="space-y-3">
-            <div className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">
-              Product
-            </div>
-            <ul className="space-y-2 text-slate-400">
-              <li><a href="#features" className="hover:text-white transition-colors">Shared Inbox</a></li>
-              <li><a href="#groups" className="hover:text-white transition-colors">Group Negotiation</a></li>
-              <li><a href="#ai-grounding" className="hover:text-white transition-colors">SQL AI Quoting</a></li>
-              <li><a href="#workflow" className="hover:text-white transition-colors">Workflow Canvas</a></li>
-              <li><a href="#pricing" className="hover:text-white transition-colors">Pricing Plans</a></li>
-            </ul>
-          </div>
-
-          {/* Col 2: Security & Arch */}
-          <div className="space-y-3">
-            <div className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">
-              Security & Arch
-            </div>
-            <ul className="space-y-2 text-slate-400">
-              <li><span className="text-slate-400">Saudi PDPL Compliant</span></li>
-              <li><span className="text-slate-400">Supabase RLS Enforced</span></li>
-              <li><span className="text-slate-400">Green API Gateway</span></li>
-              <li><span className="text-slate-400">DeepSeek JSON Engine</span></li>
-            </ul>
-          </div>
-
-          {/* Col 3: Quick Links */}
-          <div className="space-y-3">
-            <div className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">
-              Quick Access
-            </div>
-            <ul className="space-y-2 text-slate-400">
-              <li><Link href="/login" className="hover:text-white transition-colors">Log In</Link></li>
-              <li><Link href="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
-              <li><Link href="/setup" className="hover:text-white transition-colors">System Setup Checklist</Link></li>
-              <li><Link href={targetRoute} className="hover:text-white transition-colors">Workstation</Link></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom copyright line */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <div>
-            &copy; {new Date().getFullYear()} HolyCRM. All rights reserved. Umrah & Hajj Hospitality CRM.
-          </div>
-          <div className="flex items-center gap-6">
-            <span>Privacy Policy</span>
-            <span>Terms of Service</span>
-            <span>System Status</span>
-          </div>
-        </div>
       </div>
     </footer>
   );

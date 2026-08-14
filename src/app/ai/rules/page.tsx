@@ -66,19 +66,19 @@ export default function RulesPage() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-[#F8FAFC]">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8 z-10">
+    <div className="flex h-full flex-col bg-surface">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 bg-white px-6 md:px-8 z-10">
         <div className="flex items-center gap-3">
           <BackButton fallbackHref="/ai/workflow" title="Back to Workflow" />
-          <h1 className="text-xl font-bold text-slate-900">Business Routing Rules</h1>
-          <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-bold text-purple-700 ring-1 ring-purple-600/20">
+          <h1 className="text-xl font-bold text-ink">Business Routing Rules</h1>
+          <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-bold text-brand ring-1 ring-brand/20">
             {rules.filter((r) => r.is_active).length} active
           </span>
         </div>
 
         <button
           onClick={() => setEditing({ name: "", match_type: "all", priority: 100, conditions: [], action: { type: "handoff" } })}
-          className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+          className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand transition"
         >
           <Icon name="plus" size={14} />
           <span>Add New Rule</span>
@@ -88,14 +88,14 @@ export default function RulesPage() {
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto p-6 md:p-8">
         <div className="mx-auto max-w-4xl space-y-4">
           {error && (
-            <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
-              <Icon name="alert" size={16} className="mt-0.5 text-rose-600 shrink-0" />
+            <p className="flex items-start gap-2 rounded-2xl border border-danger-soft bg-danger-soft p-4 text-xs font-medium text-danger-dark">
+              <Icon name="alert" size={16} className="mt-0.5 text-danger shrink-0" />
               <span>{error}</span>
             </p>
           )}
 
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 text-xs text-slate-500 leading-relaxed shadow-xs flex items-start gap-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 ring-1 ring-purple-600/20 mt-0.5">
+          <div className="rounded-2xl border border-edge/80 bg-white p-4 text-xs text-muted leading-relaxed shadow-xs flex items-start gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand ring-1 ring-brand/20 mt-0.5">
               <Icon name="info" size={14} />
             </span>
             <p>
@@ -127,12 +127,12 @@ export default function RulesPage() {
           </div>
 
           {rules.length === 0 && (
-            <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-10 text-center space-y-2">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+            <div className="rounded-3xl border border-dashed border-edge bg-white p-10 text-center space-y-2">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface text-subtle">
                 <Icon name="filter" size={24} />
               </div>
-              <p className="text-sm font-bold text-slate-800">No custom rules configured yet</p>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <p className="text-sm font-bold text-ink">No custom rules configured yet</p>
+              <p className="text-xs text-subtle max-w-sm mx-auto">
                 The AI will use its standard automated qualification pipeline. Add a custom rule to route specific requests to specialized agent desks.
               </p>
             </div>
@@ -173,50 +173,50 @@ function RuleCard({ rule, index, regions, agents, onEdit, onToggle, onDelete }: 
         : null;
 
   return (
-    <div className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all ${rule.is_active ? "" : "opacity-60 bg-slate-50/50"}`}>
+    <div className={`rounded-2xl border border-edge/80 bg-white p-5 shadow-xs transition-all ${rule.is_active ? "" : "opacity-60 bg-surface/50"}`}>
       <div className="flex items-start gap-3.5">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-chalk text-xs font-bold text-muted">
           {index + 1}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-slate-900">{rule.name}</span>
+            <span className="text-xs font-bold text-ink">{rule.name}</span>
             {!rule.is_active && (
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+              <span className="rounded-md bg-chalk px-2 py-0.5 text-[10px] font-bold text-muted">
                 Disabled
               </span>
             )}
             {rule.match_count ? (
-              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+              <span className="rounded-md bg-wa-soft px-2 py-0.5 text-[10px] font-bold text-wa-dark ring-1 ring-wa-dark/20">
                 Matched {rule.match_count}×
               </span>
             ) : (
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+              <span className="rounded-md bg-chalk px-2 py-0.5 text-[10px] font-semibold text-subtle">
                 Never matched
               </span>
             )}
           </div>
 
-          <div className="mt-2.5 space-y-1.5 text-xs rounded-xl bg-slate-50/70 border border-slate-100 p-3">
-            <p className="text-slate-600">
-              <span className="font-bold text-purple-700 mr-1.5 uppercase text-[10px] tracking-wider">IF</span>
+          <div className="mt-2.5 space-y-1.5 text-xs rounded-xl bg-surface/70 border border-edge p-3">
+            <p className="text-muted">
+              <span className="font-bold text-brand mr-1.5 uppercase text-[10px] tracking-wider">IF</span>
               {(rule.conditions ?? []).map((c, i) => (
                 <span key={i}>
                   {i > 0 && (
-                    <span className="font-bold text-slate-400 mx-1.5">
+                    <span className="font-bold text-subtle mx-1.5">
                       {rule.match_type === "any" ? "OR" : "AND"}
                     </span>
                   )}
-                  <span className="font-semibold text-slate-900">{FIELD_LABEL[c.field] ?? c.field}</span>{" "}
-                  <span className="text-slate-500">{OPERATOR_LABEL[c.op] ?? c.op}</span>
-                  {!NO_VALUE.includes(c.op) && <span className="font-bold text-slate-900 ml-1">“{c.value}”</span>}
+                  <span className="font-semibold text-ink">{FIELD_LABEL[c.field] ?? c.field}</span>{" "}
+                  <span className="text-muted">{OPERATOR_LABEL[c.op] ?? c.op}</span>
+                  {!NO_VALUE.includes(c.op) && <span className="font-bold text-ink ml-1">“{c.value}”</span>}
                 </span>
               ))}
             </p>
-            <p className="text-slate-600">
-              <span className="font-bold text-emerald-700 mr-1.5 uppercase text-[10px] tracking-wider">THEN</span>
-              <span className="font-bold text-slate-900">{ACTION_LABEL[rule.action?.type] ?? "—"}</span>
-              {target && <span className="text-slate-600"> · <strong className="text-slate-900">{target}</strong></span>}
+            <p className="text-muted">
+              <span className="font-bold text-wa-dark mr-1.5 uppercase text-[10px] tracking-wider">THEN</span>
+              <span className="font-bold text-ink">{ACTION_LABEL[rule.action?.type] ?? "—"}</span>
+              {target && <span className="text-muted"> · <strong className="text-ink">{target}</strong></span>}
             </p>
           </div>
         </div>
@@ -227,7 +227,7 @@ function RuleCard({ rule, index, regions, agents, onEdit, onToggle, onDelete }: 
             onClick={onToggle}
             title={rule.is_active ? "Switch off" : "Switch on"}
             className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              rule.is_active ? "bg-emerald-500" : "bg-slate-300"
+              rule.is_active ? "bg-wa" : "bg-edge-strong"
             }`}
           >
             <span
@@ -239,9 +239,9 @@ function RuleCard({ rule, index, regions, agents, onEdit, onToggle, onDelete }: 
         </div>
       </div>
 
-      <div className="mt-3.5 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs font-semibold">
-        <button onClick={onEdit} className="text-purple-600 hover:text-purple-800 transition">Edit rule…</button>
-        <button onClick={onDelete} className="text-rose-500 hover:text-rose-700 transition">Delete</button>
+      <div className="mt-3.5 flex items-center justify-between border-t border-edge pt-2.5 text-xs font-semibold">
+        <button onClick={onEdit} className="text-brand hover:text-brand-dark transition">Edit rule…</button>
+        <button onClick={onDelete} className="text-danger hover:text-danger-dark transition">Delete</button>
       </div>
     </div>
   );

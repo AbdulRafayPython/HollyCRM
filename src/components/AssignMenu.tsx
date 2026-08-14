@@ -55,7 +55,7 @@ export default function AssignMenu({
           value={assignedTo ?? ""}
           disabled={busy}
           onChange={(id) => assign(id || null)}
-          className="rounded-xl border border-slate-200 bg-white py-1.5 pl-2 pr-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+          className="rounded-xl border border-edge bg-white py-1.5 pl-2 pr-2.5 text-xs font-semibold text-ink-soft hover:bg-surface transition shadow-2xs"
           options={[
             {
               value: "",
@@ -71,7 +71,7 @@ export default function AssignMenu({
           ]}
         />
       ) : (
-        <span className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white py-1.5 pl-2 pr-2.5 text-xs font-semibold text-slate-700 shadow-2xs">
+        <span className="flex items-center gap-1.5 rounded-xl border border-edge bg-white py-1.5 pl-2 pr-2.5 text-xs font-semibold text-ink-soft shadow-2xs">
           <Avatar name={owner?.full_name ?? null} type="agent" size={18} />
           <span>{assignedTo ? owner?.full_name ?? "Assigned" : "Unassigned"}</span>
         </span>
@@ -81,7 +81,7 @@ export default function AssignMenu({
         <button
           disabled={busy}
           onClick={() => assign(currentUserId)}
-          className="rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-slate-800 transition"
+          className="rounded-xl bg-ink px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-ink-soft transition"
         >
           Claim
         </button>
@@ -90,13 +90,13 @@ export default function AssignMenu({
         <button
           disabled={busy}
           onClick={() => assign(null)}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+          className="rounded-xl border border-edge bg-white px-3 py-1.5 text-xs font-semibold text-ink-soft hover:bg-surface transition"
         >
           Release
         </button>
       )}
 
-      {error && <span className="text-[10px] text-rose-600">{error}</span>}
+      {error && <span className="text-[10px] text-danger">{error}</span>}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export type RevealVariant = "up" | "left" | "right" | "zoom";
+export type RevealVariant = "up" | "left" | "right" | "zoom" | "tilt";
 
 /**
  * Scroll-triggered entrance.
@@ -54,7 +54,14 @@ export default function Reveal({
     // needed, and going through `reveal()` keeps that entrance animated.
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return;
+        // `isIntersecting` alone is not enough. A jump — an anchor link to
+        // #pricing, a restored scroll position, a trackpad fling — can move an
+        // element from below the fold to above it between two observer
+        // samples, so it never reports as intersecting and stays at opacity 0
+        // permanently. Anything already past the top of the viewport has been
+        // scrolled by and should simply be shown.
+        const scrolledPast = entry.boundingClientRect.bottom < 0;
+        if (!entry.isIntersecting && !scrolledPast) return;
         reveal();
         observer.disconnect();
       },

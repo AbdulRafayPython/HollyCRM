@@ -65,11 +65,11 @@ export default function ChatList({
   return (
     <div className="flex h-full flex-col bg-white">
       {/* Header & Search */}
-      <div className="flex shrink-0 flex-col gap-3 border-b border-slate-100 p-3.5">
+      <div className="flex shrink-0 flex-col gap-3 border-b border-edge p-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-extrabold tracking-tight text-slate-900">Conversations</h2>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+            <h2 className="text-base font-extrabold tracking-tight text-ink">Conversations</h2>
+            <span className="rounded-full bg-chalk px-2 py-0.5 text-[10px] font-bold text-muted">
               {counts[filter]}
             </span>
           </div>
@@ -80,18 +80,18 @@ export default function ChatList({
           <Icon
             name="search"
             size={14}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle"
           />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search conversations, phone…"
-            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 py-2 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
+            className="w-full rounded-xl border border-edge/80 bg-surface/70 py-2 pl-9 pr-8 text-xs text-ink placeholder:text-subtle focus:border-edge-strong focus:bg-white focus:outline-none transition"
           />
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-subtle hover:text-muted"
             >
               <Icon name="close" size={12} />
             </button>
@@ -111,15 +111,15 @@ export default function ChatList({
                 onClick={() => setFilter(t.key)}
                 className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
                   active
-                    ? "bg-slate-900 text-white shadow-2xs"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                    ? "bg-ink text-white shadow-2xs"
+                    : "text-muted hover:bg-chalk hover:text-ink"
                 }`}
               >
                 <span>{t.label}</span>
                 {counts[t.key] > 0 && (
                   <span
                     className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
-                      active ? "bg-white/20 text-white" : "bg-slate-200/70 text-slate-600"
+                      active ? "bg-white/20 text-white" : "bg-edge/70 text-muted"
                     }`}
                   >
                     {counts[t.key]}
@@ -132,14 +132,14 @@ export default function ChatList({
       </div>
 
       {/* Conversation List Scroll Area */}
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto divide-y divide-slate-100/60">
+      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto divide-y divide-edge/60">
         {visible.length === 0 && (
           <div className="p-8 text-center">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-chalk text-subtle">
               <Icon name="chat" size={18} />
             </div>
-            <p className="mt-3 text-xs font-bold text-slate-700">No conversations</p>
-            <p className="mt-1 text-[11px] text-slate-400">
+            <p className="mt-3 text-xs font-bold text-ink-soft">No conversations</p>
+            <p className="mt-1 text-[11px] text-subtle">
               Incoming WhatsApp inquiries will automatically appear here.
             </p>
           </div>
@@ -164,13 +164,13 @@ function Row({ chat, active }: { chat: ChatRow; active: boolean }) {
       href={`/inbox/${chat.id}`}
       className={`group relative flex gap-3 px-3.5 py-3 transition-colors duration-150 ${
         active
-          ? "bg-slate-100/80 shadow-xs"
-          : "hover:bg-slate-50/80"
+          ? "bg-chalk/80 shadow-xs"
+          : "hover:bg-surface/80"
       }`}
     >
       {/* Active Left Indicator Bar */}
       {active && (
-        <span className="absolute left-0 inset-y-1.5 w-1 rounded-r-md bg-emerald-500" />
+        <span className="absolute left-0 inset-y-1.5 w-1 rounded-r-md bg-wa" />
       )}
 
       {/* Avatar */}
@@ -178,7 +178,7 @@ function Row({ chat, active }: { chat: ChatRow; active: boolean }) {
         <Avatar name={chat.title || name} type={isGroup ? "group" : "direct"} size={40} />
         {isGroup && (
           <span
-            className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[9px] text-white ring-2 ring-white"
+            className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-ink-soft text-[9px] text-white ring-2 ring-white"
             title="WhatsApp Group"
           >
             👥
@@ -190,49 +190,49 @@ function Row({ chat, active }: { chat: ChatRow; active: boolean }) {
         <div className="flex items-baseline justify-between gap-1.5">
           <span
             className={`truncate text-xs font-bold ${
-              active ? "text-slate-900" : "text-slate-800 group-hover:text-slate-900"
+              active ? "text-ink" : "text-ink group-hover:text-ink"
             }`}
           >
             {name}
           </span>
-          <span className="shrink-0 text-[10px] font-medium text-slate-400">
+          <span className="shrink-0 text-[10px] font-medium text-subtle">
             {shortTime(chat.last_message_at)}
           </span>
         </div>
 
-        <p className="mt-0.5 truncate text-[11px] text-slate-500">
+        <p className="mt-0.5 truncate text-[11px] text-muted">
           {snippet}
         </p>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-1">
           {isGroup ? (
-            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
+            <span className="rounded-md bg-chalk px-1.5 py-0.5 text-[9px] font-bold text-muted">
               Group {chat.participant_count ? `(${chat.participant_count})` : ""}
             </span>
           ) : (
-            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-600/10">
+            <span className="rounded-md bg-wa-soft px-1.5 py-0.5 text-[9px] font-bold text-wa-dark ring-1 ring-wa-dark/10">
               WhatsApp
             </span>
           )}
 
           {!chat.is_bot_paused ? (
-            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">
+            <span className="rounded-md bg-wa-soft px-1.5 py-0.5 text-[9px] font-bold text-wa-dark">
               ⚡ AI Live
             </span>
           ) : (
-            <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">
+            <span className="rounded-md bg-bot-soft px-1.5 py-0.5 text-[9px] font-bold text-bot-dark">
               ⏸ AI Paused
             </span>
           )}
 
           {!chat.assigned_agent_id && (
-            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-400">
+            <span className="rounded-md bg-chalk px-1.5 py-0.5 text-[9px] font-medium text-subtle">
               Unassigned
             </span>
           )}
 
           {chat.unread_count > 0 && (
-            <span className="ml-auto inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
+            <span className="ml-auto inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-wa-dark px-1.5 text-[10px] font-extrabold text-white shadow-xs">
               {chat.unread_count}
             </span>
           )}

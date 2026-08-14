@@ -188,23 +188,23 @@ export default async function ChatPage({
   return (
     <div className="flex h-full bg-white">
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200/80 bg-white px-5 py-3 shadow-2xs z-10">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-edge/80 bg-white px-5 py-3 shadow-2xs z-10">
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <Avatar name={chat.title || `+${phone}`} type={isGroup ? "group" : "direct"} size={38} />
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h1 className="truncate text-sm font-extrabold text-slate-900 leading-tight">
+                <h1 className="truncate text-sm font-extrabold text-ink leading-tight">
                   {chat.title ?? `+${phone}`}
                 </h1>
                 {chat.is_archived && (
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 shrink-0">
+                  <span className="rounded-md bg-chalk px-2 py-0.5 text-[10px] font-bold text-muted shrink-0">
                     Archived
                   </span>
                 )}
               </div>
-              <p className="flex items-center gap-1.5 text-xs font-medium text-slate-400 truncate mt-0.5">
-                <span className={`h-2 w-2 shrink-0 rounded-full ${isGroup ? "bg-indigo-500" : "bg-emerald-500"}`} />
+              <p className="flex items-center gap-1.5 text-xs font-medium text-subtle truncate mt-0.5">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${isGroup ? "bg-brand" : "bg-wa"}`} />
                 <span className="truncate">
                   {isGroup
                     ? `WhatsApp group · ${chat.participant_count} participants`

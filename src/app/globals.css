@@ -6,17 +6,35 @@
   color-scheme: light;
 }
 
+/* One body face across the whole product. The workstation used to run on Inter
+   while the marketing site ran IBM Plex Sans, which showed as a seam the moment
+   anyone crossed from the landing page into the app. `cv11`/`ss01` went with
+   it — those are Inter's own stylistic sets and mean nothing to Plex. */
 body {
   @apply bg-surface text-ink antialiased;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-feature-settings: "cv11", "ss01";
+  font-family: var(--font-plex), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   font-variant-numeric: tabular-nums;
+}
+
+/* Scrollable, but with no visible indicator.
+   For decorative panels that must not lose content on a very short window but
+   where a scrollbar is never wanted. The auth branding panel needs this: its
+   entrance animation starts at `translateY(14px)`, transforms count toward the
+   scrollable overflow region, and that flashed a scrollbar for the ~530ms the
+   animation ran. The content still scrolls by wheel and keyboard. */
+.scroll-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-none::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 /* Scroll areas — thin, cold, only visible on hover. */
 .scroll-thin {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: #c3cbbf transparent;
 }
 .scroll-thin::-webkit-scrollbar {
   width: 8px;
@@ -59,6 +77,43 @@ body {
   /* Section label above a group of fields in the lead drawer. */
   .eyebrow {
     @apply text-caption font-semibold uppercase tracking-wider text-muted;
+  }
+
+  /* ---- Auth forms -------------------------------------------------------
+     The auth shell is locked to the window (AppShell's BARE branch), so the
+     form column is the only thing that can scroll — and a form that overflows
+     it puts its own submit button below the fold, which is the one control the
+     visitor came here to press. Signup, the tallest of them, did exactly that
+     on a normal laptop window.
+
+     So the form is sized against viewport HEIGHT rather than a fixed scale:
+     control heights, the gaps between fields, the gaps between blocks and the
+     heading all shrink together on a short window and stop at a comfortable
+     floor (46px controls — still above the 44px touch minimum). Signup fits
+     from roughly 640px of window height up; below that the column still
+     scrolls, as a safety net rather than as the normal experience.
+
+     One set of variables, four consumers, so the rhythm stays proportional:
+     nothing gets tight while something beside it stays loose. */
+  .auth-form {
+    --auth-control: clamp(2.875rem, 6.3vh, 3.5rem);
+    --auth-gap: clamp(0.5rem, 1.3vh, 0.75rem);
+    --auth-step: clamp(0.75rem, 2.4vh, 1.5rem);
+  }
+  /* Every tappable thing in the form: inputs, the Google button, submit. */
+  .auth-control {
+    height: var(--auth-control, 3.5rem);
+  }
+  /* Between fields of one group. */
+  .auth-stack > * + * {
+    margin-top: var(--auth-gap, 0.75rem);
+  }
+  /* Between blocks of the form. */
+  .auth-step {
+    margin-top: var(--auth-step, 1.5rem);
+  }
+  .auth-title {
+    font-size: clamp(1.375rem, 3.3vh, 1.9rem);
   }
 }
 
@@ -116,6 +171,183 @@ body {
     opacity: 1;
     transform: none;
     will-change: auto;
+  }
+
+  /* Footer / large card entrance. The reference showreel ends by rotating the
+     whole page back in 3D — that is the video presenting itself as an object,
+     not a page feature, so this takes the same gesture at a tenth of the dose
+     and applies it to one card. Hinged at its bottom edge, so it lifts toward
+     the reader rather than sliding. */
+  [data-reveal="tilt"] {
+    transform: perspective(1200px) rotateX(9deg) translate3d(0, 30px, 0);
+    transform-origin: 50% 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Marketing surface.
+
+   Scoped to the landing page by class, never by element: the workstation
+   shares this stylesheet and must not inherit any of it.
+   --------------------------------------------------------------------------- */
+
+/* Display type. Archivo's `wdth` axis is the reason it was chosen — headings
+   ship expanded on desktop and narrow to normal width on phones, so a long
+   headline holds its line count instead of wrapping to five lines. One font
+   file, no separate mobile type scale.
+
+   Declared in `@layer components` specifically so single-property utilities
+   still win over it. The auth headings use `normal-case` to opt out of the
+   uppercase: unlayered, this class is emitted after `@tailwind utilities` and
+   would beat `normal-case` on source order at equal specificity. */
+@layer components {
+  .mkt-display {
+    font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+    font-variation-settings: "wdth" 100;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+    line-height: 0.94;
+    text-wrap: balance;
+  }
+  @media (min-width: 640px) {
+    .mkt-display {
+      font-variation-settings: "wdth" 110;
+    }
+  }
+  @media (min-width: 1024px) {
+    .mkt-display {
+      font-variation-settings: "wdth" 118;
+    }
+  }
+}
+
+/* Ambient ground. Replaces the violet blur blobs with an eight-point khatim
+   tessellation — ordinary Islamic geometric tiling, held at near-threshold
+   opacity. Geometry only, deliberately: calligraphy or scripture on a sales
+   page reads as appropriation to exactly the customers this page is for.
+   If a visitor notices it as a pattern it is twice as strong as it should be. */
+.girih-ground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 88 88'%3E%3Cg fill='none' stroke='%2314201A' stroke-width='1.1'%3E%3Crect x='16' y='16' width='56' height='56'/%3E%3Cpath d='M44 3 L85 44 L44 85 L3 44 Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 88px 88px;
+  /* Fades out before the section edge so the tiling never terminates on a
+     hard line — the pattern should feel like atmosphere, not wallpaper. */
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 78%);
+}
+
+/* Same tiling for dark grounds. The stroke has to invert — the graphite panel
+   on the auth screen was drawing a near-black pattern on a near-black field,
+   which is simply nothing. Held lower than the light version because a light
+   line on a dark ground reads far more strongly at the same opacity. */
+.girih-ground-invert::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 88 88'%3E%3Cg fill='none' stroke='%23F7F8F5' stroke-width='1.1'%3E%3Crect x='16' y='16' width='56' height='56'/%3E%3Cpath d='M44 3 L85 44 L44 85 L3 44 Z'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.055;
+}
+
+/* Marquee. The track holds its content twice, so -50% lands exactly on the
+   seam and the loop has no visible jump. Width is content-driven; the host
+   clips. Duration comes from --marquee-dur per instance. */
+.marquee-host {
+  overflow: hidden;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  flex-wrap: nowrap;
+}
+.marquee-track > * {
+  flex: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Pausing on hover is the difference between a decoration and something a
+     visitor can actually read. Also pauses on keyboard focus within. */
+  .marquee-host:hover .marquee-track,
+  .marquee-host:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+/* With reduced motion the track must not sit at width:max-content and
+   overflow silently — it becomes a normal scrollable strip the visitor drives. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-host {
+    overflow-x: auto;
+  }
+  .marquee-track {
+    animation: none !important;
+  }
+  /* Tailwind's `animate-*` utilities carry no reduced-motion guard of their
+     own, so the idle loops have to be switched off explicitly. The hero
+     collage settles wherever it is and simply stops. */
+  .animate-levitate {
+    animation: none !important;
+  }
+  /* The auth proof ships at opacity 0 and is brought in by `proof-in`, so it
+     cannot simply be switched off — it has to be handed straight over. */
+  .animate-proof-in {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Tilted ribbons overhang the viewport by design. They need their own clip so
+   the rotated corners cannot widen the document — the root uses `clip` to keep
+   the sticky header working, and a rotated child would otherwise defeat it.
+
+   Horizontal only. Rotating a full-width row grows its vertical extent by
+   roughly width × sin(angle), and plain `overflow: clip` would shear the top
+   and bottom cards off. `clip` + `visible` is the one mixed pair CSS honours
+   as written (`hidden` + `visible` silently computes to `auto` and creates a
+   scroll container, which would break the sticky header). Sections using this
+   must carry enough vertical padding for the overhang. */
+.ribbon-clip {
+  overflow-x: clip;
+  overflow-y: visible;
+  width: 100%;
+}
+
+/* The receipt: the page's signature. A hairline draws from a quoted price down
+   to the database row that produced it. `--trace-len` is set inline from the
+   path's own length so the dash maths is exact at any height. */
+.trace-path {
+  stroke-dasharray: var(--trace-len, 120);
+  /* Drawn by default, so the receipt works anywhere — the auth page uses it
+     with no scroll observer above it. It is only held back when it sits
+     inside a reveal that has not fired yet. */
+  stroke-dashoffset: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal]:not(.is-revealed) .trace-path {
+    stroke-dashoffset: var(--trace-len, 120);
+  }
+  .is-revealed .trace-path {
+    animation: trace-draw 620ms cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards;
+  }
+}
+
+/* Accordion. Animating grid-template-rows between 0fr and 1fr transitions real
+   auto height with no JS measurement and no max-height guesswork. */
+.accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.accordion-panel[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+.accordion-panel > div {
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .accordion-panel {
+    transition: none;
   }
 }
 

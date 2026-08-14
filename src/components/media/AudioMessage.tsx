@@ -32,7 +32,7 @@ export default function AudioMessage({
 }: {
   messageId: string;
   url: string | null;
-  /** Rendered inside the violet outbound bubble — invert the palette. */
+  /** Rendered inside the brand-green outbound bubble — invert the palette. */
   onBrand?: boolean;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);

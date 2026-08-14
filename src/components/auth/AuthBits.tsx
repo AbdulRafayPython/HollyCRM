@@ -35,7 +35,7 @@ export function GoogleButton({
       type="button"
       onClick={onClick}
       disabled={busy}
-      className="flex h-14 w-full items-center justify-center gap-3 rounded-xl border border-edge bg-card
+      className="auth-control flex w-full items-center justify-center gap-3 rounded-xl border border-edge bg-card
                  text-body font-medium text-ink shadow-card transition duration-150 ease-swift
                  hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40
                  disabled:cursor-not-allowed disabled:opacity-60"
@@ -48,7 +48,7 @@ export function GoogleButton({
 
 export function OrDivider() {
   return (
-    <div className="my-5 flex items-center gap-3 text-caption text-subtle">
+    <div className="my-[var(--auth-step,1.25rem)] flex items-center gap-3 text-caption text-subtle">
       <span className="h-px flex-1 bg-edge" />
       or
       <span className="h-px flex-1 bg-edge" />
@@ -57,25 +57,30 @@ export function OrDivider() {
 }
 
 /**
- * The left panel is desktop-only, so small screens would otherwise never see the
- * product. A cropped strip of the same screenshot keeps that proof without
- * spending the vertical room a full shot would.
+ * The branding panel is desktop-only, so small screens would otherwise never
+ * see the product at all. This carries one of the same three renders on the
+ * same graphite ground, so the phone version reads as the same brand rather
+ * than a different page.
  */
 export function MobileHero() {
   return (
-    <div className="mb-6 h-24 overflow-hidden rounded-2xl ring-1 ring-slate-900/5 lg:hidden">
+    <div className="mb-[var(--auth-step,1.5rem)] flex items-center gap-4 overflow-hidden rounded-2xl bg-ink px-4 py-3 lg:hidden">
       <Image
-        src="/landing-assets/hero_mockup.jpg"
-        alt="The HolyCRM shared WhatsApp inbox beside the lead pipeline board"
-        width={1376}
-        height={768}
-        unoptimized
-        sizes="100vw"
-        // Same margin crop as the desktop panel, gentler because the band is
-        // already a narrow slice through the middle of the shot.
-        style={{ transform: "scale(1.25)" }}
-        className="h-full w-full object-cover"
+        src="/landing/auth-scene-analytics.webp"
+        alt=""
+        aria-hidden
+        width={200}
+        height={200}
+        className="-my-2 h-24 w-24 shrink-0 object-contain"
       />
+      <span className="min-w-0">
+        <span className="block text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-brass">
+          Sales · Support · Automation
+        </span>
+        <span className="mt-1 block text-meta leading-snug text-surface/75">
+          Every conversation, every deal, in one workspace.
+        </span>
+      </span>
     </div>
   );
 }
@@ -104,7 +109,7 @@ export function AuthInput({
         />
         <input
           {...props}
-          className={`field h-14 rounded-xl bg-surface pl-12 text-body ${trailing ? "pr-12" : ""} ${className}`}
+          className={`field auth-control rounded-xl bg-surface pl-12 text-body ${trailing ? "pr-12" : ""} ${className}`}
         />
         {trailing}
       </span>

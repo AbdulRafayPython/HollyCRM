@@ -1,122 +1,182 @@
-import Link from "next/link";
-import Image from "next/image";
-import Icon from "@/components/ui/Icon";
-import { cropStyle } from "./primitives";
+import Icon, { type IconName } from "@/components/ui/Icon";
+import { Cta, Eyebrow } from "./primitives";
 import Reveal from "./Reveal";
-import ParallaxShot from "./ParallaxShot";
+import Receipt from "./Receipt";
 
 const TRUST = ["Direct & group chats", "SQL-grounded pricing", "PDPL & GDPR encrypted"];
+
+/**
+ * Floating fragment of the product, orbiting the receipt.
+ *
+ * Each chip gets its own duration and delay so the group never beats in sync —
+ * that de-synchronisation is the whole difference between "floating" and
+ * "pulsing". Hidden below lg: at tablet width they would land on top of the
+ * receipt, and a collage that overlaps its own subject is just noise.
+ */
+function FloatChip({
+  icon,
+  label,
+  value,
+  className,
+  duration,
+  delay,
+  tone = "plain",
+}: {
+  icon: IconName;
+  label: string;
+  value?: string;
+  className: string;
+  duration: string;
+  delay: string;
+  tone?: "plain" | "dome" | "brass";
+}) {
+  const tones = {
+    plain: "bg-plate text-graphite ring-rule",
+    dome: "bg-dome-tint text-dome ring-dome-line",
+    brass: "bg-brass-tint text-brass-deep ring-brass/40",
+  };
+  return (
+    <div
+      aria-hidden
+      style={
+        {
+          ["--float-dur" as string]: duration,
+          ["--float-delay" as string]: delay,
+        } as React.CSSProperties
+      }
+      className={`pointer-events-none absolute hidden animate-levitate lg:block ${className}`}
+    >
+      <div
+        className={`flex items-center gap-2 rounded-xl px-3 py-2 shadow-chip ring-1 ${tones[tone]}`}
+      >
+        <Icon name={icon} className="h-4 w-4 shrink-0" />
+        <div className="flex flex-col leading-tight">
+          <span className="font-plex text-[0.68rem] font-semibold whitespace-nowrap">
+            {label}
+          </span>
+          {value ? (
+            <span className="font-plexmono text-[0.64rem] text-haze whitespace-nowrap">
+              {value}
+            </span>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LandingHero({ isConfigured = true }: { isConfigured?: boolean }) {
   const targetRoute = isConfigured ? "/home" : "/setup";
 
-  // `isolate` keeps the -z-10 washes inside this section's stacking context;
-  // without it they would paint behind the page's white background.
   return (
-    <section className="relative isolate overflow-hidden pb-16 pt-12 sm:pb-24 sm:pt-16">
-      {/* Lilac wash behind the fold. The header sits on top of this. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-32 -z-10 h-[46rem] bg-gradient-to-b from-violet-100 via-violet-50/70 to-white"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 -top-24 -z-10 h-[32rem] w-[32rem] rounded-full bg-fuchsia-300/30 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-32 top-24 -z-10 h-[26rem] w-[26rem] rounded-full bg-violet-400/20 blur-3xl"
-      />
-
+    // `isolate` keeps the girih ground inside this section's stacking context.
+    // The pattern replaces the violet blur blobs that used to sit here.
+    <section className="girih-ground relative isolate overflow-hidden pb-20 pt-14 sm:pt-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* Slightly wider copy column so "Scale WhatsApp Deals." holds one line. */}
-        <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-10">
-          {/* Copy column. Each block carries its own delay so the hero lands
-              as a sequence — badge, headline, promise, actions — rather than
-              everything arriving at once. */}
-          <div className="max-w-xl">
-            <Reveal delay={40}>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-violet-200/70 backdrop-blur">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-                Purpose-built for Umrah &amp; Hajj hospitality agencies
-              </span>
-            </Reveal>
+        <div className="mx-auto max-w-3xl text-center">
+          <Reveal delay={40}>
+            <Eyebrow>WhatsApp-native CRM for Umrah &amp; Hajj</Eyebrow>
+          </Reveal>
 
-            <Reveal delay={140}>
-              <h1 className="mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-[2.9rem] xl:text-[3.15rem]">
-                Scale WhatsApp Deals.
-                <br />
-                <span className="text-violet-600">Zero Hallucinations.</span>
-              </h1>
-            </Reveal>
+          <Reveal delay={120}>
+            <h1 className="mkt-display mt-4 text-[2.6rem] font-extrabold text-graphite sm:text-[3.6rem] lg:text-[4.4rem]">
+              Quote the room
+              <br />
+              <span className="text-dome">you actually have</span>
+            </h1>
+          </Reveal>
 
-            <Reveal delay={240}>
-              <p className="mt-6 text-base leading-relaxed text-slate-600 sm:text-lg">
-                HolyCRM is the WhatsApp-native CRM for Umrah &amp; Hajj agencies. Run
-                multi-party family negotiations, auto-advance pipeline stages, and quote
-                real Makkah &amp; Madinah inventory straight from your database.
-              </p>
-            </Reveal>
+          <Reveal delay={220}>
+            <p className="mx-auto mt-6 max-w-xl font-plex text-base leading-relaxed text-stone sm:text-lg">
+              HolyCRM runs your Makkah and Madinah bookings inside the WhatsApp
+              threads you already sell in — group negotiations, stage tracking, and
+              rates read straight from your own inventory.
+            </p>
+          </Reveal>
 
-            <Reveal delay={340}>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href={targetRoute}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-violet-600/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-2xl hover:shadow-violet-700/40 active:translate-y-0 active:scale-[0.98]"
+          <Reveal delay={320}>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Cta href={targetRoute} icon="chat">
+                Launch workstation
+              </Cta>
+              <Cta href="#pricing" variant="secondary">
+                See pricing
+              </Cta>
+            </div>
+          </Reveal>
+
+          <Reveal delay={420}>
+            <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+              {TRUST.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-center gap-1.5 font-plex text-xs font-medium text-stone"
                 >
-                  <Icon name="chat" className="h-4 w-4" />
-                  Launch Workstation
-                </Link>
-                <a
-                  href="#pricing"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md active:translate-y-0"
-                >
-                  View Pricing
-                </a>
-              </div>
-            </Reveal>
+                  <Icon name="check" className="h-4 w-4 text-dome" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
 
-            <Reveal delay={440}>
-              <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
-                {TRUST.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-1.5 text-xs font-medium text-slate-500"
-                  >
-                    <Icon name="check" className="h-4 w-4 text-emerald-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-          </div>
+        {/* The collage. The receipt is the subject; everything else orbits it. */}
+        <div className="relative mx-auto mt-14 max-w-lg">
+          <FloatChip
+            icon="kanban"
+            label="Stage advanced"
+            value="New → Quoted"
+            tone="dome"
+            className="-left-52 top-6 xl:-left-64"
+            duration="6.4s"
+            delay="0s"
+          />
+          <FloatChip
+            icon="users"
+            label="8 in this group"
+            value="4 decision makers"
+            className="-left-44 top-44 xl:-left-56"
+            duration="5.2s"
+            delay="0.7s"
+          />
+          <FloatChip
+            icon="shield"
+            label="Cooldown active"
+            value="60s · 8/10 today"
+            tone="brass"
+            className="-left-40 bottom-10 xl:-left-48"
+            duration="7.1s"
+            delay="1.4s"
+          />
+          <FloatChip
+            icon="database"
+            label="search_hotels()"
+            value="128 rows · 41 ms"
+            className="-right-48 top-2 xl:-right-60"
+            duration="5.8s"
+            delay="0.3s"
+          />
+          <FloatChip
+            icon="bot"
+            label="Intent classified"
+            value="hotel_query"
+            tone="dome"
+            className="-right-44 top-40 xl:-right-56"
+            duration="6.8s"
+            delay="1.1s"
+          />
+          <FloatChip
+            icon="lock"
+            label="Passport vault"
+            value="PDPL encrypted"
+            className="-right-40 bottom-16 xl:-right-52"
+            duration="5.6s"
+            delay="1.9s"
+          />
 
-          {/* Product shot. Bleeds past the grid on large screens so the
-              workstation reads as a window into the app, not a boxed thumbnail. */}
-          <div className="relative isolate lg:-mr-24 xl:-mr-32">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -inset-8 -z-10 rounded-[2.5rem] bg-gradient-to-tr from-violet-400/30 via-fuchsia-300/20 to-emerald-300/20 blur-3xl"
-            />
-            <Reveal variant="zoom" delay={220}>
-              <ParallaxShot className="overflow-hidden rounded-2xl shadow-2xl shadow-violet-950/15 ring-1 ring-slate-900/10">
-                <Image
-                  src="/landing-assets/hero_mockup.jpg"
-                  alt="HolyCRM shared WhatsApp inbox alongside the Kanban sales pipeline"
-                  width={1376}
-                  height={768}
-                  priority
-                  unoptimized
-                  sizes="(min-width: 1024px) 55vw, 100vw"
-                  style={cropStyle(1.5)}
-                  className="h-auto w-full"
-                />
-              </ParallaxShot>
-            </Reveal>
-          </div>
+          <Reveal variant="zoom" delay={260}>
+            <Receipt />
+          </Reveal>
         </div>
       </div>
     </section>

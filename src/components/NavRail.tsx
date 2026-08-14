@@ -22,8 +22,8 @@ const NAV: { href: string; icon: IconName; label: string }[] = [
 ];
 
 /**
- * 64px rail. Charcoal ground, mint active state — violet has too little contrast
- * against #0F172A to carry the active marker on its own.
+ * 64px rail. Charcoal ground, mint active state — the brand green has too little contrast
+ * against the charcoal rail to carry the active marker on its own.
  */
 export default function NavRail({ connected, user }: { connected: boolean; user?: ProfileUser }) {
   const pathname = usePathname() ?? "";
@@ -48,7 +48,7 @@ export default function NavRail({ connected, user }: { connected: boolean; user?
                 href={item.href}
                 title={item.label}
                 className={`relative flex flex-col items-center gap-1 py-2.5 transition-colors duration-150 ease-swift ${
-                  active ? "text-wa" : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                  active ? "text-wa" : "text-subtle hover:bg-white/5 hover:text-edge-strong"
                 }`}
               >
                 {active && <span className="absolute left-0 top-1 h-[calc(100%-8px)] w-0.5 rounded-r bg-wa" />}
@@ -72,7 +72,7 @@ export default function NavRail({ connected, user }: { connected: boolean; user?
           className={`flex flex-col items-center gap-1 py-2.5 transition-colors duration-150 ease-swift ${
             pathname.startsWith("/setup")
               ? "text-wa"
-              : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+              : "text-subtle hover:bg-white/5 hover:text-edge-strong"
           }`}
         >
           <Icon name="bolt" size={20} />

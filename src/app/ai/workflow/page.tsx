@@ -172,24 +172,24 @@ export default function WorkflowPage() {
   const needsSetup = Object.values(statuses).filter((s) => s.status === "attention").length;
 
   return (
-    <div className="flex h-full flex-col bg-[#F8FAFC]">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8 z-10">
+    <div className="flex h-full flex-col bg-surface">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 bg-white px-6 md:px-8 z-10">
         <div className="flex items-center gap-3">
           <BackButton fallbackHref="/ai" title="Back to AI agent" />
-          <h1 className="text-xl font-bold text-slate-900">Workflow Canvas</h1>
+          <h1 className="text-xl font-bold text-ink">Workflow Canvas</h1>
           {snap && (needsSetup > 0
-            ? <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700 ring-1 ring-amber-600/20">{needsSetup} step{needsSetup === 1 ? "" : "s"} need setup</span>
-            : <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 ring-1 ring-emerald-600/20">All steps configured</span>)}
+            ? <span className="rounded-full bg-bot-soft px-2.5 py-0.5 text-xs font-bold text-bot-dark ring-1 ring-bot/20">{needsSetup} step{needsSetup === 1 ? "" : "s"} need setup</span>
+            : <span className="rounded-full bg-wa-soft px-2.5 py-0.5 text-xs font-bold text-wa-dark ring-1 ring-wa-dark/20">All steps configured</span>)}
         </div>
 
         <div className="flex items-center gap-3">
-          {error && <span className="text-xs text-rose-600 font-medium">{error}</span>}
-          <span className={`text-xs text-slate-400 font-medium transition-opacity duration-200 ${saving ? "opacity-100" : "opacity-0"}`}>
+          {error && <span className="text-xs text-danger font-medium">{error}</span>}
+          <span className={`text-xs text-subtle font-medium transition-opacity duration-200 ${saving ? "opacity-100" : "opacity-0"}`}>
             Saving layout…
           </span>
           <Link
             href="/ai/rules?from=/ai/workflow"
-            className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+            className="flex items-center gap-1.5 rounded-xl border border-edge bg-white px-3.5 py-2 text-xs font-semibold text-ink-soft hover:bg-surface transition shadow-2xs"
           >
             <Icon name="filter" size={14} />
             <span>Rules{snap?.rules.active ? ` (${snap.rules.active})` : ""}</span>
@@ -198,8 +198,8 @@ export default function WorkflowPage() {
             onClick={() => { setTesting((v) => !v); setSelected(null); }}
             className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition shadow-xs ${
               testing
-                ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                : "bg-purple-600 text-white hover:bg-purple-700"
+                ? "border border-edge bg-white text-ink-soft hover:bg-surface"
+                : "bg-brand text-white hover:bg-brand"
             }`}
           >
             <Icon name="play" size={14} />

@@ -27,18 +27,18 @@ export default async function PipelinePage() {
     : { data: [] };
 
   return (
-    <div className="flex h-full flex-col bg-[#F8FAFC]">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6">
+    <div className="flex h-full flex-col bg-surface">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 bg-white px-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-slate-900">Pipeline</h1>
-          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+          <h1 className="text-xl font-bold text-ink">Pipeline</h1>
+          <span className="rounded-full bg-chalk px-2.5 py-0.5 text-xs font-semibold text-muted">
             {leads?.length ?? 0} active leads
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
+        <div className="flex items-center gap-4 text-xs font-medium text-subtle">
           <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="h-1.5 w-1.5 rounded-full bg-wa" />
             Drag cards to progress stages
           </span>
         </div>

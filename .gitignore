@@ -83,9 +83,17 @@ temp/
 
 # ===========================================================================
 #  UNUSED / REFERENCE-ONLY ASSETS
-#  These folders contain design references, prototypes, and duplicate images
-#  that are NOT referenced by any source code. Only public/landing-assets/
-#  serves the 8 images actually loaded by the landing page components.
+#  Design references, prototypes, image-generation sources and duplicates that
+#  no source file loads.
+#
+#  The only image directories the app actually serves are:
+#    public/landing/   — the landing + auth photography and 3D renders (WebP)
+#    public/banners/   — the three integration banners on settings/whatsapp
+#
+#  public/landing-assets/ used to serve the landing page. It no longer does:
+#  those were AI-generated UI screenshots whose text was hallucinated and whose
+#  brand name predated the Holly -> Holy rename. Every one was replaced by real
+#  markup or by the WebP set in public/landing/.
 # ===========================================================================
 
 # -- Root-level duplicate asset folders --
@@ -102,8 +110,13 @@ temp/
 
 # -- Unused files inside public/ --
 
-# Large 20 MB video not used by any component
+# Source PNGs handed to the image generator, kept only until they were
+# converted into the WebP set in public/landing/. Tens of MB, never served.
+public/Gpt images/
+
+# Reference showreels the landing page motion was derived from. Not shipped.
 public/4dea10d5c1dbe4727dd6cf2469130569.mp4
+public/original-50b3b12780545edf5499079baf99bc77.mp4
 
 # UUID-named image (duplicate of ai_quoting_flow_diagram.png) — unused
 public/28405ba1-bc0b-4d04-a969-591e7821f953.png
@@ -116,25 +129,15 @@ public/logo.jpg
 # Standalone quoting flow image in root (code loads /landing-assets/ version)
 public/ai_quoting_flow.png
 
-# 150-frame GIF-to-JPG extraction + its source ZIP — not used anywhere
+# Frame-by-frame extractions of the reference showreels, plus a source ZIP.
+# Used once to read the reference's motion; nothing loads them.
 public/ezgif-3e207b37f206995c-jpg/
 public/ezgif-3e207b37f206995c-jpg.zip
+public/ezgif-887ce1c1dca09140-jpg/
 
 # UI prototype thumbnails duplicated from "frontend Ui/" — not used in code
 public/frontend-ui/
 
-# Duplicate / timestamped copies inside landing-assets that are NOT referenced.
-# (The shorter-named versions ARE used: ai_agent.jpg, green_api.jpg, etc.)
-public/landing-assets/hollycrm_ai_agent_1786618007990.jpg
-public/landing-assets/hollycrm_ai_flow_1786617850102.jpg
-public/landing-assets/hollycrm_brand_logo.jpg
-public/landing-assets/hollycrm_faq_pricing_widget_1786618595068.jpg
-public/landing-assets/hollycrm_full_landing_page_1786618958289.jpg
-public/landing-assets/hollycrm_green_api_1786617986730.jpg
-public/landing-assets/hollycrm_group_messages_1786618030599.jpg
-public/landing-assets/hollycrm_hero_mockup_1786617835131.jpg
-public/landing-assets/hollycrm_interactive_widgets_1786618565528.jpg
-public/landing-assets/interactive_widgets.jpg
-public/landing-assets/logo.jpg
-public/landing-assets/pricing_faq.jpg
-public/landing-assets/ai_quoting_flow.png
+# The whole generated-screenshot set. Superseded by real markup and by
+# public/landing/ — see the note at the top of this section.
+public/landing-assets/

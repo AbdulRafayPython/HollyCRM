@@ -56,10 +56,10 @@ export default function SettingsNav() {
   };
 
   return (
-    <aside className="w-60 shrink-0 border-r border-slate-200/80 bg-[#FAFAFC] flex flex-col justify-between p-4 overflow-y-auto scroll-thin">
+    <aside className="w-60 shrink-0 border-r border-edge/80 bg-surface flex flex-col justify-between p-4 overflow-y-auto scroll-thin">
       <div className="space-y-6">
         <div>
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 px-2">
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-subtle px-2">
             Settings
           </h2>
         </div>
@@ -67,7 +67,7 @@ export default function SettingsNav() {
         <nav className="space-y-5">
           {groups.map((group) => (
             <div key={group.title} className="space-y-1">
-              <span className="block px-2 text-[11px] font-semibold text-slate-400">
+              <span className="block px-2 text-[11px] font-semibold text-subtle">
                 {group.title}
               </span>
               <div className="space-y-0.5">
@@ -79,13 +79,13 @@ export default function SettingsNav() {
                       href={item.href}
                       className={`flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold transition-all ${
                         active
-                          ? "bg-purple-100/80 text-purple-700 shadow-2xs"
-                          : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900"
+                          ? "bg-brand-soft/80 text-brand shadow-2xs"
+                          : "text-muted hover:bg-edge/60 hover:text-ink"
                       }`}
                     >
                       <span className="truncate">{item.label}</span>
                       {item.badge && (
-                        <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+                        <span className="rounded-md bg-wa-soft px-1.5 py-0.5 text-[9px] font-bold text-wa-dark ring-1 ring-wa-dark/20">
                           {item.badge}
                         </span>
                       )}
@@ -98,10 +98,10 @@ export default function SettingsNav() {
         </nav>
       </div>
 
-      <div className="pt-4 border-t border-slate-200/60 px-2">
+      <div className="pt-4 border-t border-edge/60 px-2">
         <Link
           href="/home"
-          className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-purple-600 transition"
+          className="flex items-center gap-2 text-xs font-semibold text-muted hover:text-brand transition"
         >
           <Icon name="home" size={14} />
           <span>Back to Home</span>

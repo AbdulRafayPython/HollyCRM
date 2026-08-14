@@ -1,33 +1,39 @@
-import Image from "next/image";
+import Link from "next/link";
 import Icon, { type IconName } from "@/components/ui/Icon";
 
 /**
  * Shared marketing primitives.
  *
- * The landing page is the one surface in this codebase that is not the
- * workstation: it uses the default Tailwind palette (violet accent, slate ink)
- * rather than the app's functional tokens, because it is selling the product
- * rather than operating it. Keeping the repeated pieces here is what stops the
- * eleven sections from each inventing their own eyebrow, heading and frame.
+ * The landing page runs on its own palette (paper / graphite / dome / brass)
+ * and its own typefaces, kept separate from the app's functional tokens
+ * because it is selling the product rather than operating it. Keeping the
+ * repeated pieces here is what stops each section from inventing its own
+ * eyebrow, heading and button.
+ *
+ * `Screenshot` and `cropStyle` used to live here — helpers for scaling the
+ * decorative margin off generated product renders. Both are gone: the product
+ * UI is rendered as real markup now, so there is no margin to crop.
  */
 
-/** Small pill above a section heading. */
+/** Small uppercase label above a section heading. */
 export function Eyebrow({
   icon,
   children,
-  tone = "violet",
+  tone = "dome",
 }: {
   icon?: IconName;
   children: React.ReactNode;
-  tone?: "violet" | "emerald";
+  tone?: "dome" | "brass";
 }) {
+  // Brass is a fill, never a word on the paper ground — #E8B93D on #F7F8F5 is
+  // 1.7:1. The brass eyebrow uses `brass-deep` (5.0:1) for the text itself.
   const tones = {
-    violet: "bg-violet-50 text-violet-700 ring-violet-200/70",
-    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200/70",
+    dome: "text-dome",
+    brass: "text-brass-deep",
   };
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-inset ${tones[tone]}`}
+      className={`inline-flex items-center gap-2 font-plex text-[0.7rem] font-semibold uppercase tracking-[0.14em] ${tones[tone]}`}
     >
       {icon ? <Icon name={icon} className="h-3.5 w-3.5" /> : null}
       {children}
@@ -36,8 +42,11 @@ export function Eyebrow({
 }
 
 /**
- * Section heading. `highlight` renders on its own line in violet — the
- * two-tone headline is the one typographic move the whole page repeats.
+ * Section heading.
+ *
+ * Set in Archivo caps via `.mkt-display`, which carries the responsive width
+ * axis. `highlight` renders on its own line in dome green — the one
+ * typographic move the page repeats.
  */
 export function SectionHeading({
   eyebrow,
@@ -50,7 +59,7 @@ export function SectionHeading({
 }: {
   eyebrow?: string;
   eyebrowIcon?: IconName;
-  eyebrowTone?: "violet" | "emerald";
+  eyebrowTone?: "dome" | "brass";
   title: React.ReactNode;
   highlight?: React.ReactNode;
   description?: React.ReactNode;
@@ -65,23 +74,23 @@ export function SectionHeading({
         </Eyebrow>
       ) : null}
       <h2
-        className={`text-3xl font-extrabold leading-[1.15] tracking-tight text-slate-900 sm:text-4xl ${
-          eyebrow ? "mt-5" : ""
+        className={`mkt-display text-graphite text-[2rem] font-extrabold sm:text-[2.6rem] lg:text-[3rem] ${
+          eyebrow ? "mt-3" : ""
         }`}
       >
         {title}
         {highlight ? (
           <>
             <br />
-            <span className="text-violet-600">{highlight}</span>
+            <span className="text-dome">{highlight}</span>
           </>
         ) : null}
       </h2>
       {description ? (
-        // The heading may run the full width; the paragraph under it should
-        // not — long measure is the fastest way to make a section unreadable.
+        // The heading may run full width; the paragraph under it must not —
+        // long measure is the fastest way to make a section unreadable.
         <p
-          className={`mt-4 text-base leading-relaxed text-slate-600 ${
+          className={`mt-4 font-plex text-base leading-relaxed text-stone ${
             centered ? "mx-auto max-w-2xl" : ""
           }`}
         >
@@ -93,122 +102,58 @@ export function SectionHeading({
 }
 
 /**
- * Every asset in /landing-assets is a 16:9 render with a wide decorative
- * margin around the actual product UI. Shown whole, the interface ends up a
- * postage stamp floating in lilac. Scaling inside an `overflow-hidden` frame
- * crops that margin away while keeping the frame's 16:9 box, and `focus`
- * shifts the crop when the UI is not centred in the render.
+ * Primary call to action.
  *
- * Zoom is per asset because the margins are not consistent: the workflow
- * canvas already bleeds to the edge, the group chat sits low under a title.
+ * Brass fill with graphite text — the reference showreel's yellow pill, in a
+ * register that suits pilgrimage rather than a budgeting app. The lift on
+ * hover is 1px; anything more and a button this saturated starts to bounce.
  */
-export function cropStyle(zoom: number, focus = "50% 50%"): React.CSSProperties | undefined {
-  return zoom === 1 ? undefined : { transform: `scale(${zoom})`, transformOrigin: focus };
-}
-
-/**
- * Product screenshot.
- *
- * Framed with a hairline ring and a shadow rather than an outer card — a
- * second frame around a picture that already has one reads as clutter.
- */
-export function Screenshot({
-  src,
-  alt,
-  priority = false,
-  sizes = "(min-width: 1024px) 60vw, 100vw",
-  zoom = 1,
-  focus,
-  trim,
+export function Cta({
+  href,
+  children,
+  icon,
+  variant = "primary",
+  className = "",
 }: {
-  src: string;
-  alt: string;
-  priority?: boolean;
-  sizes?: string;
-  zoom?: number;
-  focus?: string;
-  /**
-   * Band trim, for renders that carry their own title above the UI.
-   *
-   * `zoom` scales in from every edge at once, which cannot remove a title
-   * without also eating into the sides — on the group chat that clipped the
-   * conversation and left the callout labels as half-cut stubs. This keeps the
-   * full width and shortens the frame instead, so only the unwanted band goes.
-   *
-   * `aspect` is the frame's ratio; `position` is the CSS object-position that
-   * decides how the leftover height is split between top and bottom.
-   */
-  trim?: { aspect: string; position: string };
+  href: string;
+  children: React.ReactNode;
+  icon?: IconName;
+  variant?: "primary" | "secondary" | "quiet";
+  className?: string;
 }) {
+  const variants = {
+    primary:
+      "bg-brass text-graphite shadow-chip hover:-translate-y-px hover:brightness-[1.06]",
+    secondary:
+      "bg-plate text-graphite ring-1 ring-rule shadow-chip hover:-translate-y-px hover:bg-chalk",
+    quiet: "text-graphite ring-1 ring-rule hover:bg-chalk",
+  };
   return (
-    <div className="relative isolate">
-      {/* Violet bloom under the glass — gives the flat JPEG some depth.
-          `isolate` above is what keeps this negative layer from sliding behind
-          the section background entirely; the inset stays inside the page
-          gutter at every breakpoint so it never widens the document. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-tr from-violet-300/40 via-fuchsia-200/20 to-emerald-200/30 blur-2xl sm:-inset-6"
-      />
-
-      {trim ? (
-        <div
-          className="relative overflow-hidden rounded-2xl shadow-2xl shadow-violet-950/10 ring-1 ring-slate-900/10"
-          style={{ aspectRatio: trim.aspect }}
-        >
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            priority={priority}
-            unoptimized
-            sizes={sizes}
-            style={{ objectPosition: trim.position }}
-            className="object-cover"
-          />
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-2xl shadow-2xl shadow-violet-950/10 ring-1 ring-slate-900/10">
-          <Image
-            src={src}
-            alt={alt}
-            width={1376}
-            height={768}
-            priority={priority}
-            unoptimized
-            sizes={sizes}
-            style={cropStyle(zoom, focus)}
-            className="h-auto w-full"
-          />
-        </div>
-      )}
-    </div>
+    <Link
+      href={href}
+      className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-plex text-sm font-semibold transition-all duration-200 ease-swift active:translate-y-0 ${variants[variant]} ${className}`}
+    >
+      {icon ? <Icon name={icon} className="h-4 w-4" /> : null}
+      {children}
+    </Link>
   );
 }
 
-/** Checked bullet used in every alternating showcase. */
+/** Checked bullet. */
 export function CheckItem({
   title,
   children,
-  tone = "violet",
 }: {
   title: string;
   children: React.ReactNode;
-  tone?: "violet" | "emerald";
 }) {
-  const tones = {
-    violet: "bg-violet-100 text-violet-700",
-    emerald: "bg-emerald-100 text-emerald-700",
-  };
   return (
     <li className="flex items-start gap-3">
-      <span
-        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${tones[tone]}`}
-      >
+      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-dome-tint text-dome">
         <Icon name="check" className="h-3.5 w-3.5" />
       </span>
-      <span className="text-sm leading-relaxed text-slate-600">
-        <strong className="font-semibold text-slate-900">{title}</strong> {children}
+      <span className="font-plex text-sm leading-relaxed text-stone">
+        <strong className="font-semibold text-graphite">{title}</strong> {children}
       </span>
     </li>
   );
@@ -217,7 +162,7 @@ export function CheckItem({
 /** Inline code chip — `search_hotels()` and friends appear all over the copy. */
 export function Code({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded bg-violet-50 px-1.5 py-0.5 font-mono text-[0.85em] font-semibold text-violet-700">
+    <code className="rounded bg-dome-tint px-1.5 py-0.5 font-plexmono text-[0.85em] font-medium text-dome">
       {children}
     </code>
   );

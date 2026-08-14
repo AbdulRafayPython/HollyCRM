@@ -20,20 +20,20 @@ export default async function TeamSettingsPage() {
     .maybeSingle();
 
   return (
-    <div className="flex h-full bg-[#F8FAFC]">
+    <div className="flex h-full bg-surface">
       <SettingsNav />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 px-8 bg-white z-10">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Team Management</h1>
-            <p className="text-xs text-slate-400">Manage sales agents, agency roles, and invitation access</p>
+            <h1 className="text-xl font-bold text-ink">Team Management</h1>
+            <p className="text-xs text-subtle">Manage sales agents, agency roles, and invitation access</p>
           </div>
-          <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 ring-1 ring-purple-600/20">
+          <span className="rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand ring-1 ring-brand/20">
             {org?.name ?? "HolyLand Workspace"}
           </span>
         </header>
 
-        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-surface">
           <div className="max-w-4xl mx-auto">
             <TeamPanel />
           </div>

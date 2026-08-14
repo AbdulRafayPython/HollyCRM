@@ -47,16 +47,16 @@ export default function RightPanel({
 
   if (!open) {
     return (
-      <aside className="z-30 flex h-full w-11 shrink-0 flex-col items-center gap-3 border-l border-slate-200/80 bg-white py-4">
+      <aside className="z-30 flex h-full w-11 shrink-0 flex-col items-center gap-3 border-l border-edge/80 bg-white py-4">
         <button
           onClick={() => setOpen(true)}
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+          className="rounded-lg p-1.5 text-subtle hover:bg-chalk hover:text-ink-soft transition"
           title="Show lead details"
         >
           <Icon name="chevronRight" size={16} className="rotate-180" />
         </button>
         <span
-          className="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400"
+          className="mt-2 text-[10px] font-bold uppercase tracking-wider text-subtle"
           style={{ writingMode: "vertical-rl" }}
         >
           Lead Details
@@ -66,16 +66,16 @@ export default function RightPanel({
   }
 
   return (
-    <aside className="z-30 flex h-full w-[280px] xl:w-[310px] shrink-0 flex-col border-l border-slate-200/80 bg-white shadow-2xs">
+    <aside className="z-30 flex h-full w-[280px] xl:w-[310px] shrink-0 flex-col border-l border-edge/80 bg-white shadow-2xs">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
-        <h2 className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-800">
-          <Icon name="contacts" size={15} className="text-emerald-600" />
+      <div className="flex shrink-0 items-center justify-between border-b border-edge px-4 py-3">
+        <h2 className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-ink">
+          <Icon name="contacts" size={15} className="text-wa-dark" />
           <span>Lead Details</span>
         </h2>
         <button
           onClick={() => setOpen(false)}
-          className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+          className="rounded-lg p-1 text-subtle hover:bg-chalk hover:text-ink-soft transition"
           title="Collapse panel"
         >
           <Icon name="close" size={14} />
@@ -83,25 +83,25 @@ export default function RightPanel({
       </div>
 
       {/* Tabs */}
-      <div className="flex shrink-0 gap-1 border-b border-slate-100 px-3 bg-slate-50/50">
+      <div className="flex shrink-0 gap-1 border-b border-edge px-3 bg-surface/50">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`relative px-2.5 py-2.5 text-xs font-semibold transition-colors duration-150 ${
               tab === t.key
-                ? "text-slate-900"
-                : "text-slate-500 hover:text-slate-800"
+                ? "text-ink"
+                : "text-muted hover:text-ink"
             }`}
           >
             {t.label}
             {t.count ? (
-              <span className="ml-1 rounded-full bg-slate-200/70 px-1.5 py-0.2 text-[9px] font-bold text-slate-600">
+              <span className="ml-1 rounded-full bg-edge/70 px-1.5 py-0.2 text-[9px] font-bold text-muted">
                 {t.count}
               </span>
             ) : null}
             {tab === t.key && (
-              <span className="absolute inset-x-1 -bottom-px h-0.5 rounded-t bg-emerald-600" />
+              <span className="absolute inset-x-1 -bottom-px h-0.5 rounded-t bg-wa-dark" />
             )}
           </button>
         ))}
@@ -126,7 +126,7 @@ export default function RightPanel({
 function People({ participants }: { participants: Participant[] }) {
   if (participants.length === 0) {
     return (
-      <div className="p-6 text-center text-xs text-slate-400">
+      <div className="p-6 text-center text-xs text-subtle">
         No participants recorded yet. Captured automatically as members post messages.
       </div>
     );
@@ -137,15 +137,15 @@ function People({ participants }: { participants: Participant[] }) {
       {participants.map((p) => (
         <div
           key={p.contact_id}
-          className="flex items-center gap-2.5 rounded-xl border border-slate-200/70 bg-white p-2.5 shadow-2xs hover:border-slate-300 transition"
+          className="flex items-center gap-2.5 rounded-xl border border-edge/70 bg-white p-2.5 shadow-2xs hover:border-edge-strong transition"
         >
           <Avatar name={p.display_name || p.phone} size={30} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold text-slate-800">{p.display_name ?? "Member"}</p>
-            <p className="truncate text-[11px] text-slate-400 font-mono">{p.phone ?? "—"}</p>
+            <p className="truncate text-xs font-bold text-ink">{p.display_name ?? "Member"}</p>
+            <p className="truncate text-[11px] text-subtle font-mono">{p.phone ?? "—"}</p>
           </div>
           {p.is_admin && (
-            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+            <span className="rounded-md bg-wa-soft px-1.5 py-0.5 text-[9px] font-bold text-wa-dark ring-1 ring-wa-dark/20">
               Admin
             </span>
           )}

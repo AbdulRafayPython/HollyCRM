@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
               <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-danger-soft text-danger">
                 <Icon name="alert" size={26} />
               </span>
-              <h1 className="text-h1 text-ink">Link invalid or expired</h1>
+              <h1 className="mkt-display text-[1.6rem] font-extrabold normal-case text-ink">Link invalid or expired</h1>
               <p className="mx-auto mt-3 max-w-sm text-body text-muted">
                 Reset links work once and expire after an hour. Request a fresh one and
                 open it in this same browser.
@@ -86,7 +86,7 @@ export default function ResetPasswordPage() {
             </div>
           ) : (
             <form onSubmit={save}>
-              <h1 className="mb-2 text-center text-[40px] font-semibold leading-tight tracking-tight text-ink">
+              <h1 className="mkt-display mb-2 text-center text-[2.3rem] font-extrabold normal-case text-ink">
                 New password
               </h1>
               <p className="mb-8 text-center text-body text-muted">

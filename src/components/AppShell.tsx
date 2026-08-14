@@ -155,25 +155,25 @@ export default function AppShell({
           )}
 
           {/* Mobile Top App Bar (Only on < md screens) */}
-          <div className="flex md:hidden h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 z-30">
+          <div className="flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-white px-4 z-30">
             <button
               type="button"
               onClick={() => setMobileNavOpen(true)}
-              className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 transition-colors"
+              className="rounded-lg p-2 text-muted hover:bg-chalk transition-colors"
               aria-label="Open navigation menu"
             >
               <Icon name="menu" size={20} />
             </button>
 
-            <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900">
+            <div className="flex items-center gap-1.5 font-bold text-sm text-ink">
               <span>Holy</span>
-              <span className="text-purple-600">CRM</span>
+              <span className="text-brand">CRM</span>
             </div>
 
             <div className="flex items-center gap-1">
               <span
                 className={`h-2 w-2 rounded-full ${
-                  healthy && Boolean(state) ? "bg-emerald-500" : "bg-amber-500"
+                  healthy && Boolean(state) ? "bg-wa" : "bg-bot"
                 }`}
                 title={healthy && Boolean(state) ? "WhatsApp Connected" : "WhatsApp Disconnected"}
               />

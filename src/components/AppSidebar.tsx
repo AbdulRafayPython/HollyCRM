@@ -141,21 +141,21 @@ export default function AppSidebar({
       {mobileOpen && (
         <div
           onClick={onMobileClose}
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs md:hidden animate-fade-in"
+          className="fixed inset-0 z-40 bg-ink/50 backdrop-blur-xs md:hidden animate-fade-in"
           aria-hidden="true"
         />
       )}
 
       {/* Main Sidebar Container */}
       <aside
-        className={`h-full min-h-0 flex flex-col justify-between border-r border-slate-200/80 bg-white transition-all duration-300 ease-swift ${
+        className={`h-full min-h-0 flex flex-col justify-between border-r border-edge/80 bg-white transition-all duration-300 ease-swift ${
           mobileOpen
             ? "fixed inset-y-0 left-0 z-50 w-72 shadow-2xl px-3.5 py-3.5"
             : `relative z-40 hidden md:flex shrink-0 ${isCollapsed ? "w-16 px-2 py-3" : "w-60 px-3.5 py-3.5"}`
         }`}
       >
         {/* Top Header & Brand (Fixed Height, Shrink 0) */}
-        <div className="shrink-0 pb-3 border-b border-slate-100/80">
+        <div className="shrink-0 pb-3 border-b border-edge/80">
           {isCollapsed ? (
             /* Collapsed Mode: Logo Centered + Expand button below */
             <div className="flex flex-col items-center gap-2">
@@ -168,7 +168,7 @@ export default function AppSidebar({
               </Link>
               <button
                 onClick={toggleCollapse}
-                className="flex h-5 w-5 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                className="flex h-5 w-5 items-center justify-center rounded-md text-subtle hover:bg-chalk hover:text-ink-soft transition-colors"
                 title="Expand sidebar"
                 aria-label="Expand sidebar"
               >
@@ -187,11 +187,11 @@ export default function AppSidebar({
                 <HolyCrmLogo size={32} showText={false} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 leading-none">
-                    <span className="text-base font-extrabold tracking-tight text-slate-900">
-                      Holy<span className="text-purple-600">CRM</span>
+                    <span className="text-base font-extrabold tracking-tight text-ink">
+                      Holy<span className="text-brand">CRM</span>
                     </span>
                   </div>
-                  <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
+                  <p className="mt-0.5 truncate text-[11px] font-medium text-subtle">
                     {workspace.name || "workspace.holycrm.com"}
                   </p>
                 </div>
@@ -200,7 +200,7 @@ export default function AppSidebar({
               {mobileOpen ? (
                 <button
                   onClick={onMobileClose}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors md:hidden"
+                  className="rounded-lg p-1.5 text-subtle hover:bg-chalk hover:text-ink-soft transition-colors md:hidden"
                   title="Close menu"
                   aria-label="Close menu"
                 >
@@ -209,7 +209,7 @@ export default function AppSidebar({
               ) : (
                 <button
                   onClick={toggleCollapse}
-                  className="hidden md:block rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  className="hidden md:block rounded-lg p-1.5 text-subtle hover:bg-chalk hover:text-ink-soft transition-colors"
                   title="Collapse sidebar"
                   aria-label="Collapse sidebar"
                 >
@@ -225,7 +225,7 @@ export default function AppSidebar({
           {navGroups.map((group) => (
             <div key={group.title} className="flex flex-col gap-1">
               {!isCollapsed && (
-                <span className="px-2.5 text-[10px] font-bold tracking-wider uppercase text-slate-400">
+                <span className="px-2.5 text-[10px] font-bold tracking-wider uppercase text-subtle">
                   {group.title}
                 </span>
               )}
@@ -239,13 +239,13 @@ export default function AppSidebar({
                     title={isCollapsed ? item.label : undefined}
                     className={`group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-xs font-semibold transition-all duration-150 ${
                       active
-                        ? "bg-purple-50/80 text-purple-700 shadow-xs ring-1 ring-purple-600/15"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        ? "bg-brand-soft/80 text-brand shadow-xs ring-1 ring-brand/15"
+                        : "text-muted hover:bg-surface hover:text-ink"
                     } ${isCollapsed ? "justify-center px-0 py-2.5" : ""}`}
                   >
                     <span
                       className={`flex shrink-0 items-center justify-center transition-colors ${
-                        active ? "text-purple-600" : "text-slate-400 group-hover:text-slate-600"
+                        active ? "text-brand" : "text-subtle group-hover:text-muted"
                       }`}
                     >
                       <Icon name={item.icon} size={17} />
@@ -258,10 +258,10 @@ export default function AppSidebar({
                           <span
                             className={`flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
                               item.badgeTone === "danger"
-                                ? "bg-rose-500 text-white"
+                                ? "bg-danger text-white"
                                 : item.badgeTone === "wa"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : "bg-purple-100 text-purple-700"
+                                ? "bg-wa-soft text-wa-dark"
+                                : "bg-brand-soft text-brand"
                             }`}
                           >
                             {item.badge}
@@ -271,7 +271,7 @@ export default function AppSidebar({
                     )}
 
                     {isCollapsed && item.badge !== undefined && (
-                      <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                      <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-danger ring-2 ring-white" />
                     )}
                   </Link>
                 );
@@ -281,7 +281,7 @@ export default function AppSidebar({
         </nav>
 
         {/* Bottom Actions & User Profile Card (Fixed Height, Shrink 0) */}
-        <div className="shrink-0 border-t border-slate-100 pt-2 pb-0.5 bg-white flex flex-col gap-0.5">
+        <div className="shrink-0 border-t border-edge pt-2 pb-0.5 bg-white flex flex-col gap-0.5">
           {bottomItems.map((item) => {
             const active = isActive(item.href);
             return (
@@ -292,11 +292,11 @@ export default function AppSidebar({
                 title={isCollapsed ? item.label : undefined}
                 className={`group flex items-center gap-3 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-colors ${
                   active
-                    ? "bg-purple-50 text-purple-700 font-semibold"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-brand-soft text-brand font-semibold"
+                    : "text-muted hover:bg-surface hover:text-ink"
                 } ${isCollapsed ? "justify-center px-0" : ""}`}
               >
-                <span className="text-slate-400 group-hover:text-slate-600">
+                <span className="text-subtle group-hover:text-muted">
                   <Icon name={item.icon} size={16} />
                 </span>
                 {!isCollapsed && <span className="flex-1 truncate">{item.label}</span>}
@@ -304,8 +304,8 @@ export default function AppSidebar({
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                       item.badgeTone === "wa"
-                        ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
-                        : "bg-slate-100 text-slate-500"
+                        ? "bg-wa-soft text-wa-dark ring-1 ring-wa-dark/20"
+                        : "bg-chalk text-muted"
                     }`}
                   >
                     {item.badge}
@@ -321,7 +321,7 @@ export default function AppSidebar({
           <NotificationBell collapsed={isCollapsed} />
 
           {/* User Card */}
-          <div className="mt-1 border-t border-slate-100 pt-1.5">
+          <div className="mt-1 border-t border-edge pt-1.5">
             <ProfileMenu user={user} collapsed={isCollapsed} />
           </div>
         </div>

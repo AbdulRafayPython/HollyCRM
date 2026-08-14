@@ -82,40 +82,40 @@ export default function AiSettingsPage() {
     setForm((f) => (f ? { ...f, [k]: v } : f));
 
   if (!form) {
-    return <div className="p-6 text-xs text-slate-400">Loading AI settings…</div>;
+    return <div className="p-6 text-xs text-subtle">Loading AI settings…</div>;
   }
 
   return (
-    <div className="flex h-full bg-[#F8FAFC]">
+    <div className="flex h-full bg-surface">
       <SettingsNav />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 px-8 bg-white z-10">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">AI Concierge & Persona</h1>
-            <p className="text-xs text-slate-400">Configure response tone, greetings, keywords, and automated handoff triggers</p>
+            <h1 className="text-xl font-bold text-ink">AI Concierge & Persona</h1>
+            <p className="text-xs text-subtle">Configure response tone, greetings, keywords, and automated handoff triggers</p>
           </div>
 
           <div className="flex items-center gap-3">
             {saved && (
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+              <span className="rounded-full bg-wa-soft px-3 py-1 text-xs font-bold text-wa-dark ring-1 ring-wa-dark/20">
                 ✓ Saved — live in ~30s
               </span>
             )}
             <button
               form="bot-form"
               disabled={busy}
-              className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition disabled:opacity-50"
+              className="rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand transition disabled:opacity-50"
             >
               {busy ? "Saving…" : "Save Changes"}
             </button>
           </div>
         </header>
 
-        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-surface">
           <form id="bot-form" onSubmit={save} className="max-w-4xl mx-auto space-y-5">
             {error && (
-              <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
-                <Icon name="alert" size={16} className="mt-0.5 text-rose-600 shrink-0" />
+              <p className="flex items-start gap-2 rounded-2xl border border-danger-soft bg-danger-soft p-4 text-xs font-medium text-danger-dark">
+                <Icon name="alert" size={16} className="mt-0.5 text-danger shrink-0" />
                 <span>{error}</span>
               </p>
             )}

@@ -11,7 +11,7 @@ export default function GreenApiLogo({
     <div className="relative inline-flex items-center shrink-0" style={{ height: size }}>
       {/* Official Green API Logo Badge (Green squircle with bold white 'G') */}
       <div
-        className="flex items-center justify-center rounded-2xl bg-[#39A900] text-white shadow-md shadow-emerald-700/25 overflow-hidden"
+        className="flex items-center justify-center rounded-2xl bg-[#39A900] text-white shadow-md shadow-wa-dark/25 overflow-hidden"
         style={{ width: size, height: size }}
       >
         <svg
@@ -35,7 +35,7 @@ export default function GreenApiLogo({
 
       {/* Official WhatsApp Logo Badge (Overlapping Right) */}
       <div
-        className="-ml-3.5 flex items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-md shadow-emerald-500/30 ring-2 ring-white"
+        className="-ml-3.5 flex items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-md shadow-wa/30 ring-2 ring-white"
         style={{ width: size * 0.85, height: size * 0.85 }}
       >
         <svg
@@ -48,8 +48,8 @@ export default function GreenApiLogo({
       </div>
 
       {showLabel && (
-        <span className="ml-2.5 text-xs font-bold text-slate-800">
-          Green API <span className="text-emerald-600 font-semibold">WhatsApp</span>
+        <span className="ml-2.5 text-xs font-bold text-ink">
+          Green API <span className="text-wa-dark font-semibold">WhatsApp</span>
         </span>
       )}
     </div>

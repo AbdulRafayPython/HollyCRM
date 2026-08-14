@@ -37,7 +37,7 @@ export default function FileMessage({
   const tile = TILE[kind];
   const ext = extensionOf(name).toUpperCase();
 
-  // Inside the violet bubble the tile's soft pastel would vanish, so the whole
+  // Inside the brand bubble the tile's soft pastel would vanish, so the whole
   // card flips to a translucent white treatment.
   const shell = onBrand
     ? "border-white/25 bg-white/10"

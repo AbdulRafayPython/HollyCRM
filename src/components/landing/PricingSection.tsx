@@ -84,12 +84,12 @@ export default function PricingSection({ isConfigured = true }: { isConfigured?:
 
         {/* Billing toggle */}
         <Reveal delay={100} className="mt-8 flex justify-center">
-          <div className="inline-flex items-center gap-1 rounded-xl bg-slate-100 p-1 ring-1 ring-slate-900/5">
+          <div className="inline-flex items-center gap-1 rounded-xl bg-rule p-1 ring-1 ring-graphite/5">
             <button
               type="button"
               onClick={() => setIsAnnual(false)}
               className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
-                !isAnnual ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                !isAnnual ? "bg-plate text-graphite shadow-sm" : "text-stone hover:text-graphite"
               }`}
             >
               Monthly
@@ -99,12 +99,12 @@ export default function PricingSection({ isConfigured = true }: { isConfigured?:
               onClick={() => setIsAnnual(true)}
               className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
                 isAnnual
-                  ? "bg-violet-600 text-white shadow-md shadow-violet-600/20"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-dome text-white shadow-md shadow-dome/20"
+                  : "text-stone hover:text-graphite"
               }`}
             >
               Annual
-              <span className="rounded bg-emerald-400 px-1.5 py-0.5 text-[9px] font-black text-emerald-950">
+              <span className="rounded bg-brass px-1.5 py-0.5 text-[9px] font-black text-graphite">
                 −20%
               </span>
             </button>
@@ -123,38 +123,38 @@ export default function PricingSection({ isConfigured = true }: { isConfigured?:
                 className="h-full"
               >
                 <div
-                  className={`relative flex h-full flex-col rounded-3xl bg-white p-7 transition-all duration-300 ${
+                  className={`relative flex h-full flex-col rounded-3xl bg-plate p-7 transition-all duration-300 ${
                     plan.popular
-                      ? "shadow-2xl shadow-violet-900/10 ring-2 ring-violet-500 lg:-mt-4 lg:pb-11"
-                      : "shadow-sm ring-1 ring-slate-900/5 hover:-translate-y-1 hover:shadow-xl"
+                      ? "shadow-lift-lg ring-2 ring-dome lg:-mt-4 lg:pb-11"
+                      : "shadow-sm ring-1 ring-graphite/5 hover:-translate-y-1 hover:shadow-xl"
                   }`}
                 >
                   {plan.popular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-600 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-lg shadow-violet-600/30">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-dome px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-lg shadow-dome/30">
                       Most popular
                     </span>
                   )}
 
-                  <h3 className="text-xl font-extrabold tracking-tight text-slate-900">
+                  <h3 className="text-xl font-extrabold tracking-tight text-graphite">
                     {plan.name}
                   </h3>
-                  <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                  <p className="mt-1.5 text-xs leading-relaxed text-haze">
                     {plan.description}
                   </p>
 
                   <div className="mt-6 flex min-h-[3.5rem] items-baseline gap-1">
                     {price === null ? (
-                      <span className="text-4xl font-extrabold tracking-tight text-slate-900">
+                      <span className="text-4xl font-extrabold tracking-tight text-graphite">
                         Contact us
                       </span>
                     ) : (
                       <>
-                        <span className="text-4xl font-extrabold tracking-tight text-slate-900">
+                        <span className="text-4xl font-extrabold tracking-tight text-graphite">
                           ${price}
                         </span>
-                        <span className="text-sm font-semibold text-slate-500">/mo</span>
+                        <span className="text-sm font-semibold text-haze">/mo</span>
                         {isAnnual && (
-                          <span className="ml-1 text-[11px] font-medium text-slate-400">
+                          <span className="ml-1 text-[11px] font-medium text-haze">
                             billed annually
                           </span>
                         )}
@@ -168,10 +168,10 @@ export default function PricingSection({ isConfigured = true }: { isConfigured?:
                         <Icon
                           name={feature.icon}
                           className={`mt-0.5 h-4 w-4 shrink-0 ${
-                            plan.popular ? "text-violet-600" : "text-slate-400"
+                            plan.popular ? "text-dome" : "text-haze"
                           }`}
                         />
-                        <span className="text-sm text-slate-700">{feature.label}</span>
+                        <span className="text-sm text-stone">{feature.label}</span>
                       </li>
                     ))}
                   </ul>
@@ -180,8 +180,8 @@ export default function PricingSection({ isConfigured = true }: { isConfigured?:
                     href={plan.monthlyPrice === null ? "/signup" : targetRoute}
                     className={`mt-8 w-full rounded-xl px-4 py-3.5 text-center text-sm font-bold transition-all duration-300 active:scale-95 ${
                       plan.popular
-                        ? "bg-violet-600 text-white shadow-lg shadow-violet-600/25 hover:bg-violet-700 hover:shadow-xl hover:shadow-violet-700/40"
-                        : "bg-white text-slate-900 ring-1 ring-slate-200 hover:bg-slate-50"
+                        ? "bg-dome text-white shadow-lg shadow-dome/25 hover:bg-dome hover:shadow-xl hover:shadow-dome/40"
+                        : "bg-plate text-graphite ring-1 ring-rule hover:bg-chalk"
                     }`}
                   >
                     {plan.cta}

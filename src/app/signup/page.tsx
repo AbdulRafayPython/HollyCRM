@@ -105,7 +105,7 @@ export default function SignUpPage() {
           <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-soft">
             <Icon name="mail" size={22} className="text-brand" />
           </span>
-          <h1 className="text-h2 text-ink">Confirm your email</h1>
+          <h1 className="mkt-display text-[1.5rem] font-extrabold normal-case text-ink">Confirm your email</h1>
           <p className="mt-2 text-body text-muted">
             We sent a link to {email}. Open it and your workspace is ready.
           </p>
@@ -125,20 +125,20 @@ export default function SignUpPage() {
       <form onSubmit={create}>
         <MobileHero />
 
-        <h1 className="text-[1.75rem] font-semibold leading-tight tracking-tight text-ink">
+        <h1 className="mkt-display auth-title font-extrabold normal-case text-ink">
           Create your HolyCRM workspace
         </h1>
         <p className="mt-1.5 text-body text-muted">
           Your own CRM, your own WhatsApp number, your own team.
         </p>
 
-        <div className="mt-6">
+        <div className="auth-step">
           <GoogleButton onClick={signUpWithGoogle} busy={googleBusy} label="Continue with Google" />
         </div>
 
         <OrDivider />
 
-        <div className="space-y-3">
+        <div className="auth-stack">
           <AuthInput
             icon="hub"
             label="Company or team name"
@@ -184,12 +184,12 @@ export default function SignUpPage() {
 
         <button
           disabled={busy}
-          className="btn-primary mt-5 h-14 w-full rounded-xl text-body shadow-pop shadow-brand/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+          className="btn-primary auth-step auth-control w-full rounded-xl text-body shadow-pop shadow-brand/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
         >
           {busy ? "Creating…" : "Create workspace"}
         </button>
 
-        <p className="mt-5 text-center text-meta text-muted">
+        <p className="mt-[clamp(0.75rem,1.8vh,1.25rem)] text-center text-meta text-muted">
           Already have an account?{" "}
           <Link
             href="/login"

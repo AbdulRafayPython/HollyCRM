@@ -42,12 +42,12 @@ export default function BotToggle({
       title={paused ? `${assistant} is paused — click to activate` : `${assistant} is actively answering — click to pause`}
       className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-semibold transition disabled:opacity-50 shrink-0 shadow-2xs ${
         active
-          ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80"
-          : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+          ? "border-wa-soft bg-wa-soft text-wa-dark hover:bg-wa-soft/80"
+          : "border-edge bg-surface text-muted hover:bg-chalk hover:text-ink-soft"
       }`}
     >
-      <span className={`h-2 w-2 rounded-full ${active ? "bg-emerald-500" : "bg-slate-400"}`} />
-      <Icon name="bot" size={14} className={active ? "text-emerald-700" : "text-slate-400"} />
+      <span className={`h-2 w-2 rounded-full ${active ? "bg-wa" : "bg-subtle"}`} />
+      <Icon name="bot" size={14} className={active ? "text-wa-dark" : "text-subtle"} />
       <span>{active ? "AI Active" : "AI Paused"}</span>
     </button>
   );

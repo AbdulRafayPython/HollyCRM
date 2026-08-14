@@ -47,7 +47,7 @@ function ToastItem({
   return (
     <div
       onClick={onClick}
-      className="group pointer-events-auto cursor-pointer rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl ring-1 ring-slate-900/10 transition-all duration-200 hover:border-emerald-500 hover:shadow-emerald-950/10 hover:-translate-y-0.5 animate-slide-in-right"
+      className="group pointer-events-auto cursor-pointer rounded-2xl border border-edge/90 bg-white/95 backdrop-blur-md p-3.5 shadow-2xl ring-1 ring-ink/10 transition-all duration-200 hover:border-wa hover:shadow-wa-dark/10 hover:-translate-y-0.5 animate-slide-in-right"
     >
       <div className="flex items-start gap-3">
         {/* Avatar with WhatsApp Badge */}
@@ -65,30 +65,30 @@ function ToastItem({
         <div className="min-w-0 flex-1 space-y-0.5">
           <div className="flex items-center justify-between gap-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="truncate text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+              <span className="truncate text-xs font-bold text-ink group-hover:text-wa-dark transition-colors">
                 {toast.title}
               </span>
               {toast.chatType === "group" && (
-                <span className="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-500">
+                <span className="shrink-0 rounded-md bg-chalk px-1.5 py-0.5 text-[9px] font-bold text-muted">
                   Group
                 </span>
               )}
             </div>
-            <span className="shrink-0 text-[10px] font-medium text-slate-400">
+            <span className="shrink-0 text-[10px] font-medium text-subtle">
               {toast.time || "Just now"}
             </span>
           </div>
 
-          <p className="line-clamp-2 text-xs text-slate-600 leading-snug">
+          <p className="line-clamp-2 text-xs text-muted leading-snug">
             {toast.body}
           </p>
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-[10px] font-bold text-emerald-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+            <span className="text-[10px] font-bold text-wa-dark group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
               <span>Open in Inbox</span>
               <Icon name="chevronRight" size={10} />
             </span>
-            <span className="text-[10px] font-semibold text-slate-400">WhatsApp Web</span>
+            <span className="text-[10px] font-semibold text-subtle">WhatsApp Web</span>
           </div>
         </div>
 
@@ -99,7 +99,7 @@ function ToastItem({
             e.stopPropagation();
             onDismiss();
           }}
-          className="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+          className="shrink-0 rounded-lg p-1 text-subtle hover:bg-chalk hover:text-ink-soft transition"
           aria-label="Dismiss notification"
         >
           <Icon name="close" size={14} />

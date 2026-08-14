@@ -60,15 +60,15 @@ export default async function HomePage() {
   );
 
   return (
-    <div className="flex h-full flex-col bg-[#F8FAFC]">
+    <div className="flex h-full flex-col bg-surface">
       {/* Top Header Bar */}
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 bg-white px-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl font-bold tracking-tight text-ink">
             Good morning, {userName} <span className="inline-block animate-pulse">👋</span>
           </h1>
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-            <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-chalk px-2.5 py-0.5 text-xs font-medium text-muted">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
             {orgName}
           </span>
         </div>
@@ -77,16 +77,16 @@ export default async function HomePage() {
           {/* WhatsApp Quick Status Chip */}
           <Link
             href="/settings/whatsapp"
-            className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+            className="flex items-center gap-2 rounded-xl border border-edge/80 bg-surface/80 px-3 py-1.5 text-xs font-medium text-ink-soft transition hover:bg-chalk"
             title="Manage WhatsApp connection"
           >
             <span className="relative flex h-2 w-2">
               {isWaConnected && (
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wa opacity-75" />
               )}
               <span
                 className={`relative inline-flex h-2 w-2 rounded-full ${
-                  isWaConnected ? "bg-emerald-500" : "bg-amber-500"
+                  isWaConnected ? "bg-wa" : "bg-bot"
                 }`}
               />
             </span>
@@ -95,7 +95,7 @@ export default async function HomePage() {
                 ? `WhatsApp: +${instance?.phone ?? "connected"}`
                 : "Connect WhatsApp"}
             </span>
-            <Icon name="chevronRight" size={13} className="text-slate-400" />
+            <Icon name="chevronRight" size={13} className="text-subtle" />
           </Link>
 
           <Link
@@ -114,21 +114,21 @@ export default async function HomePage() {
 
           {/* Quick Announcement / Setup Banner if not configured */}
           {!isWaConnected && (
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-emerald-900 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-wa-soft bg-wa-soft/60 p-4 text-wa-dark shadow-xs">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-xs">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-wa text-white shadow-xs">
                   <Icon name="chat" size={20} />
                 </div>
                 <div>
                   <h2 className="text-sm font-bold">WhatsApp Instance Ready to Connect</h2>
-                  <p className="text-xs text-emerald-700">
+                  <p className="text-xs text-wa-dark">
                     Link your Green API instance to start receiving Umrah & Hajj inquiries directly in your HolyCRM inbox.
                   </p>
                 </div>
               </div>
               <Link
                 href="/settings/whatsapp"
-                className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700"
+                className="rounded-xl bg-wa-dark px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-wa-dark"
               >
                 Scan QR Code
               </Link>
@@ -138,60 +138,60 @@ export default async function HomePage() {
           {/* Key Metrics Cards Row */}
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-subtle">
                 Workspace KPIs
               </h2>
-              <Link href="/insights" className="text-xs font-semibold text-purple-600 hover:underline">
+              <Link href="/insights" className="text-xs font-semibold text-brand hover:underline">
                 View detailed insights →
               </Link>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {/* Card 1: Active Leads */}
-              <div className="animate-card-in [animation-delay:0ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:0ms] group relative overflow-hidden rounded-2xl border border-edge/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-subtle">
                     Active Leads
                   </span>
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft text-brand">
                     <Icon name="kanban" size={16} />
                   </span>
                 </div>
                 <div className="mt-3">
-                  <p className="text-3xl font-extrabold tracking-tight text-slate-900">
+                  <p className="text-3xl font-extrabold tracking-tight text-ink">
                     {totalLeadCount ?? 0}
                   </p>
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-purple-600 font-medium">
+                  <div className="mt-1 flex items-center gap-1.5 text-xs text-brand font-medium">
                     <span>{activeLeads.length} currently in pipeline</span>
                   </div>
                 </div>
                 {/* Horizontal Progress Animation */}
-                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-chalk">
                   <div
-                    className="animate-grow-right h-full rounded-full bg-gradient-to-r from-purple-600 to-indigo-600"
+                    className="animate-grow-right h-full rounded-full bg-gradient-to-r from-brand to-brand"
                     style={{ width: `${Math.min(100, Math.max(15, (activeLeads.length / Math.max(1, totalLeadCount ?? 1)) * 100))}%`, animationDelay: "150ms" }}
                   />
                 </div>
-                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-purple-500/5 blur-xl pointer-events-none" />
+                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-brand/5 blur-xl pointer-events-none" />
               </div>
 
               {/* Card 2: First Response Time */}
-              <div className="animate-card-in [animation-delay:80ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:80ms] group relative overflow-hidden rounded-2xl border border-edge/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-subtle">
                     Response Time
                   </span>
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft text-brand">
                     <Icon name="clock" size={16} />
                   </span>
                 </div>
                 <div className="mt-3">
-                  <p className="text-3xl font-extrabold tracking-tight text-slate-900">
+                  <p className="text-3xl font-extrabold tracking-tight text-ink">
                     {summary?.first_response_minutes != null
                       ? `${summary.first_response_minutes} min`
                       : "< 2 min"}
                   </p>
-                  <div className="mt-1 flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                  <div className="mt-1 flex items-center gap-1 text-xs text-wa-dark font-medium">
                     <span>⚡ Instant AI acknowledgment</span>
                   </div>
                 </div>
@@ -200,31 +200,31 @@ export default async function HomePage() {
                   {[10, 16, 12, 20, 18, 26, 32].map((v, i) => (
                     <span
                       key={i}
-                      className="animate-dot-pop h-1.5 w-1.5 rounded-full bg-blue-500/80"
+                      className="animate-dot-pop h-1.5 w-1.5 rounded-full bg-brand/80"
                       style={{ animationDelay: `${i * 50}ms` }}
                     />
                   ))}
                 </div>
-                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-blue-500/5 blur-xl pointer-events-none" />
+                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-brand/5 blur-xl pointer-events-none" />
               </div>
 
               {/* Card 3: AI Automation */}
-              <div className="animate-card-in [animation-delay:160ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:160ms] group relative overflow-hidden rounded-2xl border border-edge/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-subtle">
                     AI Automation
                   </span>
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-soft text-brand">
                     <Icon name="bot" size={16} />
                   </span>
                 </div>
                 <div className="mt-3">
-                  <p className="text-3xl font-extrabold tracking-tight text-slate-900">
+                  <p className="text-3xl font-extrabold tracking-tight text-ink">
                     {summary?.automation?.rate != null
                       ? `${summary.automation.rate}%`
                       : bot?.enabled ? "Active" : "Off"}
                   </p>
-                  <div className="mt-1 flex items-center gap-1 text-xs text-indigo-600 font-medium">
+                  <div className="mt-1 flex items-center gap-1 text-xs text-brand font-medium">
                     <span>{bot?.bot_name || "AI Agent"} responding</span>
                   </div>
                 </div>
@@ -233,29 +233,29 @@ export default async function HomePage() {
                   {[30, 50, 40, 75, 60, 90, 100].map((h, i) => (
                     <div
                       key={i}
-                      className="animate-grow-up w-full rounded-xs bg-indigo-400/80"
+                      className="animate-grow-up w-full rounded-xs bg-brand/80"
                       style={{ height: `${h * 0.12}px`, animationDelay: `${i * 50}ms` }}
                     />
                   ))}
                 </div>
-                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-indigo-500/5 blur-xl pointer-events-none" />
+                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-brand/5 blur-xl pointer-events-none" />
               </div>
 
               {/* Card 4: Quoted Value */}
-              <div className="animate-card-in [animation-delay:240ms] group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
+              <div className="animate-card-in [animation-delay:240ms] group relative overflow-hidden rounded-2xl border border-edge/80 bg-white p-5 shadow-xs transition duration-150 hover:shadow-md">
                 <div className="flex items-start justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-subtle">
                     Pipeline Value
                   </span>
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-wa-soft text-wa-dark">
                     <Icon name="receipt" size={16} />
                   </span>
                 </div>
                 <div className="mt-3">
-                  <p className="text-3xl font-extrabold tracking-tight text-slate-900">
+                  <p className="text-3xl font-extrabold tracking-tight text-ink">
                     {totalPipelineSar > 0 ? `SAR ${(totalPipelineSar / 1000).toFixed(0)}k` : "SAR —"}
                   </p>
-                  <div className="mt-1 flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                  <div className="mt-1 flex items-center gap-1 text-xs text-wa-dark font-medium">
                     <span>{hotelCount ?? 0} hotels in inventory</span>
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export default async function HomePage() {
                     />
                   </svg>
                 </div>
-                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-emerald-500/5 blur-xl pointer-events-none" />
+                <div className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full bg-wa/5 blur-xl pointer-events-none" />
               </div>
             </div>
           </div>
@@ -280,42 +280,42 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
             {/* Left 2 Cols: Priority Leads / Follow-ups */}
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs lg:col-span-2">
+            <div className="rounded-2xl border border-edge/80 bg-white p-6 shadow-xs lg:col-span-2">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">Priority Follow-ups & Inquiries</h2>
-                  <p className="text-xs text-slate-400">Hot leads requiring agent touch or quotation</p>
+                  <h2 className="text-base font-bold text-ink">Priority Follow-ups & Inquiries</h2>
+                  <p className="text-xs text-subtle">Hot leads requiring agent touch or quotation</p>
                 </div>
                 <Link
                   href="/pipeline"
-                  className="text-xs font-semibold text-purple-600 hover:text-purple-700"
+                  className="text-xs font-semibold text-brand hover:text-brand"
                 >
                   View Pipeline →
                 </Link>
               </div>
 
               {(priorityLeads ?? []).length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-10 text-center">
-                  <Icon name="kanban" size={28} className="text-slate-300" />
-                  <p className="mt-2 text-sm font-semibold text-slate-700">No active leads yet</p>
-                  <p className="mt-0.5 text-xs text-slate-400">Inbound WhatsApp messages will populate leads automatically.</p>
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-edge py-10 text-center">
+                  <Icon name="kanban" size={28} className="text-subtle" />
+                  <p className="mt-2 text-sm font-semibold text-ink-soft">No active leads yet</p>
+                  <p className="mt-0.5 text-xs text-subtle">Inbound WhatsApp messages will populate leads automatically.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-edge">
                   {(priorityLeads ?? []).slice(0, 4).map((lead) => (
                     <div key={lead.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-3">
                         <Avatar name={lead.customer_name || lead.phone} size={36} />
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-slate-800">
+                            <span className="text-sm font-semibold text-ink">
                               {lead.customer_name || lead.phone || "Inquiry"}
                             </span>
-                            <span className="rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 ring-1 ring-purple-600/10">
+                            <span className="rounded-md bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-brand ring-1 ring-brand/10">
                               {STAGE_LABELS[lead.stage as LeadStage] || lead.stage}
                             </span>
                           </div>
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs text-muted">
                             {lead.city ? `${lead.city} · ` : ""}
                             {lead.party_size ? `${lead.party_size} pax · ` : ""}
                             {lead.budget_sar ? `SAR ${lead.budget_sar.toLocaleString()}` : lead.dates_text || "Dates flexible"}
@@ -325,7 +325,7 @@ export default async function HomePage() {
 
                       <Link
                         href={`/inbox/${lead.chat_id}`}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700"
+                        className="rounded-xl border border-edge bg-white px-3 py-1.5 text-xs font-semibold text-ink-soft transition hover:border-brand hover:bg-brand-soft hover:text-brand"
                       >
                         Open Chat
                       </Link>
@@ -336,18 +336,18 @@ export default async function HomePage() {
             </div>
 
             {/* Right 1 Col: AI & Workflow Quick Hub */}
-            <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+            <div className="flex flex-col justify-between rounded-2xl border border-edge/80 bg-white p-6 shadow-xs">
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand">
                       <Icon name="bot" size={18} />
                     </span>
                     <div>
-                      <h2 className="text-sm font-bold text-slate-900">
+                      <h2 className="text-sm font-bold text-ink">
                         {bot?.bot_name || "AI Agent"}
                       </h2>
-                      <p className="text-[11px] text-slate-400">Autonomous Concierge</p>
+                      <p className="text-[11px] text-subtle">Autonomous Concierge</p>
                     </div>
                   </div>
                   <Chip tone={bot?.enabled ? "wa" : "danger"}>
@@ -356,47 +356,47 @@ export default async function HomePage() {
                 </div>
 
                 <div className="mt-5 space-y-3">
-                  <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-                    <span className="font-semibold text-slate-800">Workflow Pipeline:</span> Understands intent, checks live hotel rates, quotes without hallucinations, and routes to closers.
+                  <div className="rounded-xl bg-surface p-3 text-xs text-muted">
+                    <span className="font-semibold text-ink">Workflow Pipeline:</span> Understands intent, checks live hotel rates, quotes without hallucinations, and routes to closers.
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <Link
                       href="/ai/workflow"
-                      className="flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 font-semibold text-slate-700 transition hover:border-purple-300 hover:bg-purple-50/50 hover:text-purple-700"
+                      className="flex items-center gap-2 rounded-xl border border-edge p-2.5 font-semibold text-ink-soft transition hover:border-brand hover:bg-brand-soft/50 hover:text-brand"
                     >
-                      <Icon name="sparkle" size={14} className="text-purple-600" />
+                      <Icon name="sparkle" size={14} className="text-brand" />
                       <span>Workflow</span>
                     </Link>
                     <Link
                       href="/ai/rules"
-                      className="flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 font-semibold text-slate-700 transition hover:border-purple-300 hover:bg-purple-50/50 hover:text-purple-700"
+                      className="flex items-center gap-2 rounded-xl border border-edge p-2.5 font-semibold text-ink-soft transition hover:border-brand hover:bg-brand-soft/50 hover:text-brand"
                     >
-                      <Icon name="filter" size={14} className="text-purple-600" />
+                      <Icon name="filter" size={14} className="text-brand" />
                       <span>Routing Rules</span>
                     </Link>
                     <Link
                       href="/settings/knowledge"
-                      className="flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 font-semibold text-slate-700 transition hover:border-purple-300 hover:bg-purple-50/50 hover:text-purple-700"
+                      className="flex items-center gap-2 rounded-xl border border-edge p-2.5 font-semibold text-ink-soft transition hover:border-brand hover:bg-brand-soft/50 hover:text-brand"
                     >
-                      <Icon name="file" size={14} className="text-purple-600" />
+                      <Icon name="file" size={14} className="text-brand" />
                       <span>Knowledge</span>
                     </Link>
                     <Link
                       href="/settings/inventory"
-                      className="flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 font-semibold text-slate-700 transition hover:border-purple-300 hover:bg-purple-50/50 hover:text-purple-700"
+                      className="flex items-center gap-2 rounded-xl border border-edge p-2.5 font-semibold text-ink-soft transition hover:border-brand hover:bg-brand-soft/50 hover:text-brand"
                     >
-                      <Icon name="receipt" size={14} className="text-purple-600" />
+                      <Icon name="receipt" size={14} className="text-brand" />
                       <span>Inventory</span>
                     </Link>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-5 border-t border-slate-100 pt-4">
+              <div className="mt-5 border-t border-edge pt-4">
                 <Link
                   href="/ai"
-                  className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-purple-50 py-2.5 text-xs font-bold text-purple-700 transition hover:bg-purple-100"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-soft py-2.5 text-xs font-bold text-brand transition hover:bg-brand-soft"
                 >
                   <span>Configure AI Settings</span>
                   <Icon name="chevronRight" size={14} />
@@ -406,27 +406,27 @@ export default async function HomePage() {
           </div>
 
           {/* Bottom Row: Recent WhatsApp Activity */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+          <div className="rounded-2xl border border-edge/80 bg-white p-6 shadow-xs">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-slate-900">Recent WhatsApp Conversations</h2>
-                <p className="text-xs text-slate-400">Direct chats and group negotiations</p>
+                <h2 className="text-base font-bold text-ink">Recent WhatsApp Conversations</h2>
+                <p className="text-xs text-subtle">Direct chats and group negotiations</p>
               </div>
-              <Link href="/inbox" className="text-xs font-semibold text-purple-600 hover:underline">
+              <Link href="/inbox" className="text-xs font-semibold text-brand hover:underline">
                 View All in Inbox →
               </Link>
             </div>
 
             {(recentChats ?? []).length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-8 text-center">
-                <Icon name="chat" size={24} className="text-slate-300" />
-                <p className="mt-2 text-xs font-medium text-slate-500">No recent messages recorded yet.</p>
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-edge py-8 text-center">
+                <Icon name="chat" size={24} className="text-subtle" />
+                <p className="mt-2 text-xs font-medium text-muted">No recent messages recorded yet.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider">
+                    <tr className="border-b border-edge text-subtle uppercase tracking-wider">
                       <th className="pb-3 font-semibold">Contact / Group</th>
                       <th className="pb-3 font-semibold">Channel</th>
                       <th className="pb-3 font-semibold">Last Message</th>
@@ -434,32 +434,32 @@ export default async function HomePage() {
                       <th className="pb-3 text-right font-semibold">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-edge">
                     {(recentChats ?? []).map((chat) => {
                       const isGroup = chat.chat_type === "group" || chat.jid?.endsWith("@g.us");
                       return (
-                        <tr key={chat.id} className="group hover:bg-slate-50/80 transition-colors">
-                          <td className="py-3 font-medium text-slate-800">
+                        <tr key={chat.id} className="group hover:bg-surface/80 transition-colors">
+                          <td className="py-3 font-medium text-ink">
                             <div className="flex items-center gap-2.5">
                               <Avatar name={chat.chat_name || chat.jid} size={28} />
                               <span className="truncate max-w-xs">{chat.chat_name || chat.jid}</span>
                               {chat.unread_count > 0 && (
-                                <span className="rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">
                                   {chat.unread_count}
                                 </span>
                               )}
                             </div>
                           </td>
                           <td className="py-3">
-                            <span className="flex items-center gap-1.5 text-slate-600">
+                            <span className="flex items-center gap-1.5 text-muted">
                               <Dot tone={isGroup ? "group" : "wa"} />
                               {isGroup ? "WhatsApp Group" : "Direct"}
                             </span>
                           </td>
-                          <td className="py-3 text-slate-500 max-w-md truncate">
+                          <td className="py-3 text-muted max-w-md truncate">
                             {chat.last_message_text || "—"}
                           </td>
-                          <td className="py-3 text-slate-400">
+                          <td className="py-3 text-subtle">
                             {chat.last_message_at
                               ? new Date(chat.last_message_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                               : "—"}
@@ -467,7 +467,7 @@ export default async function HomePage() {
                           <td className="py-3 text-right">
                             <Link
                               href={`/inbox/${chat.id}`}
-                              className="inline-flex items-center gap-1 font-semibold text-purple-600 hover:text-purple-800"
+                              className="inline-flex items-center gap-1 font-semibold text-brand hover:text-brand-dark"
                             >
                               <span>Reply</span>
                               <Icon name="chevronRight" size={12} />

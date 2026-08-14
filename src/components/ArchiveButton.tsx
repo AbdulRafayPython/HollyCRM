@@ -31,7 +31,7 @@ export default function ArchiveButton({
       disabled={busy}
       type="button"
       title={archived ? "Move back to inbox" : "Archive conversation"}
-      className="rounded-xl border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition shadow-2xs shrink-0 disabled:opacity-50"
+      className="rounded-xl border border-edge bg-white p-1.5 text-muted hover:bg-surface hover:text-ink transition shadow-2xs shrink-0 disabled:opacity-50"
     >
       <Icon name="archive" size={15} />
     </button>

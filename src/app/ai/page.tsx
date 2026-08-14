@@ -47,26 +47,26 @@ export default function AiHomePage() {
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
-    return <div className="flex h-full items-center justify-center bg-[#F8FAFC]" />;
+    return <div className="flex h-full items-center justify-center bg-surface" />;
   }
 
   const configured = Boolean(agent?.onboarded_at);
 
   return (
-    <div className="flex h-full flex-col bg-[#F8FAFC]">
+    <div className="flex h-full flex-col bg-surface">
       {/* Header */}
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6 md:px-8 z-10">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 bg-white px-6 md:px-8 z-10">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-slate-900">AI Agent</h1>
+          <h1 className="text-xl font-bold text-ink">AI Agent</h1>
           {configured && (
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-inset ${
                 agent?.enabled
-                  ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-                  : "bg-rose-50 text-rose-700 ring-rose-600/20"
+                  ? "bg-wa-soft text-wa-dark ring-wa-dark/20"
+                  : "bg-danger-soft text-danger-dark ring-danger/20"
               }`}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${agent?.enabled ? "bg-emerald-500" : "bg-rose-500"}`} />
+              <span className={`h-1.5 w-1.5 rounded-full ${agent?.enabled ? "bg-wa" : "bg-danger"}`} />
               {agent?.enabled ? "Live" : "Switched off"}
             </span>
           )}
@@ -75,7 +75,7 @@ export default function AiHomePage() {
         {configured && (
           <Link
             href="/ai/workflow?from=/ai"
-            className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+            className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand transition"
           >
             <Icon name="sparkle" size={14} />
             <span>Open Workflow Canvas</span>
@@ -90,18 +90,18 @@ export default function AiHomePage() {
         ) : (
           <div className="mx-auto max-w-5xl space-y-6">
             {/* Agent Summary Banner Card */}
-            <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs">
+            <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-edge/80 bg-white p-6 shadow-xs">
               <div className="flex items-center gap-4 min-w-0 flex-1">
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 ring-1 ring-purple-600/20">
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand ring-1 ring-brand/20">
                   <Icon name="bot" size={26} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-extrabold text-slate-900">
-                      {agent?.bot_name} <span className="font-normal text-slate-400">·</span> {agent?.business_name}
+                    <h2 className="text-base font-extrabold text-ink">
+                      {agent?.bot_name} <span className="font-normal text-subtle">·</span> {agent?.business_name}
                     </h2>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 leading-relaxed">
+                  <p className="mt-0.5 line-clamp-2 text-xs text-muted leading-relaxed">
                     {agent?.business_description || "No agency description configured."}
                   </p>
                 </div>
@@ -109,7 +109,7 @@ export default function AiHomePage() {
 
               <button
                 onClick={() => setWizard(true)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                className="rounded-xl border border-edge bg-white px-4 py-2 text-xs font-bold text-ink-soft hover:bg-surface transition shadow-2xs"
               >
                 Edit Persona
               </button>
@@ -194,21 +194,21 @@ export default function AiHomePage() {
 function Onboarding({ onBuild }: { onBuild: () => void }) {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12 text-center space-y-6">
-      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-purple-50 text-purple-600 ring-1 ring-purple-600/20 shadow-sm">
+      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-soft text-brand ring-1 ring-brand/20 shadow-sm">
         <Icon name="bot" size={32} />
       </span>
       <div className="space-y-2">
-        <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+        <h2 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
           Your AI Assistant is ready to be configured
         </h2>
-        <p className="mx-auto max-w-xl text-xs text-slate-500 leading-relaxed">
+        <p className="mx-auto max-w-xl text-xs text-muted leading-relaxed">
           It automatically handles WhatsApp inquiries, quotes verified hotel rates, and routes qualified leads directly to your agency desk.
         </p>
       </div>
 
       <button
         onClick={onBuild}
-        className="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-6 py-3 text-xs font-bold text-white shadow-md hover:bg-purple-700 transition-all transform active:scale-95"
+        className="inline-flex items-center gap-2 rounded-2xl bg-brand px-6 py-3 text-xs font-bold text-white shadow-md hover:bg-brand transition-all transform active:scale-95"
       >
         <Icon name="bolt" size={15} />
         <span>Build my AI Agent</span>
@@ -222,13 +222,13 @@ function Onboarding({ onBuild }: { onBuild: () => void }) {
         ].map((f) => (
           <div
             key={f.title}
-            className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-2"
+            className="rounded-2xl border border-edge/80 bg-white p-5 shadow-xs space-y-2"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface text-ink-soft ring-1 ring-edge">
               <Icon name={f.icon} size={16} />
             </span>
-            <h3 className="text-xs font-bold text-slate-900">{f.title}</h3>
-            <p className="text-[11px] text-slate-400 leading-relaxed">{f.body}</p>
+            <h3 className="text-xs font-bold text-ink">{f.title}</h3>
+            <p className="text-[11px] text-subtle leading-relaxed">{f.body}</p>
           </div>
         ))}
       </div>
@@ -243,24 +243,24 @@ function Card({ href, icon, title, body, chip }: {
   return (
     <Link
       href={href}
-      className="group flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:border-purple-500 hover:shadow-lg hover:-translate-y-0.5"
+      className="group flex flex-col justify-between rounded-3xl border border-edge/80 bg-white p-5 shadow-xs transition-all duration-200 hover:border-brand hover:shadow-lg hover:-translate-y-0.5"
     >
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-600 ring-1 ring-slate-200 group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface text-muted ring-1 ring-edge group-hover:bg-brand-soft group-hover:text-brand transition-colors">
             <Icon name={icon} size={18} />
           </span>
           <Chip tone={chip.tone}>{chip.text}</Chip>
         </div>
         <div>
-          <h3 className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
+          <h3 className="text-xs font-bold text-ink group-hover:text-brand transition-colors">
             {title}
           </h3>
-          <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{body}</p>
+          <p className="mt-1 text-[11px] text-subtle leading-relaxed">{body}</p>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-end border-t border-slate-100 pt-3 text-[11px] font-bold text-purple-600 group-hover:translate-x-0.5 transition-transform">
+      <div className="mt-4 flex items-center justify-end border-t border-edge pt-3 text-[11px] font-bold text-brand group-hover:translate-x-0.5 transition-transform">
         Configure →
       </div>
     </Link>

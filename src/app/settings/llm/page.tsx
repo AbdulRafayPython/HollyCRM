@@ -99,36 +99,36 @@ export default function LlmPage() {
   const active = providers.find((p) => p.is_active);
 
   return (
-    <div className="flex h-full bg-[#F8FAFC]">
+    <div className="flex h-full bg-surface">
       <SettingsNav />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 px-8 bg-white z-10">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">LLM Models & API Keys</h1>
-            <p className="text-xs text-slate-400">Configure AI inference providers, model keys, and latency diagnostics</p>
+            <h1 className="text-xl font-bold text-ink">LLM Models & API Keys</h1>
+            <p className="text-xs text-subtle">Configure AI inference providers, model keys, and latency diagnostics</p>
           </div>
 
           <div className="flex items-center gap-3">
             {testing ? (
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+              <span className="rounded-full bg-chalk px-3 py-1 text-xs font-semibold text-muted">
                 Checking connection…
               </span>
             ) : test ? (
               test.ok ? (
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+                <span className="rounded-full bg-wa-soft px-3 py-1 text-xs font-bold text-wa-dark ring-1 ring-wa-dark/20">
                   Live · {PROVIDER_LABEL[test.provider ?? ""] ?? test.provider} ({test.latencyMs}ms)
                 </span>
               ) : (
-                <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-700 ring-1 ring-rose-600/20">
+                <span className="rounded-full bg-danger-soft px-3 py-1 text-xs font-bold text-danger-dark ring-1 ring-danger/20">
                   Connection failed
                 </span>
               )
             ) : active ? (
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-600/20">
+              <span className="rounded-full bg-wa-soft px-3 py-1 text-xs font-bold text-wa-dark ring-1 ring-wa-dark/20">
                 {PROVIDER_LABEL[active.provider]} · {active.model}
               </span>
             ) : (
-              <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-700 ring-1 ring-rose-600/20">
+              <span className="rounded-full bg-danger-soft px-3 py-1 text-xs font-bold text-danger-dark ring-1 ring-danger/20">
                 No model configured
               </span>
             )}
@@ -136,14 +136,14 @@ export default function LlmPage() {
             <button
               disabled={testing || !connected}
               onClick={runTest}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl border border-edge bg-white px-3.5 py-1.5 text-xs font-semibold text-ink-soft hover:bg-surface transition shadow-2xs disabled:opacity-50"
             >
               <Icon name="bolt" size={14} />
               <span>{testing ? "Testing…" : "Test Ping"}</span>
             </button>
             <button
               onClick={() => setAdding((v) => !v)}
-              className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+              className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-brand transition"
             >
               <Icon name="plus" size={14} />
               <span>Add Model Key</span>
@@ -151,7 +151,7 @@ export default function LlmPage() {
           </div>
         </header>
 
-        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-surface">
           <div className="max-w-5xl mx-auto space-y-4">
           {error && (
             <p className="flex items-start gap-2 rounded-lg border border-danger/25 bg-danger-soft p-3 text-meta text-danger-dark">

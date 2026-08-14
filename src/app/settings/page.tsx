@@ -155,15 +155,15 @@ export default function ProfileSettingsPage() {
   };
 
   return (
-    <div className="flex h-full bg-[#F8FAFC]">
+    <div className="flex h-full bg-surface">
       {/* Kommo-style Settings Nav Sidebar */}
       <SettingsNav />
 
       {/* Main Settings Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
         {/* Top Sticky Header with Save Button */}
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8">
-          <h1 className="text-xl font-bold text-slate-900">Profile settings</h1>
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 px-8">
+          <h1 className="text-xl font-bold text-ink">Profile settings</h1>
           <button
             type="button"
             onClick={() => handleSave()}
@@ -181,8 +181,8 @@ export default function ProfileSettingsPage() {
               <div
                 className={`flex items-center gap-2 rounded-xl p-3 text-xs font-medium ${
                   message.tone === "ok"
-                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                    : "bg-rose-50 text-rose-800 border border-rose-200"
+                    ? "bg-wa-soft text-wa-dark border border-wa-soft"
+                    : "bg-danger-soft text-danger-dark border border-danger-soft"
                 }`}
               >
                 <Icon name={message.tone === "ok" ? "check" : "alert"} size={16} />
@@ -203,7 +203,7 @@ export default function ProfileSettingsPage() {
                 />
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="relative flex h-28 w-28 cursor-pointer items-center justify-center rounded-full bg-slate-700 text-white shadow-md overflow-hidden transition-transform hover:scale-105"
+                  className="relative flex h-28 w-28 cursor-pointer items-center justify-center rounded-full bg-ink-soft text-white shadow-md overflow-hidden transition-transform hover:scale-105"
                 >
                   {profile?.avatar_url ? (
                     <img
@@ -227,7 +227,7 @@ export default function ProfileSettingsPage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-700 shadow-md ring-1 ring-slate-200 hover:bg-slate-50 transition"
+                  className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white text-ink-soft shadow-md ring-1 ring-edge hover:bg-surface transition"
                   title="Upload photo"
                 >
                   <Icon name="image" size={15} />
@@ -238,31 +238,31 @@ export default function ProfileSettingsPage() {
               <div className="flex-1 space-y-3 w-full">
                 {/* User ID */}
                 <div className="flex items-center gap-6">
-                  <span className="text-xs font-semibold text-slate-400 w-24">User ID</span>
+                  <span className="text-xs font-semibold text-subtle w-24">User ID</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-semibold text-slate-800">{userIdShort}</span>
+                    <span className="text-xs font-mono font-semibold text-ink">{userIdShort}</span>
                     <button
                       type="button"
                       onClick={copyUserId}
-                      className="text-slate-400 hover:text-slate-700 transition"
+                      className="text-subtle hover:text-ink-soft transition"
                       title="Copy full ID"
                     >
                       <Icon name="paperclip" size={13} />
                     </button>
-                    {copiedId && <span className="text-[10px] text-emerald-600 font-medium">Copied</span>}
+                    {copiedId && <span className="text-[10px] text-wa-dark font-medium">Copied</span>}
                   </div>
                 </div>
 
                 {/* Login via */}
                 <div className="flex items-center gap-6">
-                  <span className="text-xs font-semibold text-slate-400 w-24">Login via</span>
+                  <span className="text-xs font-semibold text-subtle w-24">Login via</span>
                   <div className="flex items-center gap-2">
                     <Avatar name={name || "User"} size={22} />
-                    <span className="text-xs font-semibold text-slate-800">{name || "User Account"}</span>
+                    <span className="text-xs font-semibold text-ink">{name || "User Account"}</span>
                     <form action="/auth/signout" method="post" className="inline-block ml-2">
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-rose-600 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-danger hover:underline"
                       >
                         <Icon name="logout" size={13} />
                         <span>Log out</span>
@@ -277,12 +277,12 @@ export default function ProfileSettingsPage() {
             <form onSubmit={handleSave} className="space-y-4 pt-2">
               {/* Language */}
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-3">
-                <label className="text-xs font-semibold text-slate-600">Language</label>
+                <label className="text-xs font-semibold text-muted">Language</label>
                 <div className="sm:col-span-3">
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-800 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                    className="w-full rounded-xl border border-edge bg-surface/50 px-3.5 py-2 text-xs text-ink focus:border-brand focus:bg-white focus:outline-none transition"
                   >
                     <option>English</option>
                     <option>Arabic (العربية)</option>
@@ -294,43 +294,43 @@ export default function ProfileSettingsPage() {
 
               {/* Name */}
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-3">
-                <label className="text-xs font-semibold text-slate-600">Name</label>
+                <label className="text-xs font-semibold text-muted">Name</label>
                 <div className="sm:col-span-3">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Full name"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:border-purple-500 focus:outline-none transition"
+                    className="w-full rounded-xl border border-edge px-3.5 py-2 text-xs text-ink focus:border-brand focus:outline-none transition"
                   />
                 </div>
               </div>
 
               {/* Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-3">
-                <label className="text-xs font-semibold text-slate-600">Phone</label>
+                <label className="text-xs font-semibold text-muted">Phone</label>
                 <div className="sm:col-span-3">
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+92 300 1234567"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:border-purple-500 focus:outline-none transition"
+                    className="w-full rounded-xl border border-edge px-3.5 py-2 text-xs text-ink focus:border-brand focus:outline-none transition"
                   />
                 </div>
               </div>
 
               {/* Email with Lock Icon */}
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-3">
-                <label className="text-xs font-semibold text-slate-600">Email</label>
+                <label className="text-xs font-semibold text-muted">Email</label>
                 <div className="sm:col-span-3 relative">
                   <input
                     type="email"
                     value={profile?.email || ""}
                     disabled
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 pr-9 text-xs text-slate-500 cursor-not-allowed"
+                    className="w-full rounded-xl border border-edge bg-surface px-3.5 py-2 pr-9 text-xs text-muted cursor-not-allowed"
                   />
-                  <span className="absolute right-3 top-2.5 text-slate-400">
+                  <span className="absolute right-3 top-2.5 text-subtle">
                     <Icon name="lock" size={14} />
                   </span>
                 </div>
@@ -338,18 +338,18 @@ export default function ProfileSettingsPage() {
 
               {/* Password */}
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-3">
-                <label className="text-xs font-semibold text-slate-600">Password</label>
+                <label className="text-xs font-semibold text-muted">Password</label>
                 <div className="sm:col-span-3 flex items-center gap-3">
                   <input
                     type="password"
                     value="••••••••••••"
                     disabled
-                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-400 cursor-not-allowed"
+                    className="flex-1 rounded-xl border border-edge bg-surface px-3.5 py-2 text-xs text-subtle cursor-not-allowed"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasswordModal(true)}
-                    className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-purple-700 hover:bg-purple-50 transition shrink-0"
+                    className="rounded-xl border border-edge px-3 py-2 text-xs font-semibold text-brand hover:bg-brand-soft transition shrink-0"
                   >
                     Change password
                   </button>
@@ -358,26 +358,26 @@ export default function ProfileSettingsPage() {
 
               {/* Note / Bio */}
               <div className="grid grid-cols-1 sm:grid-cols-4 items-start gap-3">
-                <label className="text-xs font-semibold text-slate-600 pt-2">Note</label>
+                <label className="text-xs font-semibold text-muted pt-2">Note</label>
                 <div className="sm:col-span-3">
                   <textarea
                     rows={3}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Add personal notes or agency responsibilities…"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:border-purple-500 focus:outline-none transition resize-y"
+                    className="w-full rounded-xl border border-edge px-3.5 py-2 text-xs text-ink focus:border-brand focus:outline-none transition resize-y"
                   />
                 </div>
               </div>
 
               {/* Left Menu Style */}
               <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-3">
-                <label className="text-xs font-semibold text-slate-600">Left menu</label>
+                <label className="text-xs font-semibold text-muted">Left menu</label>
                 <div className="sm:col-span-3">
                   <select
                     value={menuStyle}
                     onChange={(e) => setMenuStyle(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-800 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                    className="w-full rounded-xl border border-edge bg-surface/50 px-3.5 py-2 text-xs text-ink focus:border-brand focus:bg-white focus:outline-none transition"
                   >
                     <option>New left menu (Recommended)</option>
                     <option>Compact icon rail</option>
@@ -387,13 +387,13 @@ export default function ProfileSettingsPage() {
             </form>
 
             {/* Security Section matching screenshot */}
-            <div className="border-t border-slate-200/80 pt-6 space-y-4">
-              <h2 className="text-sm font-bold text-slate-900">Security</h2>
+            <div className="border-t border-edge/80 pt-6 space-y-4">
+              <h2 className="text-sm font-bold text-ink">Security</h2>
 
-              <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+              <div className="flex items-center justify-between rounded-2xl border border-edge bg-surface/50 p-4">
                 <div>
-                  <p className="text-xs font-bold text-slate-800">2-step verification</p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-xs font-bold text-ink">2-step verification</p>
+                  <p className="text-[11px] text-subtle">
                     Add an extra layer of security to your HolyCRM agent account.
                   </p>
                 </div>
@@ -402,7 +402,7 @@ export default function ProfileSettingsPage() {
                   type="button"
                   onClick={() => setTwoFactor((v) => !v)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    twoFactor ? "bg-purple-600" : "bg-slate-300"
+                    twoFactor ? "bg-brand" : "bg-edge-strong"
                   }`}
                 >
                   <span
@@ -419,63 +419,63 @@ export default function ProfileSettingsPage() {
 
       {/* Change Password Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900">Change Password</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-edge bg-white p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-edge pb-3">
+              <h3 className="text-base font-bold text-ink">Change Password</h3>
               <button
                 onClick={() => setShowPasswordModal(false)}
-                className="text-slate-400 hover:text-slate-700"
+                className="text-subtle hover:text-ink-soft"
               >
                 <Icon name="close" size={16} />
               </button>
             </div>
 
             {pwError && (
-              <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+              <p className="rounded-xl border border-danger-soft bg-danger-soft p-3 text-xs text-danger-dark">
                 {pwError}
               </p>
             )}
 
             <form onSubmit={handlePasswordSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Current password</label>
+                <label className="block text-xs font-semibold text-ink-soft">Current password</label>
                 <input
                   type="password"
                   required
                   value={currentPw}
                   onChange={(e) => setCurrentPw(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs focus:border-purple-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-edge px-3.5 py-2 text-xs focus:border-brand focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">New password</label>
+                <label className="block text-xs font-semibold text-ink-soft">New password</label>
                 <input
                   type="password"
                   required
                   value={newPw}
                   onChange={(e) => setNewPw(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs focus:border-purple-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-edge px-3.5 py-2 text-xs focus:border-brand focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Confirm new password</label>
+                <label className="block text-xs font-semibold text-ink-soft">Confirm new password</label>
                 <input
                   type="password"
                   required
                   value={confirmPw}
                   onChange={(e) => setConfirmPw(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs focus:border-purple-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-edge px-3.5 py-2 text-xs focus:border-brand focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-edge">
                 <button
                   type="button"
                   onClick={() => setShowPasswordModal(false)}
-                  className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                  className="rounded-xl px-4 py-2 text-xs font-semibold text-muted hover:bg-chalk"
                 >
                   Cancel
                 </button>

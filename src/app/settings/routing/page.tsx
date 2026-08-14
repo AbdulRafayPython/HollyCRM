@@ -80,36 +80,36 @@ export default function RoutingPage() {
   const online = agents.filter((a) => a.is_online).length;
 
   return (
-    <div className="flex h-full bg-[#F8FAFC]">
+    <div className="flex h-full bg-surface">
       <SettingsNav />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 px-8 bg-white z-10">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Routing & Coverage Desks</h1>
-            <p className="text-xs text-slate-400">Dialing code regions, auto-assignment rules, and active agent availability</p>
+            <h1 className="text-xl font-bold text-ink">Routing & Coverage Desks</h1>
+            <p className="text-xs text-subtle">Dialing code regions, auto-assignment rules, and active agent availability</p>
           </div>
 
           <div className="flex items-center gap-3">
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ${
                 online > 0
-                  ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-                  : "bg-slate-100 text-slate-600 ring-slate-200"
+                  ? "bg-wa-soft text-wa-dark ring-wa-dark/20"
+                  : "bg-chalk text-muted ring-edge"
               }`}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${online > 0 ? "bg-emerald-500" : "bg-slate-400"}`} />
+              <span className={`h-1.5 w-1.5 rounded-full ${online > 0 ? "bg-wa" : "bg-subtle"}`} />
               {online} of {agents.length} agents online
             </span>
             <Link
               href="/ai/workflow?from=/settings/routing"
-              className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+              className="rounded-xl border border-edge bg-white px-3.5 py-1.5 text-xs font-semibold text-ink-soft hover:bg-surface transition shadow-2xs"
             >
               View in Workflow →
             </Link>
           </div>
         </header>
 
-        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-surface">
           <div className="max-w-5xl mx-auto space-y-6">
           {error && (
             <p className="flex items-start gap-2 rounded-lg border border-danger/25 bg-danger-soft p-3 text-meta text-danger-dark">

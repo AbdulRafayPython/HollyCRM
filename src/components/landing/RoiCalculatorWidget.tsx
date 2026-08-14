@@ -31,19 +31,19 @@ export default function RoiCalculatorWidget() {
       value: `${hoursSavedPerMonth.toLocaleString("en-US")} hrs`,
       label: "Agent hours saved / month",
       detail: `≈ ${hoursPerAgentPerWeek} hrs per agent, per week`,
-      tone: "text-violet-600",
+      tone: "text-dome",
     },
     {
       value: `+${extraBookings.toLocaleString("en-US")}`,
       label: "Extra bookings / month",
       detail: "From faster, grounded first replies",
-      tone: "text-emerald-600",
+      tone: "text-dome",
     },
     {
       value: `${revenueUplift} SAR`,
       label: "Revenue uplift / month",
       detail: `At ${MARGIN_PER_BOOKING.toLocaleString("en-US")} SAR margin per booking`,
-      tone: "text-slate-900",
+      tone: "text-graphite",
     },
   ];
 
@@ -63,7 +63,7 @@ export default function RoiCalculatorWidget() {
         <Reveal
           variant="zoom"
           delay={120}
-          className="mt-12 overflow-hidden rounded-3xl bg-white shadow-xl shadow-violet-950/5 ring-1 ring-slate-900/5"
+          className="mt-12 overflow-hidden rounded-3xl bg-plate shadow-xl shadow-graphite/5 ring-1 ring-graphite/5"
         >
           <div className="grid lg:grid-cols-[1fr_1.1fr]">
             {/* Inputs */}
@@ -72,11 +72,11 @@ export default function RoiCalculatorWidget() {
                 <div className="flex items-baseline justify-between">
                   <label
                     htmlFor="roi-leads"
-                    className="text-sm font-bold text-slate-900"
+                    className="text-sm font-bold text-graphite"
                   >
                     Monthly WhatsApp inquiries
                   </label>
-                  <span className="rounded-lg bg-violet-50 px-2.5 py-1 text-sm font-extrabold tabular-nums text-violet-700">
+                  <span className="rounded-lg bg-dome-tint px-2.5 py-1 text-sm font-extrabold tabular-nums text-dome">
                     {monthlyLeads.toLocaleString("en-US")}
                   </span>
                 </div>
@@ -88,9 +88,9 @@ export default function RoiCalculatorWidget() {
                   step={100}
                   value={monthlyLeads}
                   onChange={(e) => setMonthlyLeads(Number(e.target.value))}
-                  className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-violet-600"
+                  className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-rule accent-dome"
                 />
-                <div className="mt-2 flex justify-between text-[11px] font-medium text-slate-400">
+                <div className="mt-2 flex justify-between text-[11px] font-medium text-haze">
                   <span>200 — boutique broker</span>
                   <span>10,000 — Ramadan peak</span>
                 </div>
@@ -100,11 +100,11 @@ export default function RoiCalculatorWidget() {
                 <div className="flex items-baseline justify-between">
                   <label
                     htmlFor="roi-agents"
-                    className="text-sm font-bold text-slate-900"
+                    className="text-sm font-bold text-graphite"
                   >
                     Sales agents on the line
                   </label>
-                  <span className="rounded-lg bg-violet-50 px-2.5 py-1 text-sm font-extrabold tabular-nums text-violet-700">
+                  <span className="rounded-lg bg-dome-tint px-2.5 py-1 text-sm font-extrabold tabular-nums text-dome">
                     {agents}
                   </span>
                 </div>
@@ -116,15 +116,15 @@ export default function RoiCalculatorWidget() {
                   step={1}
                   value={agents}
                   onChange={(e) => setAgents(Number(e.target.value))}
-                  className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-violet-600"
+                  className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-rule accent-dome"
                 />
-                <div className="mt-2 flex justify-between text-[11px] font-medium text-slate-400">
+                <div className="mt-2 flex justify-between text-[11px] font-medium text-haze">
                   <span>1 agent</span>
                   <span>40 agents</span>
                 </div>
               </div>
 
-              <p className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-400">
+              <p className="flex items-start gap-2 text-[11px] leading-relaxed text-haze">
                 <Icon name="info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 Modelled on 6 agent-minutes per manual inquiry, 70% of that automated,
                 and a 35% lift on an 8% close rate.
@@ -132,21 +132,21 @@ export default function RoiCalculatorWidget() {
             </div>
 
             {/* Outputs */}
-            <div className="space-y-4 border-t border-slate-900/5 bg-slate-50/70 p-6 sm:p-8 lg:border-l lg:border-t-0">
+            <div className="space-y-4 border-t border-graphite/5 bg-chalk/70 p-6 sm:p-8 lg:border-l lg:border-t-0">
               {results.map((result) => (
                 <div
                   key={result.label}
-                  className="rounded-2xl bg-white px-5 py-4 shadow-sm ring-1 ring-slate-900/5"
+                  className="rounded-2xl bg-plate px-5 py-4 shadow-sm ring-1 ring-graphite/5"
                 >
                   <div
                     className={`text-2xl font-extrabold tracking-tight tabular-nums ${result.tone}`}
                   >
                     {result.value}
                   </div>
-                  <div className="mt-1 text-xs font-bold text-slate-700">
+                  <div className="mt-1 text-xs font-bold text-stone">
                     {result.label}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-slate-500">{result.detail}</div>
+                  <div className="mt-0.5 text-[11px] text-haze">{result.detail}</div>
                 </div>
               ))}
             </div>

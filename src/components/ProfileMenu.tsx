@@ -72,7 +72,7 @@ export default function ProfileMenu({
           aria-expanded={open}
           title={name ?? "Account"}
           className={`flex w-full items-center justify-center rounded-xl p-1.5 transition-colors duration-150 ${
-            open ? "bg-slate-100 ring-2 ring-purple-600/30" : "hover:bg-slate-100"
+            open ? "bg-chalk ring-2 ring-brand/30" : "hover:bg-chalk"
           }`}
         >
           <span className="relative rounded-full">
@@ -80,7 +80,7 @@ export default function ProfileMenu({
             <span
               aria-hidden
               className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white transition-colors duration-200 ${
-                presence === "available" ? "bg-emerald-500" : "bg-slate-400"
+                presence === "available" ? "bg-wa" : "bg-subtle"
               }`}
             />
           </span>
@@ -94,7 +94,7 @@ export default function ProfileMenu({
           aria-haspopup="menu"
           aria-expanded={open}
           className={`flex w-full items-center justify-between gap-2.5 rounded-xl p-2 text-left transition-colors duration-150 ${
-            open ? "bg-purple-50/80 ring-1 ring-purple-600/20" : "hover:bg-slate-100/80"
+            open ? "bg-brand-soft/80 ring-1 ring-brand/20" : "hover:bg-chalk/80"
           }`}
         >
           <div className="flex min-w-0 items-center gap-2.5">
@@ -103,15 +103,15 @@ export default function ProfileMenu({
               <span
                 aria-hidden
                 className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white transition-colors duration-200 ${
-                  presence === "available" ? "bg-emerald-500" : "bg-slate-400"
+                  presence === "available" ? "bg-wa" : "bg-subtle"
                 }`}
               />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-slate-800">
+              <p className="truncate text-xs font-bold text-ink">
                 {name ?? "Account"}
               </p>
-              <p className="truncate text-[11px] font-medium text-slate-400">
+              <p className="truncate text-[11px] font-medium text-subtle">
                 {email ?? "user@workspace"}
               </p>
             </div>
@@ -119,8 +119,8 @@ export default function ProfileMenu({
           <Icon
             name="chevronDown"
             size={14}
-            className={`shrink-0 text-slate-400 transition-transform duration-200 ${
-              open ? "rotate-180 text-purple-600" : ""
+            className={`shrink-0 text-subtle transition-transform duration-200 ${
+              open ? "rotate-180 text-brand" : ""
             }`}
           />
         </button>
@@ -131,35 +131,35 @@ export default function ProfileMenu({
         <div
           role="menu"
           aria-label="Account"
-          className={`absolute z-50 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl ring-1 ring-slate-900/10 animate-rise-in ${
+          className={`absolute z-50 overflow-hidden rounded-2xl border border-edge/90 bg-white shadow-2xl ring-1 ring-ink/10 animate-rise-in ${
             collapsed
               ? "bottom-0 left-full ml-3 w-64 origin-bottom-left"
               : "bottom-full left-0 mb-2 w-full origin-bottom-left"
           }`}
         >
-          <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/50 px-3.5 py-3">
+          <div className="flex items-center gap-2.5 border-b border-edge bg-surface/50 px-3.5 py-3">
             <Avatar name={name} type="agent" size={34} src={avatar} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-slate-900">
+              <p className="truncate text-xs font-bold text-ink">
                 {name ?? "Account"}
               </p>
-              {email && <p className="truncate text-[11px] text-slate-400">{email}</p>}
+              {email && <p className="truncate text-[11px] text-subtle">{email}</p>}
             </div>
           </div>
 
           {/* Availability Toggle */}
-          <div className="border-b border-slate-100 p-2.5">
+          <div className="border-b border-edge p-2.5">
             <div className="mb-1.5 flex items-center justify-between px-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Availability</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-subtle">Availability</span>
               <span
                 className={`text-[11px] font-bold ${
-                  presence === "available" ? "text-emerald-600" : "text-slate-400"
+                  presence === "available" ? "text-wa-dark" : "text-subtle"
                 }`}
               >
                 {presence === "available" ? "Taking chats" : "Away / Paused"}
               </span>
             </div>
-            <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+            <div className="flex gap-1 rounded-xl bg-chalk p-1">
               {(["available", "away"] as const).map((value) => (
                 <button
                   key={value}
@@ -169,13 +169,13 @@ export default function ProfileMenu({
                   onClick={() => setPresence(value)}
                   className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition-all duration-150 ${
                     presence === value
-                      ? "bg-white text-slate-900 shadow-xs"
-                      : "text-slate-500 hover:text-slate-800"
+                      ? "bg-white text-ink shadow-xs"
+                      : "text-muted hover:text-ink"
                   }`}
                 >
                   <span
                     className={`h-2 w-2 rounded-full ${
-                      value === "available" ? "bg-emerald-500" : "bg-slate-400"
+                      value === "available" ? "bg-wa" : "bg-subtle"
                     }`}
                   />
                   {value === "available" ? "Available" : "Away"}
@@ -191,21 +191,21 @@ export default function ProfileMenu({
                 key={item.href}
                 href={item.href}
                 role="menuitem"
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-ink-soft transition hover:bg-brand-soft hover:text-brand"
               >
-                <Icon name={item.icon} size={16} className="text-slate-400" />
+                <Icon name={item.icon} size={16} className="text-subtle" />
                 {item.label}
               </Link>
             ))}
           </div>
 
           {/* Logout */}
-          <div className="border-t border-slate-100 p-1.5">
+          <div className="border-t border-edge p-1.5">
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
                 role="menuitem"
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-danger transition hover:bg-danger-soft"
               >
                 <Icon name="logout" size={15} />
                 Log out

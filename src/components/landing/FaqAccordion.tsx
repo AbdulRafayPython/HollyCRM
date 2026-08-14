@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
-import { SectionHeading } from "./primitives";
+import { Cta, Eyebrow } from "./primitives";
 import Reveal from "./Reveal";
 
 const FAQS = [
@@ -33,80 +33,85 @@ const FAQS = [
   },
 ];
 
+/**
+ * FAQ — split layout, heading pinned left, accordion right.
+ *
+ * The panel uses `.accordion-panel` from globals.css: grid-template-rows
+ * animating 0fr → 1fr transitions real auto height with no JS measurement and
+ * no max-height guesswork.
+ */
 export default function FaqAccordion() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
-    <section
-      id="faq"
-      className="scroll-mt-24 border-t border-slate-900/5 bg-slate-50/70 py-16 sm:py-20"
-    >
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <Reveal>
-          <SectionHeading
-            eyebrow="FAQ"
-            title="Questions agencies ask"
-            highlight="before switching."
-          />
-        </Reveal>
+    <section id="faq" className="scroll-mt-24 py-20 sm:py-28">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)] lg:gap-16">
+          <Reveal variant="left">
+            <div className="lg:sticky lg:top-28">
+              <Eyebrow>FAQ</Eyebrow>
+              <h2 className="mkt-display mt-3 text-[2rem] font-extrabold text-graphite sm:text-[2.6rem]">
+                Got questions?
+              </h2>
+              <p className="mt-4 font-plex text-base leading-relaxed text-stone">
+                The five agencies ask before switching. If yours is not here, the answer
+                is one message away.
+              </p>
+              <Cta href="/signup" variant="secondary" className="mt-6">
+                Reach out here
+              </Cta>
+            </div>
+          </Reveal>
 
-        <div className="mt-10 space-y-3">
-          {FAQS.map((faq, idx) => {
-            const isOpen = openIdx === idx;
-            return (
-              <Reveal key={faq.question} delay={idx * 70}>
-                <div
-                  className={`overflow-hidden rounded-2xl bg-white transition-all duration-300 ${
-                    isOpen
-                      ? "shadow-md ring-1 ring-violet-200"
-                      : "shadow-sm ring-1 ring-slate-900/5"
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenIdx(isOpen ? null : idx)}
-                    aria-expanded={isOpen}
-                    className="flex w-full items-center justify-between gap-4 p-5 text-left"
-                  >
-                    <span
-                      className={`text-sm font-bold transition-colors duration-300 sm:text-base ${
-                        isOpen ? "text-violet-700" : "text-slate-900"
-                      }`}
-                    >
-                      {faq.question}
-                    </span>
-                    <span
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-                        isOpen
-                          ? "rotate-180 bg-violet-100 text-violet-700"
-                          : "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      <Icon name="chevronDown" className="h-4 w-4" />
-                    </span>
-                  </button>
-
-                  {/*
-                    The answer is always in the DOM and the row collapses from
-                    0fr to 1fr, which gives a real height transition without
-                    measuring anything. Conditionally rendering it made the
-                    panel snap open — the one hard cut left on the page.
-                  */}
+          <Reveal variant="right">
+            <div className="flex flex-col gap-2.5">
+              {FAQS.map((faq, idx) => {
+                const isOpen = openIdx === idx;
+                return (
                   <div
-                    className={`grid transition-all duration-500 ease-swift ${
-                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    key={faq.question}
+                    className={`overflow-hidden rounded-2xl bg-plate transition-shadow duration-300 ring-1 ${
+                      isOpen ? "shadow-lift ring-dome-line" : "shadow-chip ring-rule"
                     }`}
                   >
-                    <div className="overflow-hidden">
-                      <div className="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600">
-                        {faq.answer}
+                    <h3>
+                      <button
+                        type="button"
+                        onClick={() => setOpenIdx(isOpen ? null : idx)}
+                        aria-expanded={isOpen}
+                        className="flex w-full items-center justify-between gap-4 p-4 text-left sm:p-5"
+                      >
+                        <span
+                          className={`mkt-display text-[0.95rem] font-bold leading-tight transition-colors duration-300 sm:text-[1.05rem] ${
+                            isOpen ? "text-dome" : "text-graphite"
+                          }`}
+                        >
+                          {faq.question}
+                        </span>
+                        <span
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+                            isOpen
+                              ? "rotate-180 bg-dome-tint text-dome"
+                              : "bg-chalk text-haze"
+                          }`}
+                        >
+                          <Icon name="chevronDown" className="h-4 w-4" />
+                        </span>
+                      </button>
+                    </h3>
+
+                    <div className="accordion-panel" data-open={isOpen}>
+                      <div>
+                        <p className="border-t border-rule px-4 pb-5 pt-4 font-plex text-sm leading-relaxed text-stone sm:px-5">
+                          {faq.answer}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Reveal>
-            );
-          })}
+                );
+              })}
+            </div>
+          </Reveal>
         </div>
       </div>
     </section>

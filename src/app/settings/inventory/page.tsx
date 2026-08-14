@@ -70,22 +70,22 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="flex h-full bg-[#F8FAFC]">
+    <div className="flex h-full bg-surface">
       <SettingsNav />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 px-8 bg-white z-10">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Hotel Inventory & Pricing</h1>
-            <p className="text-xs text-slate-400">Verified properties, room categories, and contracted seasonal rates</p>
+            <h1 className="text-xl font-bold text-ink">Hotel Inventory & Pricing</h1>
+            <p className="text-xs text-subtle">Verified properties, room categories, and contracted seasonal rates</p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 ring-1 ring-purple-600/20">
+            <span className="rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand ring-1 ring-brand/20">
               {hotels.length} propert{hotels.length === 1 ? "y" : "ies"} live
             </span>
             <button
               onClick={() => setShowHotelForm((v) => !v)}
-              className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition"
+              className="flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand transition"
             >
               <Icon name="plus" size={14} />
               <span>Add Hotel</span>
@@ -93,11 +93,11 @@ export default function InventoryPage() {
           </div>
         </header>
 
-        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-surface">
           <div className="max-w-5xl mx-auto space-y-4">
             {error && (
-              <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
-                <Icon name="alert" size={16} className="mt-0.5 text-rose-600 shrink-0" />
+              <p className="flex items-start gap-2 rounded-2xl border border-danger-soft bg-danger-soft p-4 text-xs font-medium text-danger-dark">
+                <Icon name="alert" size={16} className="mt-0.5 text-danger shrink-0" />
                 <span>{error}</span>
               </p>
             )}
@@ -194,7 +194,7 @@ export default function InventoryPage() {
             );
           })}
 
-          <p className="text-center text-xs text-slate-400">
+          <p className="text-center text-xs text-subtle">
             The AI only quotes hotels that are visible, actively priced for the requested dates, and have allotments available.
           </p>
         </div>

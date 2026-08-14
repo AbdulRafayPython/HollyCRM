@@ -3,6 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
 
+/**
+ * PLACEHOLDER FIGURES — verify or remove before launch.
+ *
+ * "5M+ messages", "200+ agencies" and "35% higher conversion" are marketing
+ * claims of the same class as the placeholder testimonials: nothing in this
+ * repo substantiates them. "100% SQL pricing accuracy" is the one that is
+ * defensible, because it describes the architecture rather than a result —
+ * the model never authors a rate.
+ */
 const STATS = [
   { to: 5, prefix: "", suffix: "M+", label: "Pilgrim messages handled" },
   { to: 100, prefix: "", suffix: "%", label: "SQL pricing accuracy" },
@@ -67,7 +76,7 @@ function Counter({ to, prefix, suffix }: { to: number; prefix: string; suffix: s
   return (
     <div
       ref={ref}
-      className="text-2xl font-extrabold tabular-nums tracking-tight text-slate-900 sm:text-3xl"
+      className="mkt-display text-2xl font-extrabold tabular-nums text-graphite sm:text-3xl"
     >
       {prefix}
       {shown}
@@ -85,16 +94,16 @@ export default function MetricsBar() {
     <section className="relative z-10 -mt-4 pb-8 sm:pb-12">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <Reveal variant="zoom">
-          <div className="grid grid-cols-2 gap-y-8 rounded-2xl bg-white px-6 py-8 shadow-xl shadow-violet-950/5 ring-1 ring-slate-900/5 sm:px-10 lg:grid-cols-4 lg:gap-y-0">
+          <div className="grid grid-cols-2 gap-y-8 rounded-2xl bg-plate px-6 py-8 shadow-lift ring-1 ring-rule sm:px-10 lg:grid-cols-4 lg:gap-y-0">
             {STATS.map((stat, i) => (
               <div
                 key={stat.label}
-                className={`text-center ${
-                  i > 0 ? "lg:border-l lg:border-slate-200/80" : ""
-                } ${i % 2 === 1 ? "border-l border-slate-200/80 lg:border-l" : ""}`}
+                className={`text-center ${i > 0 ? "lg:border-l lg:border-rule" : ""} ${
+                  i % 2 === 1 ? "border-l border-rule lg:border-l" : ""
+                }`}
               >
                 <Counter to={stat.to} prefix={stat.prefix} suffix={stat.suffix} />
-                <div className="mt-1 px-2 text-xs font-medium text-slate-500">
+                <div className="mt-1 px-2 font-plex text-xs font-medium text-haze">
                   {stat.label}
                 </div>
               </div>

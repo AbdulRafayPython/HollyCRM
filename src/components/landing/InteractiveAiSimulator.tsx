@@ -95,13 +95,13 @@ export default function InteractiveAiSimulator() {
   return (
     <section
       id="simulator"
-      className="scroll-mt-24 border-y border-slate-900/5 bg-gradient-to-b from-white via-violet-50/60 to-white py-16 sm:py-20"
+      className="scroll-mt-24 border-y border-graphite/5 bg-gradient-to-b from-white via-dome-tint/60 to-white py-16 sm:py-20"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <Reveal>
           <SectionHeading
             eyebrow="Interactive playground"
-            eyebrowTone="emerald"
+            eyebrowTone="dome"
             eyebrowIcon="play"
             title="Test the quoting engine"
             highlight="on a real inquiry."
@@ -112,10 +112,10 @@ export default function InteractiveAiSimulator() {
         <Reveal
           variant="zoom"
           delay={120}
-          className="mx-auto mt-12 max-w-4xl rounded-2xl bg-white p-6 shadow-xl shadow-violet-950/5 ring-1 ring-slate-900/5 sm:p-8"
+          className="mx-auto mt-12 max-w-4xl rounded-2xl bg-plate p-6 shadow-xl shadow-graphite/5 ring-1 ring-graphite/5 sm:p-8"
         >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-bold text-slate-500">Try a sample:</span>
+            <span className="mr-1 text-xs font-bold text-haze">Try a sample:</span>
             {PRESET_QUERIES.map((preset, idx) => (
               <button
                 key={preset.label}
@@ -123,8 +123,8 @@ export default function InteractiveAiSimulator() {
                 onClick={() => handleSelectPreset(idx)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                   selectedIndex === idx
-                    ? "bg-violet-600 text-white shadow-md shadow-violet-600/20"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    ? "bg-dome text-white shadow-md shadow-dome/20"
+                    : "bg-rule text-stone hover:bg-rule"
                 }`}
               >
                 {preset.label}
@@ -134,7 +134,7 @@ export default function InteractiveAiSimulator() {
 
           <label
             htmlFor="simulator-input"
-            className="mt-6 block text-xs font-bold text-slate-700"
+            className="mt-6 block text-xs font-bold text-stone"
           >
             Inbound WhatsApp message
           </label>
@@ -144,12 +144,12 @@ export default function InteractiveAiSimulator() {
               type="text"
               value={customText}
               onChange={(e) => setCustomText(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-3.5 pl-4 pr-32 text-sm font-medium text-slate-900 transition-all focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+              className="w-full rounded-xl border border-rule bg-chalk/60 py-3.5 pl-4 pr-32 text-sm font-medium text-graphite transition-all focus:border-dome focus:bg-plate focus:outline-none focus:ring-2 focus:ring-dome/20"
             />
             <button
               type="button"
               onClick={triggerSimulation}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-violet-600 px-3.5 py-2 text-xs font-bold text-white shadow transition-colors hover:bg-violet-700"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-dome px-3.5 py-2 text-xs font-bold text-white shadow transition-all hover:brightness-95"
             >
               Run AI match
             </button>
@@ -157,53 +157,53 @@ export default function InteractiveAiSimulator() {
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {/* Extraction */}
-            <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900 p-5">
-              <div className="mb-3 flex items-center justify-between border-b border-slate-800 pb-2 text-[11px] font-bold">
-                <span className="text-violet-300">Zod parameter extraction</span>
-                <span className="text-emerald-400">DeepSeek JSON</span>
+            <div className="overflow-hidden rounded-xl border border-graphite bg-graphite p-5">
+              <div className="mb-3 flex items-center justify-between border-b border-graphite pb-2 text-[11px] font-bold">
+                <span className="text-dome-line">Zod parameter extraction</span>
+                <span className="text-[#5FD4A0]">DeepSeek JSON</span>
               </div>
               {isSimulating ? (
-                <div className="flex items-center justify-center gap-2 py-10 text-xs text-slate-400">
-                  <span className="h-2 w-2 animate-ping rounded-full bg-violet-500" />
+                <div className="flex items-center justify-center gap-2 py-10 text-xs text-haze">
+                  <span className="h-2 w-2 animate-ping rounded-full bg-dome" />
                   Extracting parameters…
                 </div>
               ) : (
-                <pre className="overflow-x-auto font-mono text-[11px] leading-relaxed text-emerald-400">
+                <pre className="overflow-x-auto font-mono text-[11px] leading-relaxed text-[#5FD4A0]">
                   {JSON.stringify(activeData.extracted, null, 2)}
                 </pre>
               )}
             </div>
 
             {/* Match */}
-            <div className="flex flex-col justify-between rounded-xl bg-violet-50/70 p-5 ring-1 ring-violet-200/70">
+            <div className="flex flex-col justify-between rounded-xl bg-dome-tint/70 p-5 ring-1 ring-dome-line/70">
               <div>
-                <div className="mb-3 flex items-center justify-between border-b border-violet-200/70 pb-2 text-xs font-bold text-violet-900">
+                <div className="mb-3 flex items-center justify-between border-b border-dome-line/70 pb-2 text-xs font-bold text-graphite">
                   <span>SQL match result</span>
-                  <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                  <span className="rounded bg-dome-tint px-2 py-0.5 text-[10px] font-bold text-dome">
                     {activeData.match.status}
                   </span>
                 </div>
 
                 {isSimulating ? (
-                  <div className="flex items-center justify-center py-10 text-xs font-semibold text-violet-700">
+                  <div className="flex items-center justify-center py-10 text-xs font-semibold text-dome">
                     Executing search_hotels()…
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <h3 className="text-base font-extrabold text-slate-900">
+                    <h3 className="text-base font-extrabold text-graphite">
                       {activeData.match.hotel}
                     </h3>
-                    <div className="inline-block rounded-md bg-violet-200/70 px-2.5 py-1 text-xs font-bold text-violet-900">
+                    <div className="inline-block rounded-md bg-dome-line/70 px-2.5 py-1 text-xs font-bold text-graphite">
                       {activeData.match.rate}
                     </div>
-                    <dl className="space-y-1.5 text-xs text-slate-700">
+                    <dl className="space-y-1.5 text-xs text-stone">
                       {[
                         ["Category", activeData.match.category],
                         ["Rooms", activeData.match.rooms],
                         ["Location", activeData.match.distance],
                       ].map(([label, value]) => (
                         <div key={label} className="flex gap-1.5">
-                          <dt className="font-semibold text-slate-900">{label}:</dt>
+                          <dt className="font-semibold text-graphite">{label}:</dt>
                           <dd>{value}</dd>
                         </div>
                       ))}
@@ -212,9 +212,9 @@ export default function InteractiveAiSimulator() {
                 )}
               </div>
 
-              <div className="mt-5 flex items-center justify-between border-t border-violet-200/60 pt-3 text-[11px] font-medium text-violet-800">
+              <div className="mt-5 flex items-center justify-between border-t border-dome-line/60 pt-3 text-[11px] font-medium text-stone">
                 <span className="font-mono">public.hotels</span>
-                <span className="inline-flex items-center gap-1 font-bold text-emerald-700">
+                <span className="inline-flex items-center gap-1 font-bold text-dome">
                   <Icon name="checkDouble" className="h-3.5 w-3.5" />
                   100% rate accuracy
                 </span>

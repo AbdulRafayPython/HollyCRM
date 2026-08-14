@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
               <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-wa-soft text-wa">
                 <Icon name="mail" size={26} />
               </span>
-              <h1 className="text-h1 text-ink">Check your email</h1>
+              <h1 className="mkt-display text-[1.6rem] font-extrabold normal-case text-ink">Check your email</h1>
               <p className="mx-auto mt-3 max-w-sm text-body text-muted">
                 If an account exists for <strong className="text-ink">{email}</strong>, a
                 password-reset link is on its way. Open it in this browser to choose a new
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
             </div>
           ) : (
             <form onSubmit={requestReset}>
-              <h1 className="mb-2 text-center text-[40px] font-semibold leading-tight tracking-tight text-ink">
+              <h1 className="mkt-display mb-2 text-center text-[2.3rem] font-extrabold normal-case text-ink">
                 Reset password
               </h1>
               <p className="mb-8 text-center text-body text-muted">

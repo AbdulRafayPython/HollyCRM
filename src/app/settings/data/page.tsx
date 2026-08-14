@@ -90,31 +90,31 @@ export default function DataSettingsPage() {
   ];
 
   return (
-    <div className="flex h-full bg-[#F8FAFC]">
+    <div className="flex h-full bg-surface">
       <SettingsNav />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 px-8 bg-white z-10">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-edge/80 px-8 bg-white z-10">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Workspace Data Cleanup</h1>
-            <p className="text-xs text-slate-400">Scoped bulk data cleanup and message pruning controls</p>
+            <h1 className="text-xl font-bold text-ink">Workspace Data Cleanup</h1>
+            <p className="text-xs text-subtle">Scoped bulk data cleanup and message pruning controls</p>
           </div>
           {preview && (
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+            <span className="rounded-full bg-chalk px-3 py-1 text-xs font-semibold text-muted">
               {preview.total} chats · {preview.messages} messages
             </span>
           )}
         </header>
 
-        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-[#F8FAFC]">
+        <div className="scroll-thin flex-1 overflow-y-auto p-6 md:p-8 bg-surface">
           <div className="max-w-4xl mx-auto space-y-6">
-            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-3">
-              <h2 className="text-sm font-bold text-slate-900">About Data Retention</h2>
-              <p className="text-xs text-slate-500 leading-relaxed">
+            <section className="rounded-3xl border border-edge/80 bg-white p-6 shadow-xs space-y-3">
+              <h2 className="text-sm font-bold text-ink">About Data Retention</h2>
+              <p className="text-xs text-muted leading-relaxed">
                 Disconnecting a WhatsApp number never deletes customer conversations. Your message history serves as a permanent agency record so returning pilgrims keep their booking context.
               </p>
               {preview && preview.protected > 0 && (
-                <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-900">
-                  <Icon name="check" size={16} className="mt-0.5 text-emerald-600 shrink-0" />
+                <div className="flex items-start gap-2.5 rounded-2xl border border-wa-soft bg-wa-soft p-3.5 text-xs text-wa-dark">
+                  <Icon name="check" size={16} className="mt-0.5 text-wa-dark shrink-0" />
                   <span>
                     <strong className="font-bold">{preview.protected}</strong> conversation
                     {preview.protected === 1 ? " has" : "s have"} an active quotation or won booking deal. Safe cleanup scopes will strictly protect these records.
@@ -123,8 +123,8 @@ export default function DataSettingsPage() {
               )}
             </section>
 
-            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">
-              <h2 className="text-sm font-bold text-slate-900">Select Cleanup Scope</h2>
+            <section className="rounded-3xl border border-edge/80 bg-white p-6 shadow-xs space-y-4">
+              <h2 className="text-sm font-bold text-ink">Select Cleanup Scope</h2>
 
               <div className="space-y-3">
                 {OPTIONS.map((o) => (
@@ -133,9 +133,9 @@ export default function DataSettingsPage() {
                     className={`flex cursor-pointer items-start gap-3.5 rounded-2xl border p-4 transition-all duration-150 ${
                       scope === o.key
                         ? o.danger
-                          ? "border-rose-300 bg-rose-50/70 ring-1 ring-rose-500/20"
-                          : "border-purple-300 bg-purple-50/70 ring-1 ring-purple-600/20"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                          ? "border-danger bg-danger-soft/70 ring-1 ring-danger/20"
+                          : "border-brand bg-brand-soft/70 ring-1 ring-brand/20"
+                        : "border-edge bg-white hover:border-edge-strong hover:bg-surface/50"
                     }`}
                   >
                     <input
@@ -147,24 +147,24 @@ export default function DataSettingsPage() {
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-900">{o.label}</span>
+                        <span className="text-xs font-bold text-ink">{o.label}</span>
                         <Chip tone={o.danger ? "danger" : "neutral"}>
                           {counts[o.key]} chat{counts[o.key] === 1 ? "" : "s"}
                         </Chip>
                       </div>
-                      <span className="mt-1 block text-xs text-slate-500 leading-relaxed">{o.hint}</span>
+                      <span className="mt-1 block text-xs text-muted leading-relaxed">{o.hint}</span>
                     </div>
                   </label>
                 ))}
               </div>
             </section>
 
-            <section className="rounded-3xl border border-rose-200 bg-rose-50/30 p-6 shadow-xs space-y-4">
-              <div className="flex items-center gap-2 text-rose-700">
+            <section className="rounded-3xl border border-danger-soft bg-danger-soft/30 p-6 shadow-xs space-y-4">
+              <div className="flex items-center gap-2 text-danger-dark">
                 <Icon name="alert" size={18} />
                 <h2 className="text-sm font-bold">Confirmation Required</h2>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-muted leading-relaxed">
                 {counts[scope]} conversation{counts[scope] === 1 ? "" : "s"} and all associated data in this scope will be permanently removed.
               </p>
 
@@ -172,18 +172,18 @@ export default function DataSettingsPage() {
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
                 placeholder="Type DELETE to confirm"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-900 focus:border-rose-500 focus:outline-none transition"
+                className="w-full rounded-xl border border-edge bg-white px-3.5 py-2 text-xs text-ink focus:border-danger focus:outline-none transition"
               />
 
               {error && (
-                <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-800">
+                <p className="flex items-start gap-2 rounded-2xl border border-danger-soft bg-danger-soft p-3 text-xs font-medium text-danger-dark">
                   <Icon name="alert" size={15} className="mt-0.5 shrink-0" />
                   <span>{error}</span>
                 </p>
               )}
               {done && (
-                <p className="flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-medium text-emerald-800">
-                  <Icon name="check" size={15} className="mt-0.5 shrink-0 text-emerald-600" />
+                <p className="flex items-start gap-2 rounded-2xl border border-wa-soft bg-wa-soft p-3 text-xs font-medium text-wa-dark">
+                  <Icon name="check" size={15} className="mt-0.5 shrink-0 text-wa-dark" />
                   <span>{done}</span>
                 </p>
               )}
@@ -191,7 +191,7 @@ export default function DataSettingsPage() {
               <button
                 disabled={busy || confirmText !== "DELETE" || counts[scope] === 0}
                 onClick={run}
-                className="w-full rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 transition disabled:opacity-40"
+                className="w-full rounded-xl bg-danger px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-danger-dark transition disabled:opacity-40"
               >
                 {busy
                   ? "Deleting…"

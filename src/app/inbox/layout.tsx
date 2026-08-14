@@ -17,7 +17,7 @@ export default async function InboxLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex h-full">
-      <aside className="z-30 w-[280px] xl:w-[300px] shrink-0 border-r border-slate-200/80 bg-white">
+      <aside className="z-30 w-[280px] xl:w-[300px] shrink-0 border-r border-edge/80 bg-white">
         <Suspense fallback={<ChatListFallback />}>
           <ChatListPanel currentUserId={user.id} />
         </Suspense>

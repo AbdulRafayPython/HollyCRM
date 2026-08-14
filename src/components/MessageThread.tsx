@@ -173,16 +173,16 @@ export default function MessageThread({
   let lastDay = "";
 
   return (
-    <div className="flex flex-1 flex-col min-h-0 bg-[#F4F6F8]">
+    <div className="flex flex-1 flex-col min-h-0 bg-surface">
       {/* Scrollable Conversation Stream */}
       <div className="scroll-thin min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
         {messages.length === 0 && (
           <div className="pt-16 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-300 shadow-xs border border-slate-200">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-subtle shadow-xs border border-edge">
               <Icon name="chat" size={22} />
             </div>
-            <p className="mt-3 text-xs font-bold text-slate-700">No messages in this chat yet</p>
-            <p className="mt-0.5 text-[11px] text-slate-400">
+            <p className="mt-3 text-xs font-bold text-ink-soft">No messages in this chat yet</p>
+            <p className="mt-0.5 text-[11px] text-subtle">
               Send a greeting or waiting for customer inbound reply.
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function MessageThread({
             <div key={m.id} className="space-y-4">
               {divider && (
                 <div className="flex justify-center">
-                  <span className="rounded-full border border-slate-200/70 bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 shadow-2xs">
+                  <span className="rounded-full border border-edge/70 bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted shadow-2xs">
                     {divider}
                   </span>
                 </div>
@@ -214,18 +214,18 @@ export default function MessageThread({
       </div>
 
       {/* Composer Section */}
-      <form onSubmit={send} className="shrink-0 border-t border-slate-200/80 bg-white p-3.5">
+      <form onSubmit={send} className="shrink-0 border-t border-edge/80 bg-white p-3.5">
         {error && (
-          <p className="mb-2 flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+          <p className="mb-2 flex items-center gap-1.5 text-xs text-danger font-medium">
             <Icon name="alert" size={14} />
             {error}
           </p>
         )}
-        <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-2 transition focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10 shadow-xs">
+        <div className="flex items-end gap-2 rounded-2xl border border-edge bg-surface/70 p-2 transition focus-within:border-wa focus-within:bg-white focus-within:ring-2 focus-within:ring-wa/10 shadow-xs">
           {!recording && (
             <button
               type="button"
-              className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              className="rounded-xl p-2 text-subtle hover:bg-chalk hover:text-ink-soft transition"
               title="Attach documents or photos via the Files tab"
             >
               <Icon name="paperclip" size={17} />
@@ -247,11 +247,11 @@ export default function MessageThread({
                 }}
                 rows={1}
                 placeholder="Type a message to WhatsApp…"
-                className="max-h-32 flex-1 resize-none bg-transparent px-2 py-2 text-xs text-slate-800 outline-none placeholder:text-slate-400 leading-relaxed"
+                className="max-h-32 flex-1 resize-none bg-transparent px-2 py-2 text-xs text-ink outline-none placeholder:text-subtle leading-relaxed"
               />
               <button
                 disabled={!text.trim()}
-                className="rounded-xl bg-emerald-600 px-3.5 py-2 text-white shadow-xs hover:bg-emerald-700 disabled:opacity-40 transition shrink-0"
+                className="rounded-xl bg-wa-dark px-3.5 py-2 text-white shadow-xs hover:bg-wa-dark disabled:opacity-40 transition shrink-0"
                 title="Send message"
               >
                 <Icon name="send" size={15} />
@@ -260,7 +260,7 @@ export default function MessageThread({
           )}
         </div>
 
-        <p className="mt-2 text-center text-[11px] text-slate-400 font-medium">
+        <p className="mt-2 text-center text-[11px] text-subtle font-medium">
           {recording
             ? "Recording audio · delete with trash or send with arrow"
             : "Enter sends message · Shift+Enter for new line · Live Green API sync"}
@@ -285,7 +285,7 @@ function Bubble({
   if (m.sender_type === "system") {
     return (
       <div className="flex animate-rise-in justify-center">
-        <span className="rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10px] font-semibold text-slate-500 shadow-2xs">
+        <span className="rounded-full border border-edge bg-white/90 px-3 py-1 text-[10px] font-semibold text-muted shadow-2xs">
           {m.body}
         </span>
       </div>
@@ -301,10 +301,10 @@ function Bubble({
 
   // Visual bubble styles: Outgoing is WhatsApp light emerald green, Inbound is crisp white, Bot is warm amber
   const bubbleStyle = isBot
-    ? "bg-gradient-to-br from-amber-50/90 to-white border-amber-200/90 text-slate-900 rounded-2xl rounded-tr-xs"
+    ? "bg-gradient-to-br from-bot-soft/90 to-white border-bot-soft/90 text-ink rounded-2xl rounded-tr-xs"
     : mine
-    ? "bg-[#D9FDD3] border-[#BFF1B3] text-slate-900 rounded-2xl rounded-tr-xs"
-    : "bg-white border-slate-200/90 text-slate-900 rounded-2xl rounded-tl-xs";
+    ? "bg-[#D9FDD3] border-[#BFF1B3] text-ink rounded-2xl rounded-tr-xs"
+    : "bg-white border-edge/90 text-ink rounded-2xl rounded-tl-xs";
 
   const hasMedia = Boolean(m.media_path);
   const isImage = m.message_type === "image";
@@ -312,15 +312,15 @@ function Bubble({
   return (
     <div className={`flex animate-rise-in flex-col gap-1 ${mine ? "items-end" : "items-start"}`}>
       {/* Sender & Timestamp Info */}
-      <div className="flex items-center gap-1.5 px-1 text-[11px] text-slate-400">
+      <div className="flex items-center gap-1.5 px-1 text-[11px] text-subtle">
         {isBot && (
-          <span className="flex items-center gap-1 font-semibold text-amber-700">
+          <span className="flex items-center gap-1 font-semibold text-bot-dark">
             <Icon name="bot" size={13} />
             <span>AI Concierge</span>
           </span>
         )}
         {!isBot && (
-          <span className={senderName && !mine ? "font-bold text-emerald-800" : "font-medium text-slate-500"}>
+          <span className={senderName && !mine ? "font-bold text-wa-dark" : "font-medium text-muted"}>
             {who}
           </span>
         )}
@@ -348,7 +348,7 @@ function Bubble({
         )}
 
         {!hasMedia && !m.body && m.message_type !== "text" && (
-          <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
+          <p className="flex items-center gap-1.5 text-[11px] text-muted">
             <Icon name="alert" size={13} />
             {m.message_type === "location" ? "Location shared" : `Unsupported ${m.message_type} message`}
           </p>
@@ -367,8 +367,8 @@ function Attachment({ m, onBrand }: { m: Message; onBrand: boolean }) {
 
   if (!url) {
     return (
-      <span className="flex items-center gap-2 text-xs text-slate-400">
-        <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-slate-300" />
+      <span className="flex items-center gap-2 text-xs text-subtle">
+        <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-edge-strong" />
         Loading attachment…
       </span>
     );
@@ -387,14 +387,14 @@ function Receipt({ status }: { status: string }) {
   if (!status) return null;
   if (status === "failed") {
     return (
-      <span className="flex items-center gap-1 px-1 text-[10px] font-semibold text-rose-600">
+      <span className="flex items-center gap-1 px-1 text-[10px] font-semibold text-danger">
         <Icon name="alert" size={11} /> failed to deliver
       </span>
     );
   }
   const read = status === "read";
   return (
-    <span className={`flex items-center gap-1 px-1 text-[10px] font-medium ${read ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+    <span className={`flex items-center gap-1 px-1 text-[10px] font-medium ${read ? "text-wa-dark font-bold" : "text-subtle"}`}>
       <Icon name={status === "pending" || status === "sent" ? "check" : "checkDouble"} size={12} />
       {status === "read" ? "Read" : status}
     </span>

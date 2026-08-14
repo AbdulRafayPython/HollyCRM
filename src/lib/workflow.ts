@@ -201,7 +201,7 @@ export const EDGES: WorkflowEdge[] = [
 ];
 
 /** Palette per node kind. Colour carries meaning here, as everywhere else in
- *  the product: amber is AI-authored, emerald is a successful exit, indigo is
+ *  the product: brass is AI-authored, emerald is a successful exit, clay is
  *  a decision, slate is data the bot reads rather than writes. */
 export const KIND_STYLES: Record<NodeKind, { ring: string; chip: string; dot: string }> = {
   trigger:  { ring: "border-group/40",  chip: "bg-group-soft text-brand-dark",  dot: "bg-group" },

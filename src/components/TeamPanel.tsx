@@ -108,7 +108,7 @@ export default function TeamPanel() {
 
   if (!data) {
     return (
-      <div className="flex h-32 items-center justify-center text-xs text-slate-400">
+      <div className="flex h-32 items-center justify-center text-xs text-subtle">
         Loading team workspace…
       </div>
     );
@@ -117,19 +117,19 @@ export default function TeamPanel() {
   return (
     <div className="space-y-6">
       {error && (
-        <p className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-800">
-          <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-rose-600" />
+        <p className="flex items-start gap-2 rounded-2xl border border-danger-soft bg-danger-soft p-4 text-xs font-medium text-danger-dark">
+          <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-danger" />
           <span>{error}</span>
         </p>
       )}
 
       {/* Invite Box */}
       {data.you.is_owner && (
-        <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-3">
+        <section className="rounded-3xl border border-edge/80 bg-white p-6 shadow-xs space-y-3">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">Invite a Sales Agent</h2>
-            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
-              Generates an invitation link for <span className="font-semibold text-slate-800">{data.workspace}</span>. Direct links expire in 7 days and can be shared over WhatsApp.
+            <h2 className="text-sm font-bold text-ink">Invite a Sales Agent</h2>
+            <p className="mt-0.5 text-xs text-muted leading-relaxed">
+              Generates an invitation link for <span className="font-semibold text-ink">{data.workspace}</span>. Direct links expire in 7 days and can be shared over WhatsApp.
             </p>
           </div>
 
@@ -140,13 +140,13 @@ export default function TeamPanel() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="agent@company.com"
-              className="flex-1 basis-64 rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-xs text-slate-800 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+              className="flex-1 basis-64 rounded-xl border border-edge bg-surface/70 px-3.5 py-2 text-xs text-ink focus:border-brand focus:bg-white focus:outline-none transition"
             />
             <Dropdown
               label="Role"
               value={role}
               onChange={setRole}
-              className="rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-800 hover:border-slate-300"
+              className="rounded-xl border border-edge bg-surface/70 px-3.5 py-2 text-xs font-semibold text-ink hover:border-edge-strong"
               options={[
                 { value: "sales_agent", label: "Sales Agent" },
                 { value: "owner", label: "Workspace Owner" },
@@ -154,51 +154,51 @@ export default function TeamPanel() {
             />
             <button
               disabled={busy}
-              className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition disabled:opacity-50"
+              className="rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand transition disabled:opacity-50"
             >
               {busy ? "Creating…" : "Generate Invite Link"}
             </button>
           </form>
 
           {freshLink && (
-            <div className="mt-3 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5">
-              <Icon name="check" size={16} className="shrink-0 text-emerald-600" />
-              <code className="min-w-0 flex-1 truncate text-xs font-mono text-emerald-800">{freshLink}</code>
-              <span className="shrink-0 text-[11px] font-bold text-emerald-700">Copied to clipboard ✓</span>
+            <div className="mt-3 flex items-center gap-2 rounded-2xl border border-wa-soft bg-wa-soft px-4 py-2.5">
+              <Icon name="check" size={16} className="shrink-0 text-wa-dark" />
+              <code className="min-w-0 flex-1 truncate text-xs font-mono text-wa-dark">{freshLink}</code>
+              <span className="shrink-0 text-[11px] font-bold text-wa-dark">Copied to clipboard ✓</span>
             </div>
           )}
         </section>
       )}
 
       {/* Active Members Card */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+      <section className="rounded-3xl border border-edge/80 bg-white shadow-xs overflow-hidden">
+        <div className="flex items-center justify-between border-b border-edge px-6 py-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-subtle">
             Active Members ({data.members.filter((m) => m.is_active).length})
           </h2>
         </div>
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-edge">
           {data.members.map((m) => (
             <li
               key={m.id}
-              className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-slate-50/50 transition"
+              className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-surface/50 transition"
             >
               <Avatar name={m.full_name} type="agent" size={38} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="truncate text-xs font-bold text-slate-900">{m.full_name ?? "Unnamed Agent"}</span>
+                  <span className="truncate text-xs font-bold text-ink">{m.full_name ?? "Unnamed Agent"}</span>
                   {m.is_you && (
-                    <span className="rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 ring-1 ring-purple-600/20">
+                    <span className="rounded-md bg-brand-soft px-2 py-0.5 text-[10px] font-bold text-brand ring-1 ring-brand/20">
                       You
                     </span>
                   )}
                   {!m.is_active && (
-                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                    <span className="rounded-md bg-chalk px-2 py-0.5 text-[10px] font-bold text-muted">
                       Deactivated
                     </span>
                   )}
                 </div>
-                <p className="truncate text-[11px] text-slate-400">{m.email ?? "—"}</p>
+                <p className="truncate text-[11px] text-subtle">{m.email ?? "—"}</p>
               </div>
 
               {data.you.is_owner && !m.is_you ? (
@@ -207,14 +207,14 @@ export default function TeamPanel() {
                   align="right"
                   value={m.role === "owner" || m.role === "super_admin" ? "owner" : "sales_agent"}
                   onChange={(next) => patchMember(m.id, { role: next })}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-300"
+                  className="rounded-xl border border-edge bg-white px-3 py-1.5 text-xs font-semibold text-ink-soft hover:border-edge-strong"
                   options={[
                     { value: "sales_agent", label: "Sales Agent" },
                     { value: "owner", label: "Workspace Owner" },
                   ]}
                 />
               ) : (
-                <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <span className="rounded-lg bg-chalk px-2.5 py-1 text-xs font-semibold text-ink-soft">
                   {ROLE_LABELS[m.role] ?? m.role}
                 </span>
               )}
@@ -224,8 +224,8 @@ export default function TeamPanel() {
                   onClick={() => patchMember(m.id, { is_active: !m.is_active })}
                   className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
                     m.is_active
-                      ? "text-rose-600 hover:bg-rose-50"
-                      : "text-emerald-600 hover:bg-emerald-50"
+                      ? "text-danger hover:bg-danger-soft"
+                      : "text-wa-dark hover:bg-wa-soft"
                   }`}
                   title={m.is_active ? "Deactivate agent" : "Restore access"}
                 >
@@ -239,36 +239,36 @@ export default function TeamPanel() {
 
       {/* Pending Invitations */}
       {data.you.is_owner && data.invitations.length > 0 && (
-        <section className="rounded-3xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-          <div className="border-b border-slate-100 px-6 py-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+        <section className="rounded-3xl border border-edge/80 bg-white shadow-xs overflow-hidden">
+          <div className="border-b border-edge px-6 py-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-subtle">
               Pending Invitations ({data.invitations.length})
             </h2>
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-edge">
             {data.invitations.map((i) => (
               <li
                 key={i.id}
-                className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-slate-50/50 transition"
+                className="flex items-center gap-3.5 px-6 py-3.5 hover:bg-surface/50 transition"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-600 ring-1 ring-slate-200">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface text-muted ring-1 ring-edge">
                   <Icon name="mail" size={16} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-bold text-slate-900">{i.email}</p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="truncate text-xs font-bold text-ink">{i.email}</p>
+                  <p className="text-[11px] text-subtle">
                     {ROLE_LABELS[i.role] ?? i.role} · expires {expiry(i.expires_at)}
                   </p>
                 </div>
                 <button
                   onClick={() => copy(i.token)}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                  className="rounded-xl border border-edge bg-white px-3 py-1.5 text-xs font-semibold text-ink-soft hover:bg-surface transition shadow-2xs"
                 >
                   {copied === i.token ? "Copied ✓" : "Copy Link"}
                 </button>
                 <button
                   onClick={() => revoke(i.id)}
-                  className="rounded-xl px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition"
+                  className="rounded-xl px-3 py-1.5 text-xs font-semibold text-danger hover:bg-danger-soft transition"
                 >
                   Revoke
                 </button>
@@ -279,7 +279,7 @@ export default function TeamPanel() {
       )}
 
       {!data.you.is_owner && (
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-subtle">
           Only the workspace owner can invite or adjust agent permissions.
         </p>
       )}
