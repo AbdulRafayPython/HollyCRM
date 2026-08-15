@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { supabaseBrowser } from "@/lib/supabase/client";
 import HolyCrmLogo from "@/components/ui/HolyCrmLogo";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import ProfileMenu, { type ProfileUser } from "./ProfileMenu";
@@ -61,24 +62,36 @@ export default function AppSidebar({
     if (onMobileClose) onMobileClose();
   }, [pathname]);
 
-  // Fetch unread count for badge
+  /* Unread badge.
+   *
+   * This polled `/api/chats?limit=20`, a route that does not exist. The 404 was
+   * swallowed by `if (res.ok)` inside a bare `catch {}`, so the badge simply
+   * never appeared and nothing said why. It read from the table directly, the
+   * way /home and ChatList already do — RLS scopes it to the caller's org.
+   *
+   * Filtering on unread > 0 also fixes the count: `limit=20` summed only the
+   * first twenty chats, so a busy inbox silently under-reported. */
   useEffect(() => {
+    const sb = supabaseBrowser();
+    let cancelled = false;
+
     const fetchUnread = async () => {
-      try {
-        const res = await fetch("/api/chats?limit=20");
-        if (res.ok) {
-          const data = await res.json();
-          const total = (data.chats ?? []).reduce(
-            (acc: number, c: { unread_count?: number }) => acc + (c.unread_count || 0),
-            0
-          );
-          setUnreadCount(total);
-        }
-      } catch {}
+      const { data, error } = await sb
+        .from("chats")
+        .select("unread_count")
+        .gt("unread_count", 0);
+      if (cancelled || error) return;
+      setUnreadCount(
+        (data ?? []).reduce((total, c) => total + (c.unread_count || 0), 0)
+      );
     };
+
     fetchUnread();
     const interval = setInterval(fetchUnread, 30_000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   const navGroups: NavGroup[] = [

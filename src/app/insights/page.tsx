@@ -19,6 +19,18 @@ interface Summary {
   ai: { calls: number; failures: number; avg_latency_ms: number | null; p95_latency_ms: number | null };
 }
 
+/**
+ * Human stay dates. `leads` has no free-text dates column — it stores
+ * check_in_date / check_out_date — so the label is built from those.
+ */
+function formatStay(checkIn: string | null, checkOut: string | null): string {
+  if (!checkIn && !checkOut) return "Flexible";
+  const fmt = (d: string) =>
+    new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  if (checkIn && checkOut) return `${fmt(checkIn)} – ${fmt(checkOut)}`;
+  return fmt((checkIn ?? checkOut)!);
+}
+
 export default async function InsightsPage({
   searchParams,
 }: {
@@ -36,13 +48,35 @@ export default async function InsightsPage({
 
   const [
     { data, error },
-    { data: leadsData },
+    { data: leadRows },
     { data: agentsData },
   ] = await Promise.all([
     sb.rpc("analytics_summary", { p_days: days }),
-    sb.from("leads").select("id, chat_id, customer_name, phone, city, dates_text, party_size, budget_sar, stage, created_at, updated_at").order("updated_at", { ascending: false }).limit(20),
+    /* Five of the columns this used to name do not exist on `leads`
+       (customer_name, phone, dates_text, party_size, budget_sar), so PostgREST
+       rejected the whole select with a 400 and the lead board rendered empty.
+       The customer's name and number live on `contacts`, reached through the
+       contact_id foreign key. */
+    sb.from("leads").select("id, chat_id, city, pax_count, budget_amount, budget_currency, check_in_date, check_out_date, stage, created_at, updated_at, contacts(display_name, phone_e164)").order("updated_at", { ascending: false }).limit(20),
     sb.from("profiles").select("id, full_name, avatar_url, role").limit(4),
   ]);
+
+  /* Flattened into the shape LeadCard already renders, so the card itself and
+     every call site stay as they are. */
+  const leadsData = (leadRows ?? []).map((l) => {
+    const c = (Array.isArray(l.contacts) ? l.contacts[0] : l.contacts) as
+      | { display_name?: string | null; phone_e164?: string | null }
+      | null
+      | undefined;
+    return {
+      ...l,
+      customer_name: c?.display_name ?? null,
+      phone: c?.phone_e164 ?? null,
+      party_size: l.pax_count,
+      budget_sar: l.budget_amount,
+      dates_text: formatStay(l.check_in_date, l.check_out_date),
+    };
+  });
 
   const s = data as Summary | null;
 
@@ -536,7 +570,7 @@ function LeadCard({
     party_size: number | null;
     budget_sar: number | null;
     created_at: string;
-  };
+  } & Record<string, unknown>;
   defaultPriority?: "Urgent" | "Low" | "Normal";
 }) {
   const priorityColor =

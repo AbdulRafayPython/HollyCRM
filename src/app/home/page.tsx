@@ -16,6 +16,18 @@ interface Summary {
   by_channel: Record<string, { leads: number; won: number; lost: number }>;
 }
 
+/**
+ * Human stay dates. `leads` has no free-text dates column — it stores
+ * check_in_date / check_out_date — so the label is built from those.
+ */
+function formatStay(checkIn: string | null, checkOut: string | null): string {
+  if (!checkIn && !checkOut) return "Dates flexible";
+  const fmt = (d: string) =>
+    new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  if (checkIn && checkOut) return `${fmt(checkIn)} – ${fmt(checkOut)}`;
+  return fmt((checkIn ?? checkOut)!);
+}
+
 export default async function HomePage() {
   if (!isSupabaseConfigured()) redirect("/setup");
 
@@ -39,8 +51,15 @@ export default async function HomePage() {
     sb.from("bot_settings").select("bot_name, enabled, onboarded_at").maybeSingle(),
     sb.from("green_api_instances").select("instance_id, phone, state, is_active").eq("is_active", true).maybeSingle(),
     sb.rpc("analytics_summary", { p_days: 30 }),
-    sb.from("chats").select("id, jid, chat_name, chat_type, unread_count, last_message_text, last_message_at, status").order("last_message_at", { ascending: false, nullsFirst: false }).limit(5),
-    sb.from("leads").select("id, chat_id, customer_name, phone, city, dates_text, party_size, budget_sar, stage, created_at, updated_at").order("updated_at", { ascending: false }).limit(5),
+    /* These two selects named eight columns that do not exist on their tables
+       (chats.jid/chat_name/last_message_text/status, leads.customer_name/
+       phone/dates_text/party_size/budget_sar). PostgREST answers the whole
+       request with a 400, so `data` came back null, the `?? []` guards below
+       swallowed it, and the dashboard rendered every panel empty with no error
+       anywhere. Names now match the schema; the customer's name and phone live
+       on `contacts` and are embedded through the contact_id foreign key. */
+    sb.from("chats").select("id, chat_jid, title, chat_type, unread_count, last_message_at, is_archived, contacts(display_name)").order("last_message_at", { ascending: false, nullsFirst: false }).limit(5),
+    sb.from("leads").select("id, chat_id, city, pax_count, budget_amount, budget_currency, check_in_date, check_out_date, stage, created_at, updated_at, contacts(display_name, phone_e164)").order("updated_at", { ascending: false }).limit(5),
     sb.from("leads").select("id", { count: "exact", head: true }),
     sb.from("hotels").select("id", { count: "exact", head: true }),
   ]);
@@ -55,9 +74,38 @@ export default async function HomePage() {
     (l) => l.stage !== "closed_won" && l.stage !== "closed_lost"
   );
   const totalPipelineSar = (priorityLeads ?? []).reduce(
-    (acc, l) => acc + (Number(l.budget_sar) || 0),
+    (acc, l) => acc + (Number(l.budget_amount) || 0),
     0
   );
+
+  /* The recent-conversations table shows a preview of the last message, but
+     `chats` stores no message text — only `last_message_at`. One extra query
+     over the five chats on screen, newest first, and the first row seen per
+     chat is that chat's latest. */
+  const recentChatIds = (recentChats ?? []).map((c) => c.id);
+  const { data: lastMessages } = recentChatIds.length
+    ? await sb
+        .from("messages")
+        .select("chat_id, body, wa_timestamp")
+        .in("chat_id", recentChatIds)
+        .order("wa_timestamp", { ascending: false })
+        .limit(60)
+    : { data: [] };
+
+  const lastMessageByChat = new Map<string, string>();
+  for (const m of lastMessages ?? []) {
+    if (m.body && !lastMessageByChat.has(m.chat_id)) {
+      lastMessageByChat.set(m.chat_id, m.body);
+    }
+  }
+
+  /** Contact rows arrive as an object or a single-element array depending on
+   *  how PostgREST resolves the embed; normalise both. */
+  const contactOf = (row: { contacts?: unknown }) => {
+    const c = row.contacts;
+    const one = Array.isArray(c) ? c[0] : c;
+    return (one ?? null) as { display_name?: string | null; phone_e164?: string | null } | null;
+  };
 
   return (
     <div className="flex h-full flex-col bg-surface">
@@ -302,14 +350,17 @@ export default async function HomePage() {
                 </div>
               ) : (
                 <div className="divide-y divide-edge">
-                  {(priorityLeads ?? []).slice(0, 4).map((lead) => (
+                  {(priorityLeads ?? []).slice(0, 4).map((lead) => {
+                    const contact = contactOf(lead);
+                    const who = contact?.display_name || contact?.phone_e164;
+                    return (
                     <div key={lead.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-3">
-                        <Avatar name={lead.customer_name || lead.phone} size={36} />
+                        <Avatar name={who} size={36} />
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-ink">
-                              {lead.customer_name || lead.phone || "Inquiry"}
+                              {who || "Inquiry"}
                             </span>
                             <span className="rounded-md bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-brand ring-1 ring-brand/10">
                               {STAGE_LABELS[lead.stage as LeadStage] || lead.stage}
@@ -317,8 +368,10 @@ export default async function HomePage() {
                           </div>
                           <p className="mt-0.5 text-xs text-muted">
                             {lead.city ? `${lead.city} · ` : ""}
-                            {lead.party_size ? `${lead.party_size} pax · ` : ""}
-                            {lead.budget_sar ? `SAR ${lead.budget_sar.toLocaleString()}` : lead.dates_text || "Dates flexible"}
+                            {lead.pax_count ? `${lead.pax_count} pax · ` : ""}
+                            {lead.budget_amount
+                              ? `${lead.budget_currency || "SAR"} ${Number(lead.budget_amount).toLocaleString()}`
+                              : formatStay(lead.check_in_date, lead.check_out_date)}
                           </p>
                         </div>
                       </div>
@@ -330,7 +383,8 @@ export default async function HomePage() {
                         Open Chat
                       </Link>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -436,13 +490,15 @@ export default async function HomePage() {
                   </thead>
                   <tbody className="divide-y divide-edge">
                     {(recentChats ?? []).map((chat) => {
-                      const isGroup = chat.chat_type === "group" || chat.jid?.endsWith("@g.us");
+                      const isGroup = chat.chat_type === "group" || chat.chat_jid?.endsWith("@g.us");
+                      const label =
+                        chat.title || contactOf(chat)?.display_name || chat.chat_jid;
                       return (
                         <tr key={chat.id} className="group hover:bg-surface/80 transition-colors">
                           <td className="py-3 font-medium text-ink">
                             <div className="flex items-center gap-2.5">
-                              <Avatar name={chat.chat_name || chat.jid} size={28} />
-                              <span className="truncate max-w-xs">{chat.chat_name || chat.jid}</span>
+                              <Avatar name={label} size={28} />
+                              <span className="truncate max-w-xs">{label}</span>
                               {chat.unread_count > 0 && (
                                 <span className="rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white">
                                   {chat.unread_count}
@@ -457,7 +513,7 @@ export default async function HomePage() {
                             </span>
                           </td>
                           <td className="py-3 text-muted max-w-md truncate">
-                            {chat.last_message_text || "—"}
+                            {lastMessageByChat.get(chat.id) || "—"}
                           </td>
                           <td className="py-3 text-subtle">
                             {chat.last_message_at
