@@ -71,7 +71,15 @@ export default function AiSettingsPage() {
     });
     setBusy(false);
     if (!res.ok) {
-      setError("Could not save settings");
+      // Surface what the server actually said. The route distinguishes a
+      // permissions refusal ("Only a supervisor can change AI agent settings.")
+      // from a genuine failure, and swallowing that behind one generic string
+      // is what made a plain 405 look like a mystery.
+      const detail = await res
+        .json()
+        .then((d: { error?: string }) => d?.error)
+        .catch(() => undefined);
+      setError(detail || `Could not save settings (${res.status})`);
       return;
     }
     setSaved(true);

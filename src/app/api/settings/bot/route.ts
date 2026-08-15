@@ -14,8 +14,17 @@ export async function GET() {
   return NextResponse.json({ settings: data });
 }
 
-/** Saves the AI agent configuration. bot_settings RLS = supervisors only. */
-export async function PUT(req: Request) {
+/**
+ * Saves the AI agent configuration. bot_settings RLS = supervisors only.
+ *
+ * PATCH, not PUT: every other settings route in this app updates with PATCH
+ * (hotels, knowledge, llm, routing, rules, instances, team members, profile),
+ * and the settings page was written to that convention. This route was the one
+ * outlier exporting PUT, so the page's PATCH hit a route with no PATCH handler,
+ * Next answered 405, and the form reported "Could not save settings" — for
+ * every user, every time.
+ */
+export async function PATCH(req: Request) {
   const body = (await req.json()) as Record<string, unknown>;
 
   const sb = await supabaseServer();
