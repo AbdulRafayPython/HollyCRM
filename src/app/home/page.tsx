@@ -58,7 +58,13 @@ export default async function HomePage() {
        swallowed it, and the dashboard rendered every panel empty with no error
        anywhere. Names now match the schema; the customer's name and phone live
        on `contacts` and are embedded through the contact_id foreign key. */
-    sb.from("chats").select("id, chat_jid, title, chat_type, unread_count, last_message_at, is_archived, contacts(display_name)").order("last_message_at", { ascending: false, nullsFirst: false }).limit(5),
+    /* The contacts embed must name its foreign key. There are two ways to get
+       from `chats` to `contacts` — the direct `chats.contact_id`, and a
+       many-to-many through `chat_participants`, which holds FKs to both — so a
+       bare `contacts(...)` is ambiguous and PostgREST answers 300 Multiple
+       Choices rather than picking one. That emptied this panel while the leads
+       panel, which has only one path to contacts, was fine. */
+    sb.from("chats").select("id, chat_jid, title, chat_type, unread_count, last_message_at, is_archived, contacts!chats_contact_id_fkey(display_name)").order("last_message_at", { ascending: false, nullsFirst: false }).limit(5),
     sb.from("leads").select("id, chat_id, city, pax_count, budget_amount, budget_currency, check_in_date, check_out_date, stage, created_at, updated_at, contacts(display_name, phone_e164)").order("updated_at", { ascending: false }).limit(5),
     sb.from("leads").select("id", { count: "exact", head: true }),
     sb.from("hotels").select("id", { count: "exact", head: true }),

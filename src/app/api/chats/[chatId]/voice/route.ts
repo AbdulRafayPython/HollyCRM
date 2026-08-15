@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { GreenQuotaError, sendFileByUrl } from "@/lib/green/client";
+import { asProvider, explainSendError, sendFileByUrl } from "@/lib/wa/send";
 import { MEDIA_BUCKET, MEDIA_URL_TTL_S, extensionForMime } from "@/lib/media";
 import { RemuxError, webmToOgg } from "@/lib/audio/webmToOgg";
 
@@ -27,7 +27,7 @@ export async function POST(
   const sb = await supabaseServer();
   const [{ data: { user } }, { data: chat }] = await Promise.all([
     sb.auth.getUser(),
-    sb.from("chats").select("id, org_id, chat_jid").eq("id", chatId).maybeSingle(),
+    sb.from("chats").select("id, org_id, chat_jid, provider").eq("id", chatId).maybeSingle(),
   ]);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!chat) return NextResponse.json({ error: "forbidden" }, { status: 403 });
@@ -100,8 +100,9 @@ export async function POST(
   }
 
   const db = supabaseAdmin();
-  // Green API resolves the file type from the fileName extension first, so the
-  // extension has to match what we actually built, not what was recorded.
+  // Both gateways resolve the file type from the fileName extension first
+  // (WasenderAPI picks its audioUrl/documentUrl field from it), so the extension
+  // has to match what we actually built, not what was recorded.
   const ext = extensionForMime(mime);
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const fileName = `voice-message-${stamp}.${ext}`;
@@ -121,22 +122,15 @@ export async function POST(
 
   let waId: string | null = null;
   try {
-    const res = await sendFileByUrl(chat.org_id, chat.chat_jid, signed.signedUrl, fileName);
+    const res = await sendFileByUrl(
+      asProvider(chat.provider), chat.org_id, chat.chat_jid, signed.signedUrl, fileName
+    );
     waId = res?.idMessage ?? null;
   } catch (err) {
-    if (err instanceof GreenQuotaError) {
-      return NextResponse.json(
-        {
-          error:
-            `Green API free-tier monthly quota is exhausted. This chat cannot be ` +
-            `messaged — only ${err.allowedJids.length} number(s) remain usable this month: ` +
-            `${err.allowedJids.map((j) => "+" + j.split("@")[0]).join(", ")}. ` +
-            `Upgrade the tariff in the Green API console to lift the limit.`,
-          quota_exceeded: true,
-          allowed: err.allowedJids,
-        },
-        { status: 402 }
-      );
+    const explained = explainSendError(err);
+    if (explained) {
+      const { message, status, ...rest } = explained;
+      return NextResponse.json({ error: message, ...rest }, { status });
     }
     // The object is already in the bucket; drop it so a failed send doesn't
     // leave an orphan no row will ever point at.

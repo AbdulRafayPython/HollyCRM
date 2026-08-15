@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { sendFileByUrl } from "@/lib/green/client";
+import { asProvider, sendFileByUrl } from "@/lib/wa/send";
 
 export const runtime = "nodejs";
 
@@ -25,7 +25,7 @@ export async function POST(
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { data: chat } = await sb
-    .from("chats").select("id, org_id, chat_jid").eq("id", chatId).maybeSingle();
+    .from("chats").select("id, org_id, chat_jid, provider").eq("id", chatId).maybeSingle();
   if (!chat) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
   const form = await req.formData();
@@ -78,7 +78,9 @@ export async function POST(
   }
 
   try {
-    const res = await sendFileByUrl(chat.org_id, chat.chat_jid, signed.signedUrl, safeName, caption);
+    const res = await sendFileByUrl(
+      asProvider(chat.provider), chat.org_id, chat.chat_jid, signed.signedUrl, safeName, caption
+    );
     await db.from("messages").insert({
       org_id: chat.org_id,
       chat_id: chatId,

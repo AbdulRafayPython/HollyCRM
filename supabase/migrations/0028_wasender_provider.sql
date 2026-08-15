@@ -14,14 +14,20 @@
 create table if not exists public.wasender_sessions (
   id               uuid primary key default gen_random_uuid(),
   org_id           uuid not null references public.organizations(id) on delete cascade,
-  -- WasenderAPI's own session id. Text, not int: it is an opaque handle and the
-  -- webhook envelope carries it as a string.
-  session_id       text not null unique,
+  -- WasenderAPI's own numeric session id, when known. Informational only:
+  -- GET /api/status does not return it, and the webhook is resolved by secret
+  -- (below) rather than by this, so it is nullable on purpose.
+  session_id       text,
   session_name     text,
   -- Bearer token for POST /api/send-message, issued per session.
   api_key          text,
-  -- Compared against the X-Webhook-Signature header on every inbound request.
-  webhook_secret   text,
+  -- The X-Webhook-Signature value WasenderAPI sends on every inbound request.
+  --
+  -- Unique because it is BOTH halves of the door: the route looks the session up
+  -- by this value, which authenticates the request and identifies the workspace
+  -- in a single indexed read. Two sessions sharing a secret would make that
+  -- lookup ambiguous, so the database refuses it.
+  webhook_secret   text unique,
   phone            text,
   own_jid          text,                       -- E2: used to detect @mentions of the bot
   status           text not null default 'unknown',
@@ -64,5 +70,6 @@ create policy wasender_admin on public.wasender_sessions for all to authenticate
 -- 4. Notes ----------------------------------------------------------------------
 -- webhook_events needs no change. Its dedup index is on (instance_id,
 -- wa_message_id) where instance_id is free text, so WasenderAPI events are
--- written with a 'wasender:<session_id>' key and dedupe in the same index
--- without colliding with a numeric Green API instance id.
+-- written with a 'wasender:<row uuid>' key and dedupe in the same index without
+-- colliding with a numeric Green API instance id. The row uuid is used rather
+-- than WasenderAPI's session id because it always exists.

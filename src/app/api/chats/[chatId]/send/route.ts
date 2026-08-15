@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { GreenQuotaError, sendText } from "@/lib/green/client";
+import { asProvider, explainSendError, sendText } from "@/lib/wa/send";
 
 export const runtime = "nodejs";
 
@@ -20,31 +20,22 @@ export async function POST(
   const sb = await supabaseServer();
   const [{ data: { user } }, { data: chat }] = await Promise.all([
     sb.auth.getUser(),
-    sb.from("chats").select("id, org_id, chat_jid").eq("id", chatId).maybeSingle(),
+    sb.from("chats").select("id, org_id, chat_jid, provider").eq("id", chatId).maybeSingle(),
   ]);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!chat) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
   let waId: string | null = null;
   try {
-    const res = await sendText(chat.org_id, chat.chat_jid, text);
+    const res = await sendText(asProvider(chat.provider), chat.org_id, chat.chat_jid, text);
     waId = res?.idMessage ?? null;
   } catch (err) {
-    if (err instanceof GreenQuotaError) {
-      // A permanent condition for the month, not a retryable failure — tell the
-      // agent exactly what the boundary is instead of dumping gateway JSON.
-      return NextResponse.json(
-        {
-          error:
-            `Green API free-tier monthly quota is exhausted. This chat cannot be ` +
-            `messaged — only ${err.allowedJids.length} number(s) remain usable this month: ` +
-            `${err.allowedJids.map((j) => "+" + j.split("@")[0]).join(", ")}. ` +
-            `Upgrade the tariff in the Green API console to lift the limit.`,
-          quota_exceeded: true,
-          allowed: err.allowedJids,
-        },
-        { status: 402 }
-      );
+    // Gateway limits are not bugs and not retryable — tell the agent exactly
+    // what the boundary is instead of dumping gateway JSON at them.
+    const explained = explainSendError(err);
+    if (explained) {
+      const { message, status, ...rest } = explained;
+      return NextResponse.json({ error: message, ...rest }, { status });
     }
     return NextResponse.json({ error: `send failed: ${err}` }, { status: 502 });
   }

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { GreenQuotaError, sendText } from "@/lib/green/client";
+import { GreenQuotaError } from "@/lib/green/client";
+import { sendText } from "@/lib/wa/send";
 import {
   extractRequirements, isSocial, type Intent, type Requirements,
 } from "@/lib/deepseek/extract";
@@ -809,16 +810,19 @@ function describeEnquiry(slots: Slots): string | null {
   return parts.length ? parts.join(", ") : null;
 }
 
-/** Sends via Green API, mirrors into messages, and updates the group throttle. */
+/**
+ * Sends through whichever gateway this chat belongs to, mirrors into messages,
+ * and updates the group throttle.
+ */
 async function deliver(ing: IngestResult, orgId: string, chatJid: string, text: string) {
   const db = supabaseAdmin();
   let waId: string | null = null;
   try {
-    const res = await sendText(orgId, chatJid, text);
+    const res = await sendText(ing.provider, orgId, chatJid, text);
     waId = res?.idMessage ?? null;
   } catch (err) {
     await db.from("ai_runs").insert({
-      org_id: orgId, chat_id: ing.chatId, model: "green-api",
+      org_id: orgId, chat_id: ing.chatId, model: ing.provider,
       purpose: "send", succeeded: false, error: String(err),
     });
 

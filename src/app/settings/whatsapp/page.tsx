@@ -19,6 +19,15 @@ interface InstanceRow {
   is_active: boolean;
 }
 
+interface WasenderRow {
+  id: string;
+  session_id: string | null;
+  session_name: string | null;
+  phone: string | null;
+  status: string;
+  is_active: boolean;
+}
+
 type CategoryTab = "all" | "messengers" | "ai" | "automations" | "leads" | "installed";
 
 interface BannerSlide {
@@ -92,9 +101,24 @@ export default function IntegrationMarketplacePage() {
   const [notice, setNotice] = useState<string | null>(null);
   const { confirm, dialog } = useConfirm();
 
+  // WasenderAPI — the second gateway. Kept in its own state rather than merged
+  // with instances: the two have different credentials, different status
+  // vocabularies, and a workspace can run both at once while it migrates.
+  const [sessions, setSessions] = useState<WasenderRow[]>([]);
+  const [showWasender, setShowWasender] = useState(false);
+  const [waApiKey, setWaApiKey] = useState("");
+  const [waSecret, setWaSecret] = useState("");
+  const [waName, setWaName] = useState("");
+  const [waPhone, setWaPhone] = useState("");
+  const [waWebhookUrl, setWaWebhookUrl] = useState<string | null>(null);
+
   async function load() {
-    const res = await fetch("/api/settings/instances");
-    if (res.ok) setInstances((await res.json()).instances ?? []);
+    const [inst, wa] = await Promise.all([
+      fetch("/api/settings/instances"),
+      fetch("/api/settings/wasender"),
+    ]);
+    if (inst.ok) setInstances((await inst.json()).instances ?? []);
+    if (wa.ok) setSessions((await wa.json()).sessions ?? []);
     setLoading(false);
   }
 
@@ -168,8 +192,66 @@ export default function IntegrationMarketplacePage() {
     load();
   }
 
+  async function connectWasender(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    const res = await fetch("/api/settings/wasender", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        apiKey: waApiKey,
+        webhookSecret: waSecret,
+        sessionName: waName,
+        phone: waPhone,
+      }),
+    });
+    const json = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) {
+      setError(json.error ?? "Connection failed. Please verify the API key.");
+      return;
+    }
+    setNotice(json.hint ?? "WasenderAPI session connected.");
+    // The URL is shown, not hidden behind a success toast: WasenderAPI has no
+    // API for setting it, so pasting this into their dashboard is a step the
+    // user still has to perform by hand.
+    setWaWebhookUrl(json.webhookUrl ?? null);
+    setWaApiKey("");
+    setWaSecret("");
+    load();
+  }
+
+  async function activateWasender(id: string) {
+    setError(null);
+    const res = await fetch(`/api/settings/wasender/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ activate: true }),
+    });
+    if (!res.ok) setError((await res.json().catch(() => ({}))).error ?? "Failed to activate");
+    load();
+  }
+
+  async function removeWasender(id: string, label: string) {
+    const ok = await confirm({
+      title: "Remove this WasenderAPI session?",
+      body: `${label} will be disconnected from the CRM. Conversations, leads and message history are all kept — but chats that arrived on this number will not be able to send until a session is reconnected.`,
+      confirmLabel: "Remove session",
+      tone: "danger",
+    });
+    if (!ok) return;
+    const res = await fetch(`/api/settings/wasender/${id}`, { method: "DELETE" });
+    if (!res.ok) setError((await res.json().catch(() => ({}))).error ?? "Failed to remove");
+    load();
+  }
+
   const activeInstance = instances.find((i) => i.is_active) ?? instances[0];
   const isConnected = Boolean(activeInstance && activeInstance.state === "authorized");
+
+  const activeSession = sessions.find((s) => s.is_active) ?? sessions[0];
+  const waConnected = Boolean(activeSession && activeSession.status === "connected");
 
   return (
     <div className="flex h-full bg-surface">
@@ -409,7 +491,56 @@ export default function IntegrationMarketplacePage() {
                     </div>
                   </div>
 
-                  {/* CARD 2: Telegram Gateway */}
+                  {/* CARD 2: WhatsApp (WasenderAPI) — the second live gateway */}
+                  <div
+                    onClick={() => setShowWasender(true)}
+                    className="group cursor-pointer flex flex-col justify-between rounded-2xl border-2 border-edge bg-white p-4 shadow-xs transition-all duration-200 hover:border-wa hover:shadow-lg hover:-translate-y-0.5"
+                  >
+                    <div>
+                      <div className="flex h-20 w-full items-center justify-center rounded-xl bg-wa-soft/80 border border-wa-soft mb-3 group-hover:bg-wa-soft/70 transition">
+                        <Icon name="whatsapp" size={38} className="text-wa-dark" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-extrabold text-ink group-hover:text-wa-dark transition-colors">
+                            WhatsApp (WasenderAPI)
+                          </h4>
+                        </div>
+                        <p className="text-[11px] text-muted leading-snug">
+                          QR-linked sessions with the same 2-way sync, bot replies and routing.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-edge">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                          waConnected
+                            ? "bg-wa-soft text-wa-dark ring-1 ring-wa-dark/20"
+                            : activeSession
+                            ? "bg-bot-soft text-bot-dark ring-1 ring-bot/20"
+                            : "bg-chalk text-muted"
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            waConnected ? "bg-wa" : activeSession ? "bg-bot" : "bg-subtle"
+                          }`}
+                        />
+                        {waConnected ? "✓ Installed" : "Ready"}
+                      </span>
+
+                      <button
+                        type="button"
+                        className="rounded-lg bg-ink px-2.5 py-1 text-[11px] font-bold text-white group-hover:bg-wa-dark transition"
+                      >
+                        {waConnected ? "Settings" : "+ Install"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* CARD 3: Telegram Gateway */}
                   {(activeTab !== "installed") && (
                     <div className="flex flex-col justify-between rounded-2xl border border-edge/80 bg-white p-4 shadow-2xs opacity-85">
                       <div>
@@ -743,6 +874,242 @@ export default function IntegrationMarketplacePage() {
                     className="rounded-xl bg-wa-dark px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-wa-dark disabled:opacity-50 transition"
                   >
                     {busy ? "Validating & Connecting…" : "Connect Instance"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* WASENDERAPI CONNECTION POP-UP MODAL */}
+      {showWasender && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-edge bg-white shadow-2xl overflow-hidden">
+
+            <div className="flex items-center justify-between border-b border-edge px-6 py-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-wa-soft">
+                  <Icon name="whatsapp" size={22} className="text-wa-dark" />
+                </span>
+                <div>
+                  <h3 className="text-base font-extrabold text-ink">
+                    Connect WhatsApp via WasenderAPI
+                  </h3>
+                  <p className="text-xs text-subtle">
+                    Paste the session API key and webhook secret from your WasenderAPI dashboard
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowWasender(false)}
+                className="rounded-xl p-2 text-subtle hover:bg-chalk hover:text-ink-soft transition"
+              >
+                <Icon name="close" size={18} />
+              </button>
+            </div>
+
+            <div className="scroll-thin flex-1 overflow-y-auto p-6 space-y-6">
+              {notice && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-wa-soft bg-wa-soft p-4 text-xs font-medium text-wa-dark">
+                  <Icon name="check" size={16} className="mt-0.5 text-wa-dark shrink-0" />
+                  <span>{notice}</span>
+                </div>
+              )}
+
+              {error && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-danger-soft bg-danger-soft p-4 text-xs font-medium text-danger-dark">
+                  <Icon name="alert" size={16} className="mt-0.5 text-danger shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/*
+                The one manual step. WasenderAPI exposes no endpoint for setting
+                a session's webhook, so this URL has to be copied into their
+                dashboard by hand — showing it plainly beats implying it was
+                configured automatically.
+              */}
+              {waWebhookUrl && (
+                <div className="rounded-2xl border border-bot/30 bg-bot-soft/40 p-4 space-y-2">
+                  <h4 className="text-xs font-extrabold text-ink">
+                    Last step — paste this into WasenderAPI
+                  </h4>
+                  <p className="text-[11px] text-muted leading-relaxed">
+                    Open the session in WasenderAPI → enable <strong>Webhook Notifications</strong>,
+                    set the Webhook URL to the address below, and tick at least the{" "}
+                    <strong>Message Received</strong> and <strong>Session Status</strong> events.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 truncate rounded-xl border border-edge bg-white px-3 py-2 text-[11px] font-mono text-ink">
+                      {waWebhookUrl}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard?.writeText(waWebhookUrl)}
+                      className="shrink-0 rounded-xl bg-ink px-3 py-2 text-[11px] font-bold text-white hover:bg-wa-dark transition"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {sessions.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-subtle">
+                    Registered Sessions
+                  </h4>
+                  <div className="space-y-2">
+                    {sessions.map((s) => {
+                      const live = s.status === "connected";
+                      const label = s.phone ? `+${s.phone}` : s.session_name ?? s.id.slice(0, 8);
+                      return (
+                        <div
+                          key={s.id}
+                          className={`flex items-center justify-between rounded-2xl border p-4 transition-colors ${
+                            s.is_active ? "border-wa bg-wa-soft/40" : "border-edge bg-surface/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="active-wasender"
+                              checked={s.is_active}
+                              onChange={() => activateWasender(s.id)}
+                              className="h-4 w-4 text-wa-dark focus:ring-wa"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-ink">{label}</span>
+                                <Chip tone={live ? "wa" : "danger"}>
+                                  {live ? "Connected" : s.status || "Not paired"}
+                                </Chip>
+                                {s.is_active && (
+                                  <span className="rounded-md bg-wa-soft px-2 py-0.5 text-[10px] font-bold text-wa-dark">
+                                    Primary sender
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-0.5 text-[11px] font-mono text-subtle">
+                                {s.session_name ?? "Session"}
+                                {s.session_id ? ` · #${s.session_id}` : ""}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeWasender(s.id, label)}
+                            className="rounded-xl p-2 text-subtle hover:bg-danger-soft hover:text-danger transition"
+                            title="Remove session"
+                          >
+                            <Icon name="trash" size={15} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={connectWasender} className="rounded-2xl border border-edge bg-surface/50 p-5 space-y-4">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-ink">
+                    {sessions.length > 0 ? "Add Another WasenderAPI Session" : "Session Credentials"}
+                  </h4>
+                  <ol className="list-decimal space-y-1 pl-4 text-xs text-muted">
+                    <li>
+                      Create a session at{" "}
+                      <a
+                        href="https://wasenderapi.com/whatsapp/create"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-wa-dark font-semibold underline"
+                      >
+                        wasenderapi.com
+                      </a>{" "}
+                      and scan the QR code with WhatsApp.
+                    </li>
+                    <li>
+                      Copy the session&apos;s <code className="bg-edge/80 px-1 py-0.5 rounded text-[11px]">API Key</code> and
+                      generate a <code className="bg-edge/80 px-1 py-0.5 rounded text-[11px]">Webhook Secret</code> on the same page.
+                    </li>
+                    <li>Save here, then paste the webhook URL we give you back into that session.</li>
+                  </ol>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink-soft">Session API Key</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••••••••••••••••••••••••••"
+                    value={waApiKey}
+                    onChange={(e) => setWaApiKey(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-edge bg-white px-3.5 py-2 text-xs focus:border-wa focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink-soft">Webhook Secret</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••••••••••••••••••••••••••"
+                    value={waSecret}
+                    onChange={(e) => setWaSecret(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-edge bg-white px-3.5 py-2 text-xs focus:border-wa focus:outline-none"
+                  />
+                  <p className="mt-1 text-[11px] text-subtle">
+                    Sent as <code className="bg-edge/80 px-1 py-0.5 rounded">X-Webhook-Signature</code> on every
+                    inbound message. It is how we verify the message is really from WasenderAPI.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-ink-soft">Session Name (optional)</label>
+                    <input
+                      type="text"
+                      placeholder="HolyCRM"
+                      value={waName}
+                      onChange={(e) => setWaName(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-edge bg-white px-3.5 py-2 text-xs focus:border-wa focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-ink-soft">Linked Phone Number</label>
+                    <input
+                      type="text"
+                      placeholder="+92 313 0005968"
+                      value={waPhone}
+                      onChange={(e) => setWaPhone(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-edge bg-white px-3.5 py-2 text-xs focus:border-wa focus:outline-none"
+                    />
+                    <p className="mt-1 text-[11px] text-subtle">
+                      Used to detect when the bot is @mentioned in a group.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowWasender(false)}
+                    className="rounded-xl px-4 py-2 text-xs font-semibold text-muted hover:bg-edge/60"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="rounded-xl bg-wa-dark px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-wa-dark disabled:opacity-50 transition"
+                  >
+                    {busy ? "Validating & Connecting…" : "Connect Session"}
                   </button>
                 </div>
               </form>

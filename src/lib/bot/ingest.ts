@@ -2,6 +2,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { extractMessage, mentionsOwnJid } from "@/lib/green/client";
 import { isGroupJid, jidToPhone, type GreenWebhook } from "@/lib/green/types";
 import { countryCode } from "@/lib/phone";
+import { asProvider, type Provider } from "@/lib/wa/send";
 
 export interface IngestResult {
   chatId: string;
@@ -14,6 +15,13 @@ export interface IngestResult {
   duplicate: boolean;
   mediaUrl: string | null;
   mediaMime: string | null;
+  /**
+   * Which gateway delivered this — and therefore which one the reply must leave
+   * through. Read from the chat row rather than trusted from the caller, so a
+   * chat that was created under one provider keeps answering on it even if a
+   * webhook from the other ever arrives for the same jid.
+   */
+  provider: Provider;
   /**
    * Who sent this message — not which chat it arrived in.
    *
@@ -36,7 +44,11 @@ export interface IngestResult {
 export async function ingestInbound(
   hook: GreenWebhook,
   orgId: string,
-  ownJid: string
+  ownJid: string,
+  /** The gateway this webhook came from. Stamped onto chats it creates. */
+  provider: Provider = "green_api",
+  /** wasender_sessions.id, when provider is 'wasender'. */
+  wasenderSessionId: string | null = null
 ): Promise<IngestResult | null> {
   const db = supabaseAdmin();
   const chatJid = hook.senderData?.chatId;
@@ -91,13 +103,17 @@ export async function ingestInbound(
   // ---- chat ----
   const { data: existingChat } = await db
     .from("chats")
-    .select("id, is_bot_paused")
+    .select("id, is_bot_paused, provider")
     .eq("org_id", orgId)
     .eq("chat_jid", chatJid)
     .maybeSingle();
 
   let chatId = existingChat?.id as string | undefined;
   let isBotPaused = existingChat?.is_bot_paused ?? false;
+  // An existing chat's own provider wins. Replying through a gateway the
+  // conversation did not start on would send the answer from a different phone
+  // number, which to the customer reads as a stranger joining the thread.
+  let chatProvider = existingChat ? asProvider(existingChat.provider) : provider;
 
   if (!chatId) {
     const { data: created, error } = await db
@@ -111,12 +127,15 @@ export async function ingestInbound(
           : hook.senderData?.senderName ?? jidToPhone(chatJid),
         contact_id: isGroup ? null : contact?.id ?? null,
         last_message_at: waTimestamp,
+        provider,
+        wasender_session_id: provider === "wasender" ? wasenderSessionId : null,
       })
-      .select("id, is_bot_paused")
+      .select("id, is_bot_paused, provider")
       .single();
     if (error || !created) return null;
     chatId = created.id;
     isBotPaused = created.is_bot_paused;
+    chatProvider = asProvider(created.provider);
   }
   // NOTE: unread_count / last_message_at / first_agent_reply_at are maintained
   // by the apply_message_rollups trigger (0004) — atomically, for every message
@@ -223,6 +242,7 @@ export async function ingestInbound(
     duplicate: !msgErr && !msg,
     mediaUrl,
     mediaMime,
+    provider: chatProvider,
     senderContactId: contact?.id ?? null,
     senderName: senderName ?? contact?.display_name ?? null,
     senderPhone: jidToPhone(senderJid),
