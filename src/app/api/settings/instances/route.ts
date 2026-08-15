@@ -64,6 +64,26 @@ export async function POST(req: Request) {
     );
   }
 
+  /*
+   * One gateway per workspace (0029). The trigger is the real guarantee; this
+   * check exists so the user gets a sentence they can act on instead of a
+   * Postgres exception surfacing as "duplicate key".
+   */
+  const { count: wasenderCount } = await sb
+    .from("wasender_sessions")
+    .select("id", { count: "exact", head: true });
+  if ((wasenderCount ?? 0) > 0) {
+    return NextResponse.json(
+      {
+        error:
+          "This workspace is already connected to WasenderAPI. Disconnect it first — " +
+          "running two WhatsApp gateways at once makes replies unpredictable and raises the risk of the number being restricted.",
+        blocked_by: "wasender",
+      },
+      { status: 409 }
+    );
+  }
+
   const secret = process.env.GREEN_API_WEBHOOK_SECRET;
   if (!secret) {
     return NextResponse.json(

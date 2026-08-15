@@ -40,6 +40,7 @@ export default async function HomePage() {
     { data: org },
     { data: bot },
     { data: instance },
+    { data: waSession },
     { data: summaryRaw },
     { data: recentChats },
     { data: priorityLeads },
@@ -50,6 +51,11 @@ export default async function HomePage() {
     sb.from("organizations").select("name").maybeSingle(),
     sb.from("bot_settings").select("bot_name, enabled, onboarded_at").maybeSingle(),
     sb.from("green_api_instances").select("instance_id, phone, state, is_active").eq("is_active", true).maybeSingle(),
+    // The second gateway. A workspace may run either or both, so this panel
+    // must not report "not connected" to a team whose WhatsApp is live on
+    // WasenderAPI — that banner is the one thing on the dashboard that tells
+    // them whether messages are arriving at all.
+    sb.from("wasender_sessions").select("session_name, phone, status, is_active").eq("is_active", true).maybeSingle(),
     sb.rpc("analytics_summary", { p_days: 30 }),
     /* These two selects named eight columns that do not exist on their tables
        (chats.jid/chat_name/last_message_text/status, leads.customer_name/
@@ -71,7 +77,12 @@ export default async function HomePage() {
   ]);
 
   const summary = summaryRaw as Summary | null;
-  const isWaConnected = Boolean(instance && instance.state === "authorized");
+  // Live on either gateway counts as connected. The phone shown is whichever
+  // one is actually sending, so the banner names the number customers see.
+  const greenLive = Boolean(instance && instance.state === "authorized");
+  const wasenderLive = Boolean(waSession && waSession.status === "connected");
+  const isWaConnected = greenLive || wasenderLive;
+  const connectedPhone = greenLive ? instance?.phone : waSession?.phone;
   const userName = me?.full_name?.split(" ")[0] || "there";
   const orgName = org?.name || "Holyland Hospitality";
 
@@ -146,7 +157,7 @@ export default async function HomePage() {
             </span>
             <span>
               {isWaConnected
-                ? `WhatsApp: +${instance?.phone ?? "connected"}`
+                ? `WhatsApp: +${connectedPhone ?? "connected"}`
                 : "Connect WhatsApp"}
             </span>
             <Icon name="chevronRight" size={13} className="text-subtle" />
@@ -176,7 +187,7 @@ export default async function HomePage() {
                 <div>
                   <h2 className="text-sm font-bold">WhatsApp Instance Ready to Connect</h2>
                   <p className="text-xs text-wa-dark">
-                    Link your Green API instance to start receiving Umrah & Hajj inquiries directly in your HolyCRM inbox.
+                    Connect a Green API instance or a WasenderAPI session to start receiving Umrah &amp; Hajj inquiries directly in your HolyCRM inbox.
                   </p>
                 </div>
               </div>

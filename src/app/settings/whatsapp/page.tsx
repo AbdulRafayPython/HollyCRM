@@ -79,6 +79,48 @@ const BANNER_SLIDES: BannerSlide[] = [
   },
 ];
 
+/**
+ * Shown in place of a connect form when the workspace is already on the other
+ * gateway. It explains the reason rather than just greying the button out — a
+ * disabled control with no cause is the thing people file support tickets about.
+ */
+function GatewayBlocked({
+  other,
+  onSwitch,
+}: {
+  other: string;
+  onSwitch: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-bot/30 bg-bot-soft/40 p-5 space-y-3">
+      <div className="flex items-start gap-2.5">
+        <Icon name="lock" size={16} className="mt-0.5 text-bot-dark shrink-0" />
+        <div className="space-y-1">
+          <h4 className="text-sm font-bold text-ink">
+            Already connected to {other}
+          </h4>
+          <p className="text-[11px] leading-relaxed text-muted">
+            A workspace uses one WhatsApp gateway at a time. With two connected, whichever
+            one receives a message first owns that conversation — so replies come from an
+            unpredictable gateway, and two unofficial clients holding sessions on one number
+            raises the risk of WhatsApp restricting it.
+          </p>
+          <p className="text-[11px] leading-relaxed text-muted">
+            Disconnect {other} first. Your conversations, leads and message history are all kept.
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onSwitch}
+        className="w-full rounded-xl bg-ink px-4 py-2 text-xs font-bold text-white hover:bg-wa-dark transition"
+      >
+        Manage {other} connection
+      </button>
+    </div>
+  );
+}
+
 export default function IntegrationMarketplacePage() {
   const [instances, setInstances] = useState<InstanceRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -252,6 +294,15 @@ export default function IntegrationMarketplacePage() {
 
   const activeSession = sessions.find((s) => s.is_active) ?? sessions[0];
   const waConnected = Boolean(activeSession && activeSession.status === "connected");
+
+  /*
+   * One gateway per workspace (0029). "Linked" means any row exists at all, not
+   * that it is authorised — a half-connected Green instance still blocks
+   * WasenderAPI, because the point is that only one gateway ever holds a socket
+   * on the number.
+   */
+  const greenLinked = instances.length > 0;
+  const wasenderLinked = sessions.length > 0;
 
   return (
     <div className="flex h-full bg-surface">
@@ -479,14 +530,14 @@ export default function IntegrationMarketplacePage() {
                             isConnected ? "bg-wa" : activeInstance ? "bg-bot" : "bg-subtle"
                           }`}
                         />
-                        {isConnected ? "✓ Installed" : "Ready"}
+                        {isConnected ? "✓ Installed" : wasenderLinked ? "Blocked" : "Ready"}
                       </span>
 
                       <button
                         type="button"
                         className="rounded-lg bg-ink px-2.5 py-1 text-[11px] font-bold text-white group-hover:bg-wa-dark transition"
                       >
-                        {isConnected ? "Settings" : "+ Install"}
+                        {greenLinked ? "Settings" : wasenderLinked ? "Unavailable" : "+ Install"}
                       </button>
                     </div>
                   </div>
@@ -528,14 +579,14 @@ export default function IntegrationMarketplacePage() {
                             waConnected ? "bg-wa" : activeSession ? "bg-bot" : "bg-subtle"
                           }`}
                         />
-                        {waConnected ? "✓ Installed" : "Ready"}
+                        {waConnected ? "✓ Installed" : greenLinked ? "Blocked" : "Ready"}
                       </span>
 
                       <button
                         type="button"
                         className="rounded-lg bg-ink px-2.5 py-1 text-[11px] font-bold text-white group-hover:bg-wa-dark transition"
                       >
-                        {waConnected ? "Settings" : "+ Install"}
+                        {wasenderLinked ? "Settings" : greenLinked ? "Unavailable" : "+ Install"}
                       </button>
                     </div>
                   </div>
@@ -796,8 +847,25 @@ export default function IntegrationMarketplacePage() {
                 </div>
               )}
 
-              {/* Connection Form */}
-              <form onSubmit={connect} className="rounded-2xl border border-edge bg-surface/50 p-5 space-y-4">
+              {/* Connection Form — blocked while WasenderAPI owns this workspace */}
+              {wasenderLinked && (
+                <GatewayBlocked
+                  other="WasenderAPI"
+                  onSwitch={() => {
+                    setShowModal(false);
+                    setError(null);
+                    setNotice(null);
+                    setShowWasender(true);
+                  }}
+                />
+              )}
+
+              <form
+                onSubmit={connect}
+                className={`rounded-2xl border border-edge bg-surface/50 p-5 space-y-4 ${
+                  wasenderLinked ? "hidden" : ""
+                }`}
+              >
                 <div className="space-y-1">
                   <h4 className="text-sm font-bold text-ink">
                     {instances.length > 0 ? "Add Another Green API Instance" : "Instance Credentials"}
@@ -1015,7 +1083,25 @@ export default function IntegrationMarketplacePage() {
                 </div>
               )}
 
-              <form onSubmit={connectWasender} className="rounded-2xl border border-edge bg-surface/50 p-5 space-y-4">
+              {/* Connection Form — blocked while Green API owns this workspace */}
+              {greenLinked && (
+                <GatewayBlocked
+                  other="Green API"
+                  onSwitch={() => {
+                    setShowWasender(false);
+                    setError(null);
+                    setNotice(null);
+                    setShowModal(true);
+                  }}
+                />
+              )}
+
+              <form
+                onSubmit={connectWasender}
+                className={`rounded-2xl border border-edge bg-surface/50 p-5 space-y-4 ${
+                  greenLinked ? "hidden" : ""
+                }`}
+              >
                 <div className="space-y-1">
                   <h4 className="text-sm font-bold text-ink">
                     {sessions.length > 0 ? "Add Another WasenderAPI Session" : "Session Credentials"}

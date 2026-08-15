@@ -142,15 +142,33 @@ export default async function ChatPage({
    * their supervisor does; that is the kind of inconsistency that gets reported
    * as "the CRM is showing me something different".
    */
-  const { data: instance } = await supabaseAdmin()
-    .from("green_api_instances")
-    .select("own_jid, is_active")
-    .eq("org_id", chat.org_id)
-    .order("is_active", { ascending: false })
-    .limit(5);
+  // Both gateways are asked. A chat that arrived on WasenderAPI has no
+  // green_api_instances row behind it, and reading only that table would leave
+  // every mention of us in those threads rendered as raw digits.
+  const [{ data: instance }, { data: waSessions }] = await Promise.all([
+    supabaseAdmin()
+      .from("green_api_instances")
+      .select("own_jid, is_active")
+      .eq("org_id", chat.org_id)
+      .order("is_active", { ascending: false })
+      .limit(5),
+    supabaseAdmin()
+      .from("wasender_sessions")
+      .select("own_jid, is_active")
+      .eq("org_id", chat.org_id)
+      .order("is_active", { ascending: false })
+      .limit(5),
+  ]);
+
+  // The chat's own provider is preferred, so the active number of the gateway
+  // this conversation actually runs on wins over the other one's.
+  const ordered =
+    chat.provider === "wasender"
+      ? [...(waSessions ?? []), ...(instance ?? [])]
+      : [...(instance ?? []), ...(waSessions ?? [])];
 
   const ownPhone =
-    (instance ?? [])
+    ordered
       .map((i) => i.own_jid?.split("@")[0]?.replace(/\D/g, "") ?? "")
       .find(Boolean) ??
     process.env.GREEN_API_OWN_JID?.split("@")[0]?.replace(/\D/g, "") ??
