@@ -9,8 +9,21 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 import SettingsNav from "@/components/settings/SettingsNav";
 
+interface Destination { id: string; name: string; anchor_label: string }
+interface Supplier { id: string; name: string; kind?: string }
 interface Hotel {
-  id: string; name: string; city: "Makkah" | "Madinah"; star_rating: number | null;
+  id: string; name: string;
+  /**
+   * The city_name enum mirror. NULL for every destination the enum never had a
+   * value for, which is why nothing here reads it — `destination` is the truth
+   * (0031). Kept on the type so it is obvious it exists and is not to be used.
+   */
+  city: string | null;
+  destination_id: string | null;
+  destination: Destination | null;
+  supplier_id: string | null;
+  supplier: { id: string; name: string } | null;
+  star_rating: number | null;
   distance_to_haram_m: number | null; has_shuttle: boolean; shuttle_minutes: number | null;
   description: string | null; is_active: boolean;
 }
@@ -30,6 +43,8 @@ export default function InventoryPage() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [rates, setRates] = useState<Rate[]>([]);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [open, setOpen] = useState<string | null>(null);
   const [showHotelForm, setShowHotelForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +55,7 @@ export default function InventoryPage() {
     if (!res.ok) return setError("Could not load inventory");
     const j = await res.json();
     setHotels(j.hotels); setRoomTypes(j.roomTypes); setRates(j.rates);
+    setDestinations(j.destinations ?? []); setSuppliers(j.suppliers ?? []);
   }
   useEffect(() => { load(); }, []);
 
@@ -104,6 +120,8 @@ export default function InventoryPage() {
 
             {showHotelForm && (
               <HotelForm
+                destinations={destinations}
+                suppliers={suppliers}
                 onCancel={() => setShowHotelForm(false)}
                 onSave={async (h) => { if (await post({ kind: "hotel", ...h })) setShowHotelForm(false); }}
               />
@@ -123,11 +141,15 @@ export default function InventoryPage() {
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2 text-body font-semibold text-ink">
                       {h.name}
-                      <Chip tone={h.city === "Makkah" ? "brand" : "group"}>{h.city}</Chip>
+                      <Chip tone={destinationTone(h.destination_id)}>
+                        {h.destination?.name ?? "Unplaced"}
+                      </Chip>
+                      {h.supplier && <Chip tone="neutral">{h.supplier.name}</Chip>}
                       {!h.is_active && <Chip tone="neutral">Hidden from AI</Chip>}
                     </span>
                     <span className="mt-0.5 flex items-center gap-1.5 text-caption text-muted">
-                      {h.star_rating ?? "—"}★ · {h.distance_to_haram_m ?? "—"} m
+                      {h.star_rating ?? "—"}★ · {h.distance_to_haram_m ?? "—"} m to{" "}
+                      {h.destination?.anchor_label ?? "centre"}
                       {h.has_shuttle ? ` · shuttle ${h.shuttle_minutes ?? "?"} min` : ""}
                       · {hRooms.length} room types
                     </span>
@@ -206,10 +228,50 @@ export default function InventoryPage() {
   );
 }
 
-function HotelForm({ onSave, onCancel }: {
+/**
+ * The city dropdown used to be two hardcoded <option>s matching the frozen
+ * city_name enum, which is the reason no operator could add a Dubai hotel even
+ * after the rest of the product could sell one. It is now the workspace's own
+ * destinations table, and the distance label follows the destination's anchor
+ * so a Dubai hotel is not asked how far it is from the Haram.
+ */
+function HotelForm({ destinations, suppliers, onSave, onCancel }: {
+  destinations: Destination[];
+  suppliers: Supplier[];
   onSave: (h: Record<string, unknown>) => void; onCancel: () => void;
 }) {
-  const [f, setF] = useState({ name: "", city: "Makkah", star_rating: 4, distance_to_haram_m: 500, has_shuttle: false, shuttle_minutes: 10, description: "" });
+  const [f, setF] = useState({
+    name: "",
+    destination_id: destinations[0]?.id ?? "",
+    supplier_id: "",
+    star_rating: 4, distance_to_haram_m: 500,
+    has_shuttle: false, shuttle_minutes: 10, description: "",
+  });
+  // Resolved rather than read straight off state: the list arrives from a fetch,
+  // so a form opened before it lands would hold destination_id = "" while the
+  // <select> renders real options — a blank dropdown that submits nothing.
+  const destinationId = f.destination_id || destinations[0]?.id || "";
+  const anchor =
+    destinations.find((d) => d.id === destinationId)?.anchor_label ?? "centre";
+
+  if (destinations.length === 0) {
+    return (
+      <div className="panel space-y-3 p-5">
+        <h2 className="text-h3 text-ink">New hotel</h2>
+        <p className="text-meta text-muted">
+          This workspace has no destinations yet, and a hotel has to sit in one.
+          Add one under{" "}
+          <Link href="/settings/routing" className="text-wa-dark underline">
+            Routing &amp; Coverage
+          </Link>
+          , then come back.
+        </p>
+        <div className="flex justify-end">
+          <button onClick={onCancel} className="btn-ghost rounded-lg px-4 py-2 text-meta">Close</button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="panel space-y-3 p-5">
       <h2 className="text-h3 text-ink">New hotel</h2>
@@ -220,10 +282,24 @@ function HotelForm({ onSave, onCancel }: {
             onChange={(e) => setF({ ...f, name: e.target.value })} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-meta font-medium text-ink">City</span>
-          <select className="field rounded-lg py-2.5 text-meta" value={f.city}
-            onChange={(e) => setF({ ...f, city: e.target.value })}>
-            <option>Makkah</option><option>Madinah</option>
+          <span className="mb-1 block text-meta font-medium text-ink">Destination</span>
+          <select className="field rounded-lg py-2.5 text-meta" value={destinationId}
+            onChange={(e) => setF({ ...f, destination_id: e.target.value })}>
+            {destinations.map((d) => (
+              <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-meta font-medium text-ink">
+            Supplier <span className="text-subtle">(optional)</span>
+          </span>
+          <select className="field rounded-lg py-2.5 text-meta" value={f.supplier_id}
+            onChange={(e) => setF({ ...f, supplier_id: e.target.value })}>
+            <option value="">Not recorded</option>
+            {suppliers.map((sp) => (
+              <option key={sp.id} value={sp.id}>{sp.name}</option>
+            ))}
           </select>
         </label>
         <label className="block">
@@ -232,7 +308,7 @@ function HotelForm({ onSave, onCancel }: {
             onChange={(e) => setF({ ...f, star_rating: Number(e.target.value) })} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-meta font-medium text-ink">Distance to Haram (m)</span>
+          <span className="mb-1 block text-meta font-medium text-ink">Distance to {anchor} (m)</span>
           <input type="number" className="field rounded-lg py-2.5 text-meta" value={f.distance_to_haram_m}
             onChange={(e) => setF({ ...f, distance_to_haram_m: Number(e.target.value) })} />
         </label>
@@ -253,7 +329,8 @@ function HotelForm({ onSave, onCancel }: {
       </div>
       <div className="flex justify-end gap-2">
         <button onClick={onCancel} className="btn-ghost rounded-lg px-4 py-2 text-meta">Cancel</button>
-        <button disabled={!f.name.trim()} onClick={() => onSave(f)}
+        <button disabled={!f.name.trim() || !destinationId}
+          onClick={() => onSave({ ...f, destination_id: destinationId })}
           className="btn-primary rounded-lg px-4 py-2 text-meta disabled:opacity-40">
           Add hotel
         </button>
@@ -355,4 +432,20 @@ function AddRoomType({ onAdd }: { onAdd: (r: Record<string, unknown>) => void })
       </button>
     </div>
   );
+}
+
+/**
+ * A stable chip colour per destination.
+ *
+ * Replaces `h.city === "Makkah" ? "brand" : "group"`, which was a two-value
+ * ternary standing in for a two-value enum. Hashing the id keeps a destination
+ * the same colour between renders and across sessions without anyone having to
+ * pick one when they add a market.
+ */
+function destinationTone(id: string | null): "brand" | "group" | "bot" | "wa" | "neutral" {
+  if (!id) return "neutral";
+  const TONES = ["brand", "group", "bot", "wa"] as const;
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return TONES[hash % TONES.length];
 }

@@ -1,0 +1,21 @@
+-- =============================================================================
+-- HollyCRM 0030 — a third role between the owner and a sales agent
+--
+-- 0010/0011 collapsed the vocabulary to two roles because the product was one
+-- workspace per customer: the person who signs up, and the people who sell for
+-- them. That holds until an agency grows a desk lead — someone who reassigns
+-- conversations, keeps the rate sheet current and covers a market, but has no
+-- business rotating the LLM key, reconnecting WhatsApp, or removing colleagues.
+--
+-- Today there is no way to express that. `app.is_supervisor()` and
+-- `app.is_owner()` return the same answer for every existing row, so every
+-- policy written against is_supervisor() is in practice owner-only, and the
+-- distinction the policies were drafted for has never existed at runtime.
+-- Promoting a desk lead means handing them the workspace.
+--
+-- Separate migration for the same reason 0010 was: Postgres will not let an
+-- enum value be USED in the transaction that added it. 0033 is where
+-- app.is_supervisor() starts returning true for it.
+-- =============================================================================
+
+alter type public.app_role add value if not exists 'supervisor';

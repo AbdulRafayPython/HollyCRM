@@ -2,7 +2,9 @@
 // Regenerate properly later with: supabase gen types typescript --linked
 
 /**
- * A workspace has one owner and any number of sales agents.
+ * A workspace has one owner, any number of sales agents, and — since 0030 —
+ * supervisors in between: desk leads who run a market without holding the
+ * workspace's credentials.
  *
  * `super_admin`/`team_lead`/`agent` are the pre-0011 vocabulary, kept in the
  * union because the enum still carries them and an un-migrated row would
@@ -10,6 +12,7 @@
  */
 export type AppRole =
   | "owner"
+  | "supervisor"
   | "sales_agent"
   | "super_admin"
   | "team_lead"
@@ -17,20 +20,33 @@ export type AppRole =
 
 export const ROLE_LABELS: Record<AppRole, string> = {
   owner: "Owner",
+  supervisor: "Supervisor",
   sales_agent: "Sales agent",
   super_admin: "Owner",
-  team_lead: "Owner",
+  team_lead: "Supervisor",
   agent: "Sales agent",
 };
 
-/** Owns the workspace: billing, the WhatsApp connection, and the team. */
+/**
+ * Owns the workspace: billing, the WhatsApp connection, the model key, and the
+ * team. Mirrors app.is_owner().
+ *
+ * 0033 moved the credential-bearing tables (green_api_instances,
+ * wasender_sessions, llm_providers, webhook_events, ai_runs) from is_supervisor
+ * to is_owner, so a route guarding one of those must use THIS helper — a
+ * supervisor who passes the route check only gets a raw RLS error instead.
+ */
 export function isOwner(role: string | null | undefined): boolean {
   return role === "owner" || role === "super_admin";
 }
 
-/** May reassign chats and change workspace settings. Mirrors app.is_supervisor(). */
+/**
+ * May reassign chats, keep the rate sheet current and run a desk. Mirrors
+ * app.is_supervisor() — keep the two in step, since the API layer deliberately
+ * lets RLS answer the access question and a drift shows up as a 500, not a 403.
+ */
 export function isSupervisor(role: string | null | undefined): boolean {
-  return isOwner(role) || role === "team_lead";
+  return isOwner(role) || role === "supervisor" || role === "team_lead";
 }
 export type ChatType = "direct" | "group";
 export type SenderType = "client" | "agent" | "bot" | "system";
@@ -41,7 +57,14 @@ export type MsgType =
 export type LeadStage =
   | "new_inquiry" | "requirements_gathered" | "quotation_sent"
   | "under_negotiation" | "closed_won" | "closed_lost";
-export type CityName = "Makkah" | "Madinah";
+/**
+ * Was the `public.city_name` enum. 0031 made destinations org-owned rows and
+ * 0033 dropped the matching CHECK off leads.city, so the value is now whatever
+ * the operator named a market — "Dubai", "Istanbul". The two originals are kept
+ * as a hint, not a ceiling: narrowing this back to a union is what made the
+ * schema unable to sell anything outside the Haram.
+ */
+export type CityName = "Makkah" | "Madinah" | (string & {});
 export type RoomConfig = "single" | "double" | "triple" | "quad" | "sharing";
 
 export const LEAD_STAGES: LeadStage[] = [
@@ -113,7 +136,9 @@ export interface Lead {
   assigned_agent_id: string | null;
   stage: LeadStage;
   /** Slot memory for the bot: what the customer has told us, carried across turns. */
-  city: "Makkah" | "Madinah" | null;
+  city: CityName | null;
+  /** 0033: the authoritative market. `city` mirrors destinations.name off it. */
+  destination_id: string | null;
   min_stars: number | null;
   makkah_hotel_pref: string | null;
   madinah_hotel_pref: string | null;

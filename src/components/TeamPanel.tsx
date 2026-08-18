@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import Avatar from "./ui/Avatar";
 import Dropdown from "./ui/Dropdown";
 import Icon from "./ui/Icon";
@@ -10,6 +11,8 @@ interface Member {
   id: string;
   full_name: string | null;
   role: AppRole;
+  role_id: string | null;
+  assigned_role: { id: string; name: string } | null;
   is_active: boolean;
   email: string | null;
   is_you: boolean;
@@ -202,20 +205,23 @@ export default function TeamPanel() {
               </div>
 
               {data.you.is_owner && !m.is_you ? (
-                <Dropdown
-                  label={`Role for ${m.full_name ?? "member"}`}
-                  align="right"
-                  value={m.role === "owner" || m.role === "super_admin" ? "owner" : "sales_agent"}
-                  onChange={(next) => patchMember(m.id, { role: next })}
-                  className="rounded-xl border border-edge bg-white px-3 py-1.5 text-xs font-semibold text-ink-soft hover:border-edge-strong"
-                  options={[
-                    { value: "sales_agent", label: "Sales Agent" },
-                    { value: "owner", label: "Workspace Owner" },
-                  ]}
-                />
+                /*
+                 * Role assignment moved to Settings -> Roles & permissions when
+                 * 0034 made a role an editable set of permissions. A two-option
+                 * dropdown here could only offer the old rungs, and would have
+                 * shown "Sales Agent" for somebody holding a custom role —
+                 * silently mis-describing their access, and demoting them if
+                 * touched.
+                 */
+                <Link
+                  href="/settings/roles"
+                  className="shrink-0 rounded-xl border border-edge bg-white px-3 py-1.5 text-xs font-semibold text-ink-soft hover:border-edge-strong"
+                >
+                  {m.assigned_role?.name ?? ROLE_LABELS[m.role] ?? m.role} · Change
+                </Link>
               ) : (
                 <span className="rounded-lg bg-chalk px-2.5 py-1 text-xs font-semibold text-ink-soft">
-                  {ROLE_LABELS[m.role] ?? m.role}
+                  {m.assigned_role?.name ?? ROLE_LABELS[m.role] ?? m.role}
                 </span>
               )}
 

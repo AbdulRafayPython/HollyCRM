@@ -29,9 +29,13 @@ export async function GET() {
   const { data: me } = await sb
     .from("profiles").select("org_id, role, full_name, avatar_url").eq("id", user.id).maybeSingle();
 
-  const [{ data: org }, { data: bot }] = await Promise.all([
+  const [{ data: org }, { data: bot }, { data: perms }] = await Promise.all([
     sb.from("organizations").select("name").eq("id", me?.org_id ?? "").maybeSingle(),
     sb.from("bot_settings").select("bot_name").maybeSingle(),
+    // 0036. Rides along with the poll the shell already makes, so the sidebar
+    // can gate on what the caller may actually do rather than on a role name —
+    // which is the only way a custom role gets the right navigation.
+    sb.rpc("my_permissions"),
   ]);
 
   const identity = {
@@ -40,6 +44,7 @@ export async function GET() {
       email: user.email ?? null,
       role: me?.role ?? null,
       avatar: me?.avatar_url ?? null,
+      permissions: (perms as string[] | null) ?? [],
     },
     workspace: org?.name ?? null,
     assistant: bot?.bot_name?.trim() || "AI Assistant",

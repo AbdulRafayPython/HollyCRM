@@ -25,7 +25,7 @@ export async function GET() {
 
   const [{ data: members }, { data: org }] = await Promise.all([
     sb.from("profiles")
-      .select("id, full_name, role, is_active, created_at")
+      .select("id, full_name, role, role_id, is_active, created_at, assigned_role:roles(id, name)")
       .order("created_at"),
     sb.from("organizations").select("id, name").eq("id", me.org_id).maybeSingle(),
   ]);

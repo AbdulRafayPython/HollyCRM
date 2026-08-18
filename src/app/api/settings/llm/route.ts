@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { invalidateLlmCache } from "@/lib/llm/resolve";
 import { testConnection } from "@/lib/deepseek/client";
-import { isSupervisor } from "@/lib/types";
+import { isOwner } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -56,7 +56,7 @@ export async function GET() {
    */
   const envKey = process.env.DEEPSEEK_API_KEY;
   const deployment =
-    envKey && isSupervisor(me?.role)
+    envKey && isOwner(me?.role)
       ? {
           id: "deployment",
           provider: "deepseek",

@@ -9,6 +9,7 @@ import Icon, { type IconName } from "@/components/ui/Icon";
 import ProfileMenu, { type ProfileUser } from "./ProfileMenu";
 import NotificationBell from "./notifications/NotificationBell";
 import { useWorkspace } from "./WorkspaceContext";
+import { canReach } from "@/lib/access";
 
 interface NavItem {
   href: string;
@@ -139,6 +140,16 @@ export default function AppSidebar({
     { href: "/settings/team", icon: "users", label: "Team" },
   ];
 
+  // Presentation only — the matching policy in Postgres is the actual control
+  // (see src/lib/access.ts). Filtering here is what stops an agent clicking into
+  // Model & API keys and being answered with a raw RLS error string.
+  const role = workspace.user.role;
+  const perms = workspace.user.permissions;
+  const visibleGroups = navGroups
+    .map((g) => ({ ...g, items: g.items.filter((i) => canReach(perms, i.href, role)) }))
+    .filter((g) => g.items.length > 0);
+  const visibleBottomItems = bottomItems.filter((i) => canReach(perms, i.href, role));
+
   const isActive = (href: string) => {
     if (href === "/home") return pathname === "/home";
     if (href === "/insights") return pathname.startsWith("/insights") || pathname.startsWith("/analytics");
@@ -235,7 +246,7 @@ export default function AppSidebar({
 
         {/* Middle Navigation Section (Scrollable, Flex 1) */}
         <nav className="scroll-thin min-h-0 flex-1 overflow-y-auto pr-1 pt-3 flex flex-col gap-3.5">
-          {navGroups.map((group) => (
+          {visibleGroups.map((group) => (
             <div key={group.title} className="flex flex-col gap-1">
               {!isCollapsed && (
                 <span className="px-2.5 text-[10px] font-bold tracking-wider uppercase text-subtle">
@@ -295,7 +306,7 @@ export default function AppSidebar({
 
         {/* Bottom Actions & User Profile Card (Fixed Height, Shrink 0) */}
         <div className="shrink-0 border-t border-edge pt-2 pb-0.5 bg-white flex flex-col gap-0.5">
-          {bottomItems.map((item) => {
+          {visibleBottomItems.map((item) => {
             const active = isActive(item.href);
             return (
               <Link

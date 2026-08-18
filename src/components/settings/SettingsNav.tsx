@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Icon, { type IconName } from "@/components/ui/Icon";
+import { useWorkspace } from "@/components/WorkspaceContext";
+import { canReach } from "@/lib/access";
 
 interface SettingsGroup {
   title: string;
@@ -16,6 +18,9 @@ interface SettingsGroup {
 
 export default function SettingsNav() {
   const pathname = usePathname() ?? "";
+  const ws = useWorkspace();
+  const role = ws.user.role;
+  const perms = ws.user.permissions;
 
   const groups: SettingsGroup[] = [
     {
@@ -35,6 +40,7 @@ export default function SettingsNav() {
       items: [
         { href: "/settings/notifications", label: "Notification settings", icon: "bell" },
         { href: "/settings/team", label: "User management", icon: "users" },
+        { href: "/settings/roles", label: "Roles & permissions", icon: "shield" },
         { href: "/settings/data", label: "Data cleanup", icon: "archive" },
       ],
     },
@@ -49,6 +55,13 @@ export default function SettingsNav() {
       ],
     },
   ];
+
+  // Same table the main sidebar uses, so the two cannot drift apart and offer
+  // different doors. Groups that empty out disappear rather than leaving a
+  // heading with nothing under it.
+  const visibleGroups = groups
+    .map((g) => ({ ...g, items: g.items.filter((i) => canReach(perms, i.href, role)) }))
+    .filter((g) => g.items.length > 0);
 
   const isActive = (href: string) => {
     if (href === "/settings") return pathname === "/settings" || pathname === "/profile";
@@ -65,7 +78,7 @@ export default function SettingsNav() {
         </div>
 
         <nav className="space-y-5">
-          {groups.map((group) => (
+          {visibleGroups.map((group) => (
             <div key={group.title} className="space-y-1">
               <span className="block px-2 text-[11px] font-semibold text-subtle">
                 {group.title}

@@ -9,7 +9,15 @@ export interface Workspace {
   name: string | null;
   /** What this workspace calls its AI — "Holyland AI", "Sales Bot", anything. */
   assistant: string;
-  user: { name: string | null; email: string | null; role: string | null; avatar?: string | null };
+  /**
+   * `permissions` is the authority for what the UI offers (0036); `role` is only
+   * a label and a first-paint fallback. A custom role has no rung, so anything
+   * deciding on `role` alone would guess wrong.
+   */
+  user: {
+    name: string | null; email: string | null; role: string | null;
+    avatar?: string | null; permissions?: string[];
+  };
   /**
    * Whether this agent is taking new conversations. Lives here rather than in
    * the menu that renders it, because the router's decision is invisible from
@@ -23,7 +31,7 @@ export interface Workspace {
 const FALLBACK: Workspace = {
   name: null,
   assistant: "AI Assistant",
-  user: { name: null, email: null, role: null, avatar: null },
+  user: { name: null, email: null, role: null, avatar: null, permissions: undefined },
   presence: "available",
   setPresence: () => {},
 };

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { invalidateSessionCache, probeSession } from "@/lib/wasender/client";
-import { isSupervisor } from "@/lib/types";
+import { isOwner } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { data: me } = await sb.from("profiles").select("org_id, role").eq("id", user.id).maybeSingle();
-  if (!me || !isSupervisor(me.role)) {
+  if (!me || !isOwner(me.role)) {
     return NextResponse.json(
       { error: "Only the workspace owner can connect WhatsApp." },
       { status: 403 }

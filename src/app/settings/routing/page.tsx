@@ -9,6 +9,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { CODE_SUGGESTIONS } from "@/lib/phone";
 
 import SettingsNav from "@/components/settings/SettingsNav";
+import CoveragePanel from "@/components/settings/CoveragePanel";
 
 interface Region {
   id: string; name: string; country_codes: string[]; is_default: boolean; is_active: boolean;
@@ -293,6 +294,8 @@ export default function RoutingPage() {
               </tbody>
             </table>
           </section>
+
+          <CoveragePanel />
         </div>
       </div>
       {dialog}
